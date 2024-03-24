@@ -1,12 +1,16 @@
 import os
 
+
 class Config(object):
-    SECRET_KEY = 'key'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'
+    SECRET_KEY = "key"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///database.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    ADMIN = {'username': 'admin',
-             'email': 'admin',
-             'password': 'admin'}
+    ADMIN = {
+        "username": "admin",
+        "email": "admin",
+        "password": "admin",
+        "is_admin": True,
+    }
 
     # THEME SUPPORT
     #  if set then url_for('static', filename='', theme='')
@@ -20,12 +24,12 @@ class ProductionConfig(Config):
     DEBUG = False
 
     # PostgreSQL database
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}:{}/{}'.format(
-        os.environ.get('GENTELELLA_DATABASE_USER', 'gentelella'),
-        os.environ.get('GENTELELLA_DATABASE_PASSWORD', 'gentelella'),
-        os.environ.get('GENTELELLA_DATABASE_HOST', 'db'),
-        os.environ.get('GENTELELLA_DATABASE_PORT', 5432),
-        os.environ.get('GENTELELLA_DATABASE_NAME', 'gentelella')
+    SQLALCHEMY_DATABASE_URI = "postgresql://{}:{}@{}:{}/{}".format(
+        os.environ.get("GENTELELLA_DATABASE_USER", "gentelella"),
+        os.environ.get("GENTELELLA_DATABASE_PASSWORD", "gentelella"),
+        os.environ.get("GENTELELLA_DATABASE_HOST", "db"),
+        os.environ.get("GENTELELLA_DATABASE_PORT", 5432),
+        os.environ.get("GENTELELLA_DATABASE_NAME", "gentelella"),
     )
 
 
@@ -33,7 +37,4 @@ class DebugConfig(Config):
     DEBUG = True
 
 
-config_dict = {
-    'Production': ProductionConfig,
-    'Debug': DebugConfig
-}
+config_dict = {"Production": ProductionConfig, "Debug": DebugConfig}

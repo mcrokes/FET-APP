@@ -1,0 +1,84 @@
+{% extends 'base_site.html' %}
+
+{% block title %}
+  Manage Users
+{% endblock %}
+
+{% block stylesheets %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.css" />
+  <style>
+    .dataTables_filter {
+      width: unset !important;
+    }
+    
+    #user_data {
+      width: 100% !important;
+      /*text-align: center !important;*/
+      align-items: center;
+    }
+    
+    #user_data th {
+      background-color: #04aa6d;
+      color: white;
+      padding: 0.5rem;
+    }
+    
+    th,
+    td {
+      border-bottom: 1px solid #ddd;
+      text-align: center !important;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="dashboard_graph">
+          <div style="width: 100%; min-height:800px;">
+            <table id="user_data">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Opciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ super() }}
+
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
+
+  <script>
+    let table = $('#user_data').DataTable({
+      ajax: '/setting/api/users',
+      columns: [{ data: 'id' }, { data: 'name' }, { data: 'email' }, { data: 'id' }],
+      columnDefs: [
+        {
+          targets: [-1],
+          class: 'text-center',
+          orderable: false,
+          render: function (data, type, row) {
+            var buttons = '<a href="/setting/setting_password/' + row.id + '" class="btn btn-warning btn-xs btn-flat"><i class="fas fa-edit"></i></a> '
+            buttons += '<a href="/setting/delete_user/' + row.id + '" type="button" class="btn btn-danger btn-xs btn-flat"><i class="fas fa-trash-alt"></i></a>'
+            return buttons
+          }
+        }
+      ]
+    })
+  </script>
+{% endblock %}
