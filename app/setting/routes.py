@@ -8,6 +8,7 @@ from .forms import (
     setting_password_Form,
 )
 from ..base.models import User
+from .common.useful_functions import check_admin
 
 
 @blueprint.route("/api/users", methods=["GET"])
@@ -19,8 +20,7 @@ def get_Users():
 @blueprint.route("/manage_users", methods=["GET", "POST"])
 @login_required
 def manage_Users():
-    admin_user = current_app.config["ADMIN"]["username"]
-    if current_user.username == admin_user:
+    if check_admin():
         # form = add_user_Form(request.form)
         users = User.get_users_list()
         print(users)
@@ -42,8 +42,7 @@ def manage_Users():
 @blueprint.route("/add_user", methods=["GET", "POST"])
 @login_required
 def add_User():
-    admin_user = current_app.config["ADMIN"]["username"]
-    if current_user.username == admin_user:
+    if check_admin():
         form = add_user_Form(request.form)
         if "Add" in request.form:
             user = User.query.filter_by(username=request.form["username"]).first()
@@ -63,22 +62,21 @@ def add_User():
 @blueprint.route("/delete_user/<id>", methods=["GET", "POST"])
 @login_required
 def delete_user(id):
-    admin_user = current_app.config["ADMIN"]["username"]
-    if current_user.username == admin_user:
+    if check_admin():
         user = User.query.filter_by(id=id).first()
         if user:
             form = delete_user_Form(user.username)
             if "Delete" in request.form:
                 username = request.form["username"]
                 user = User.query.filter_by(username=username).first()
-                if user:
-                    if username == admin_user:
-                        status = "admin user can't be deleted !"
-                    else:
-                        user.delete_from_db()
-                        status = "delete user success !"
-                else:
-                    status = "user doesn't exist !"
+                # if user:
+                #     if username == admin_user:
+                #         status = "admin user can't be deleted !"
+                #     else:
+                user.delete_from_db()
+                #         status = "delete user success !"
+                # else:
+                #     status = "user doesn't exist !"
                 return redirect("/setting/manage_users")
             return render_template("delete_user.html", form=form, status="", user=user)
         return redirect("/page_404")
@@ -88,24 +86,19 @@ def delete_user(id):
 @blueprint.route("/setting_password/<id>", methods=["GET", "POST"])
 @login_required
 def setting_password(id):
-    print(id)
-    admin_user = current_app.config["ADMIN"]["username"]
-    if current_user.username == admin_user:
-        form = setting_password_Form(request.form)
-        if "Setting" in request.form:
-            username = request.form["username"]
-            user = User.query.filter_by(username=username).first()
-            if user:
-                if username == admin_user:
-                    status = "please change admin password from server !"
-                else:
-                    user.password = user.hashpw(request.form["password"])
-                    user.db_commit()
-                    status = "Setting password success !"
-            else:
-                status = "user doesn't exist !"
-            return render_template("setting_password.html", form=form, status=status)
-        return render_template("setting_password.html", form=form, status="")
+    if check_admin():
+        user = User.query.filter_by(id=id).first()
+        if user and not user.is_admin:
+            form = setting_password_Form(request.form)
+            if "Setting" in request.form:
+                user.password = user.hashpw(request.form["password"])
+                user.db_commit()
+                # status = "Setting password success !"
+                return redirect("/setting/manage_users")
+            return render_template(
+                "setting_password.html", form=form, status="", user=user
+            )
+        return redirect("/page_404")
     return redirect("/page_403")
 
 

@@ -15,7 +15,7 @@ class delete_user_Form(FlaskForm):
 
 
 class setting_password_Form(FlaskForm):
-    username = StringField("Username", id="username_setting")
+    # username = StringField("Username", id="username_setting")
     password = PasswordField("Password", id="pwd_setting")
 
 
