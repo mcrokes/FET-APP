@@ -1,0 +1,124 @@
+{% extends 'base_site.html' %}
+
+{% block title %}
+  Add Models
+{% endblock %}
+
+{% block stylesheets %}
+  <!-- Bulma -->
+  <!-- <link href="{{ url_for('static', filename='vendors/bulma/css/bulma.min.css') }}" rel="stylesheet" /> -->
+  {{ super() }}
+
+  <style>
+    .form-fields {
+      width: max-content;
+      margin: auto !important;
+      max-width: 100%;
+    }
+    @media (max-width: 1200px) {
+      .custom-col {
+        float: unset !important;
+      }
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 5rem;
+      max-height: 10rem;
+    }
+    .custom-input,
+    .custom-file-input {
+      min-height: 5rem !important;
+      width: 100%;
+      max-width: 100%;
+      color: #444;
+      padding: 5px;
+      background: #fff;
+      border-radius: 4px !important;
+      height: unset;
+    }
+    .custom-file-input::file-selector-button {
+      margin-right: 20px;
+      border: none;
+      background: springgreen;
+      padding: 10px 20px;
+      border-radius: 4px;
+      color: #444;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+    
+    .custom-file-input:focus::file-selector-button,
+    .custom-file-input::file-selector-button:hover {
+      background: limegreen;
+      color: #fff;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Add Classifier Model</h2>
+              <ul class="nav navbar-right" style="cursor: pointer;">
+                <li>
+                  <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+              </ul>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <div class="container is-widescreen">
+                <form class="container" data-parsley-validate method="post" enctype="multipart/form-data">
+                  <section class="row justify-content-md-center form-fields">
+                    {% if status == 'Initial' %}
+                      {% for field in form if field.widget.input_type != 'hidden' %}
+                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                          {% if field.widget.input_type == 'file' %}
+                            {{ field(class='form-control custom-file-input', placeholder=field.label.text, accept=field.render_kw.accept) }}
+                          {% else %}
+                            {{ field(class='form-control custom-input', placeholder=field.label.text) }}
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    {% elif status == 'Second' %}
+                      <input type="text" name="model_id" value="{{ model_id }}" hidden />
+                      <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; width: 100%;">
+                        <label for="target-slector">Columna de Clasificación</label>
+                        <select name="target" id="target-slector" class="form-control custom-input form-select form-select-lg mb-3" aria-label="Large select example">
+                          {% for option in form %}
+                            <option value="{{ option }}">{{ option }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    {% else %}
+                      {{ form }}
+                    {% endif %}
+                  </section>
+
+                  <div class="navbar-right">
+                    <button type="submit" class="btn btn-default submit" name="{{ status }}">
+                      {% if status != 'Add' %}
+                        Siguiente
+                      {% else %}
+                        Crear
+                      {% endif %}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ super() }}
+{% endblock %}

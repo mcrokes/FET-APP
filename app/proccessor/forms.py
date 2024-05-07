@@ -6,6 +6,6 @@ from wtforms import FileField, StringField, TextAreaField
 
 class add_classifier(FlaskForm):
     name = StringField("Model Name", id="model-name")
-    description = TextAreaField("Description", id="model-description")
-    model = FileField("Model", id="model")
-    dataset = FileField("Data Set", id="model-data-set")
+    model = FileField("Model", id="model", render_kw={'accept': ".joblib"})
+    description = TextAreaField("Description", id="model-description")    
+    dataset = FileField("Data Set", id="model-data-set", render_kw={'accept': ".csv"})
