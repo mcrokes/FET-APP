@@ -14,6 +14,7 @@ class ModelForProccess(db.Model):
     dataset = Column(String)
     description = Column(String)
     target_row = Column(String)
+    percent_processed = Column(Integer, default=0)
 
     def to_dict(self):
         return {

@@ -53,6 +53,12 @@
       background: limegreen;
       color: #fff;
     }
+    
+    @media (min-width: 1200px) {
+      .custom-qualitative-col {
+        width: unset !important;
+      }
+    }
   </style>
 {% endblock %}
 
@@ -75,33 +81,50 @@
               <div class="container is-widescreen">
                 <form class="container" data-parsley-validate method="post" enctype="multipart/form-data">
                   <section class="row justify-content-md-center form-fields">
-                    {% if status == 'Initial' %}
-                      {% for field in form if field.widget.input_type != 'hidden' %}
-                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
-                          {% if field.widget.input_type == 'file' %}
-                            {{ field(class='form-control custom-file-input', placeholder=field.label.text, accept=field.render_kw.accept) }}
-                          {% else %}
-                            {{ field(class='form-control custom-input', placeholder=field.label.text) }}
-                          {% endif %}
-                        </div>
-                      {% endfor %}
-                    {% elif status == 'Second' %}
-                      <input type="text" name="model_id" value="{{ model_id }}" hidden />
-                      <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; width: 100%;">
-                        <label for="target-slector">Columna de Clasificación</label>
-                        <select name="target" id="target-slector" class="form-control custom-input form-select form-select-lg mb-3" aria-label="Large select example">
-                          {% for option in form %}
-                            <option value="{{ option }}">{{ option }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
+                    {% if status != 'Initial' %}
+                      <input type="text" id="model_id" name="model_id" value="{{ model_id }}" data-status="{{ status }}" hidden />
+                    {% endif %}
+                    {% if status == 'Create' %}
+                      Creating %<p id="progress_bar">0</p>
                     {% else %}
-                      {{ form }}
+                      {% if status == 'Initial' %}
+                        {% for field in form if field.widget.input_type != 'hidden' %}
+                          <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                            {% if field.widget.input_type == 'file' %}
+                              {{ field(class='form-control custom-file-input', placeholder=field.label.text, accept=field.render_kw.accept) }}
+                            {% else %}
+                              {{ field(class='form-control custom-input', placeholder=field.label.text) }}
+                            {% endif %}
+                          </div>
+                        {% endfor %}
+                      {% elif status == 'Second' %}
+                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; width: 100%;">
+                          <label for="target-slector">Columna de Clasificación</label>
+                          <select name="target" id="target-slector" class="form-control custom-input form-select form-select-lg mb-3" aria-label="Large select example">
+                            {% for option in form %}
+                              <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      {% elif status == 'Add' %}
+                        <h2>Establezca valores a las posibles variables cualitativas.</h2>
+                        {% for col in form %}
+                          <input type="text" name="Q-Variable-{{ col.name }}" value="{{ col.name }}" hidden />
+                          <div class="col col-lg-6 custom-col custom-qualitative-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                            <label for="">{{ col.name }}</label>
+                            {% for var in col.variables %}
+                              <div class="col custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                                <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
+                              </div>
+                            {% endfor %}
+                          </div>
+                        {% endfor %}
+                      {% endif %}
                     {% endif %}
                   </section>
 
                   <div class="navbar-right">
-                    <button type="submit" class="btn btn-default submit" name="{{ status }}">
+                    <button type="submit" id="submit" class="btn btn-default submit" name="{{ status }}">
                       {% if status != 'Add' %}
                         Siguiente
                       {% else %}
@@ -121,4 +144,43 @@
 
 {% block javascripts %}
   {{ super() }}
+  <script>
+    let x = 0
+    const getFunction = async () => {
+      // get
+      const progress_bar = document.getElementById('progress_bar')
+      const model_id = document.getElementById('model_id')
+    
+      response = await fetch('http://127.0.0.1:5000/add_model/classifier/percent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: model_id.value
+      })
+      res = await response.json().then((value) => {
+        progress_bar.innerHTML = value[0]
+        progress_bar.name = value[0]
+        console.log(value[0])
+        return value
+      })
+    
+      if (res >= 100) {
+        clearInterval(x)
+      }
+    }
+    
+    const add_button = document.getElementById('submit')
+    
+    const manage_percent = async () => {
+      const model_id = document.getElementById('model_id')
+      console.log('works')
+      console.log(model_id.dataset.status)
+      if (model_id && model_id.dataset.status == 'Create') {
+        
+        x = setInterval(await getFunction, 3000)
+        console.log(x)
+      }
+    }
+    
+    window.addEventListener('DOMContentLoaded', manage_percent)
+  </script>
 {% endblock %}

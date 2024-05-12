@@ -5,6 +5,7 @@ from configs.config import config_dict
 from app import create_app, db
 import os
 import sys
+from flask.ctx import AppContext
 
 load_dotenv()
 
@@ -23,8 +24,6 @@ except KeyError:
     sys.exit("Error: Invalid FET_CONFIG_MODE environment variable entry.")
 
 app = create_app(config_mode)
-
-
 Migrate(app, db)
 
 if __name__ == "__main__":
