@@ -11,4 +11,4 @@ def app1_template():
 @blueprint.route('/app2')
 @login_required
 def app2_template():
-    return render_template('app2.html', dash_url = Dash_App2.url_base)
+    return render_template('app2.html', dash_url = Dash_App2.url_base + f"?user_id={8}")

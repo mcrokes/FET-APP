@@ -2,6 +2,7 @@ import threading
 import time
 
 from app.proccessor.forms import add_classifier
+from app.proccessor.model.model import ClassificationTrainedModel
 from app.proccessor.models import ModelForProccess
 from . import blueprint
 from flask import current_app, make_response, render_template, request
@@ -82,7 +83,7 @@ def save_classifier():
             db_model.target_row = request.form["target"]
             db_model.db_commit()
             qualitative_variables_form = []
-            df = db_model.to_dict()["dataset"].drop(columns="Sobreviviente")
+            df = db_model.to_dict()["dataset"]
             for column in df:
                 if len(set(df[column])) < 5:
                     qualitative_variables_form.append(
@@ -104,29 +105,44 @@ def save_classifier():
             status = "Wrong Data"
             return render_template("add_models.html", form=form, status=status)
     elif "Add" in request.form:
+        db_model: ModelForProccess = ModelForProccess.query.filter(
+            ModelForProccess.id == request.form["model_id"]
+        ).first()
         qualitative_variables_saved = []
+        target_description = {}
+        
         q_dict = {}
         for element in request.form:
             if element != "model_id":
                 if "Q-Variable" in element or element == "Add":
                     if q_dict != {}:
-                        qualitative_variables_saved.append(q_dict)
+                        if q_dict["column_name"] == db_model.target_row:
+                            target_description = q_dict
+                        else:
+                            qualitative_variables_saved.append(q_dict)
                     if element != "Add":
                         q_dict = {
-                            "name": request.form[element],
+                            "column_name": request.form[element],
                             "variables": [],
                         }
                 else:
                     q_dict["variables"].append(
                         {
-                            "old_value": element.replace(f'{q_dict['name']}-', ''),
+                            "old_value": element.replace(f'{q_dict['column_name']}-', ''),
                             "new_value": request.form[element],
                         }
                     )
-        db_model: ModelForProccess = ModelForProccess.query.filter(
-            ModelForProccess.id == request.form["model_id"]
-        ).first()
         
+        
+        test_size = 0.2
+        random_state = 123
+        
+        features_description = "features_description"        
+        full_model = ClassificationTrainedModel(name=db_model.name, df=db_model.to_dict()["dataset"], predictors_description=features_description,
+                                                target=db_model.target_row, test_size=test_size, random_state=random_state,
+                                                model=db_model.to_dict()["model"], model_description=db_model.description,
+                                                target_description=target_description,
+                                                q_variables_values_list=qualitative_variables_saved)
         x = threading.Thread(target=thread_function, args=(db_model.id, current_app.app_context()))
         x.start()
         # Function to add, the model    
