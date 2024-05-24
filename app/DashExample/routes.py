@@ -1,6 +1,6 @@
 from . import blueprint
-from flask import render_template
-from flask_login import login_required
+from flask import g, render_template, request
+from flask_login import login_required, current_user
 from Dashboard import Dash_App1, Dash_App2
 
 @blueprint.route('/app1')
@@ -11,4 +11,7 @@ def app1_template():
 @blueprint.route('/app2')
 @login_required
 def app2_template():
-    return render_template('app2.html', dash_url = Dash_App2.url_base + f"?user_id={8}")
+    print(request.args['model_id'])
+    print(current_user)
+    print(g)
+    return render_template('app2.html', dash_url = Dash_App2.url_base + f"?user_id={request.args['model_id']}")

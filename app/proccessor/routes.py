@@ -13,7 +13,6 @@ import joblib
 
 
 def thread_function(model_id, app):
-    print(1)
     with app:
         db_model: ModelForProccess = ModelForProccess.query.filter(
                 ModelForProccess.id == model_id
@@ -149,12 +148,3 @@ def save_classifier():
         return render_template("add_models.html", model_id=db_model.id, status="Create")
     return render_template("add_models.html", form=form, status="Initial")
 
-
-
-@blueprint.route("/classifier/percent", methods=["GET", "POST"])
-@login_required
-def get_percent():
-    db_model: ModelForProccess = ModelForProccess.query.filter(
-                ModelForProccess.id == request.data.decode()
-    ).first()
-    return make_response([db_model.percent_processed])

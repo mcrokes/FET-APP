@@ -151,7 +151,7 @@
       const progress_bar = document.getElementById('progress_bar')
       const model_id = document.getElementById('model_id')
     
-      response = await fetch('http://127.0.0.1:5000/add_model/classifier/percent', {
+      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/classifier/percent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: model_id.value
