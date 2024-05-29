@@ -84,19 +84,13 @@ def Add_Dash(server):
     app = Dash(server=server, url_base_pathname=url_base)
     apply_layout_with_auth(app, layout)
 
-    # @app.callback(Output("target", "children"), [Input("input_text", "value")])
-    # def callback_fun(value):
-    #     return "your input is {}".format(value)
-
-    print("APP CREATED")
     @app.callback(
         Output("dataset-title", "children"), Output("dataset-view", "children"),
-        # Input("dataset-title", "children"),
         Input('path', 'href')
     )
     def graph_explainers(cl):
         f = furl(cl)
-        param1= f.args['user_id']
+        param1= f.args['model_id']
         try:
             model_x: ModelForProccess = ModelForProccess.query.filter(ModelForProccess.id == param1).first()
             df = model_x.to_dict()["dataset"]

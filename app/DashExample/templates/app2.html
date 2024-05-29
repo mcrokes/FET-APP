@@ -13,6 +13,7 @@
         <div class="dashboard_graph">
           <div style="width: 100%; min-height:800px;" >
             <iframe 
+              id="x"
               noresize='noresize' 
               style='position: absolute; background: transparent; width: 95%; height:100%;' 
               src={{ dash_url }}
@@ -27,5 +28,5 @@
 {% endblock content %}
 
 {% block javascripts %}
-  {{ super()}}
+  {{ super()}}  
 {% endblock javascripts %}

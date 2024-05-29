@@ -28,5 +28,5 @@ def get_list():
     db_model: ModelForProccess = ModelForProccess.query.all()
     response = []
     for model in db_model:
-        response.append(model.id)
+        response.append({"id": model.id, "name": model.name})
     return make_response(response)

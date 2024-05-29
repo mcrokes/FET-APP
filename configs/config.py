@@ -25,11 +25,11 @@ class ProductionConfig(Config):
 
     # PostgreSQL database
     SQLALCHEMY_DATABASE_URI = "postgresql://{}:{}@{}:{}/{}".format(
-        os.environ.get("GENTELELLA_DATABASE_USER", "gentelella"),
-        os.environ.get("GENTELELLA_DATABASE_PASSWORD", "gentelella"),
-        os.environ.get("GENTELELLA_DATABASE_HOST", "db"),
-        os.environ.get("GENTELELLA_DATABASE_PORT", 5432),
-        os.environ.get("GENTELELLA_DATABASE_NAME", "gentelella"),
+        os.environ.get("FET_DATABASE_USER", "gentelella"),
+        os.environ.get("FET_DATABASE_PASSWORD", "gentelella"),
+        os.environ.get("FET_DATABASE_HOST", "db"),
+        os.environ.get("FET_DATABASE_PORT", 5432),
+        os.environ.get("FET_DATABASE_NAME", "gentelella"),
     )
 
 

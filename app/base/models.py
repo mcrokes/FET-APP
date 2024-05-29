@@ -23,7 +23,7 @@ class User(db.Model, UserMixin):
         }
 
     def get_users_list():
-        return User.query.filter(User.is_admin == False).all()
+        return User.query.filter(not User.is_admin).all()
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():

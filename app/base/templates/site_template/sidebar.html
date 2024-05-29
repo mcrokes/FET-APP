@@ -18,7 +18,7 @@
   <!-- sidebar menu -->
   <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
     <div class="menu_section">
-      <h3>General {{ user_id }}</h3>
+      <h3>General</h3>
       <ul class="nav side-menu">
         <li>
           <a href="/home"><i class="fa fa-home"></i> Home <span></span></a>
@@ -36,12 +36,6 @@
             <li>
               <a><i class="fa fa-bar-chart-o"></i> Clasificación <span class="fa fa-chevron-down"></span></a>
               <ul id="classification-models" class="nav child_menu">
-                <!--  <li>
-                  <a href="/DashExample/app1">dash app1</a>
-                </li>
-                <li>
-                  <a href="/DashExample/app2">dash app2</a>
-                </li>  -->
               </ul>
             </li>
             <li>
@@ -49,9 +43,6 @@
               <ul class="nav child_menu">
                 <li>
                   <a href="/DashExample/app1">dash app1</a>
-                </li>
-                <li>
-                  <a href="/DashExample/app2">dash app2</a>
                 </li>
               </ul>
             </li>
@@ -102,7 +93,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: user_id
       })
-      const models_ids = await response.json().then((value) => {
+      const models_data = await response.json().then((value) => {
         // progress_bar.innerHTML = value[0]
         // progress_bar.name = value[0]
         console.log(value)
@@ -110,8 +101,8 @@
       })
       const classifiers = document.getElementById("classification-models")
       let classifiersList = ""
-      models_ids.forEach((id) => {
-        classifiersList += "<li><a href='/DashExample/app2?model_id=" + id + "'>dash app" + id + "</a></li>"
+      models_data.forEach((model) => {
+        classifiersList += "<li><a href='/DashExample/app2?model_id=" + model.id + "'>Explainer: " + model.name + "</a></li>"
       })
       classifiers.innerHTML = classifiersList
     }    
