@@ -1,5 +1,6 @@
 from sqlalchemy import BINARY, Column, Float, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr, AbstractConcreteBase
 import json
 
 import pickle
@@ -147,12 +148,127 @@ class ExplainedClassifierModel(ExplainedModel):
     confusion_matrixes_data = relationship(
         "ConfusionMatrixesData", back_populates="explained_classifier_model"
     )
+    roc_data = relationship(
+        "ROCData", back_populates="explained_classifier_model"
+    )
     importances_data = relationship(
         "ImportancesData", uselist=False, back_populates="explained_classifier_model"
     )
     permutation_importances_data = relationship(
-        "PermutationImportancesData", uselist=False, back_populates="explained_classifier_model"
+        "PermutationImportancesData",
+        uselist=False,
+        back_populates="explained_classifier_model",
     )
+    surrogate_trees_data = relationship(
+        "SurrogateTreeClassifierData", back_populates="explained_classifier_model"
+    )
+    inner_trees_data = relationship(
+        "InnerTreeClassifierData", back_populates="explained_classifier_model"
+    )
+
+
+class Tree(db.Model):
+
+    __tablename__ = "tree"
+
+    id = Column(Integer, primary_key=True)
+    depth = Column(Integer)
+    rules_amount = Column(Integer)
+    inexact_rules_amount = Column(Integer)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "tree",
+    }
+
+    surrogate_tree = relationship(
+        "SurrogateTreeClassifierData", uselist=False, back_populates="tree"
+    )
+
+    inner_tree = relationship(
+        "InnerTreeClassifierData", uselist=False, back_populates="tree"
+    )
+
+    rules = relationship("TreeClassifierRule", back_populates="tree_classifier")
+
+
+class SurrogateTreeClassifierData(db.Model):
+
+    __tablename__ = "surrogate_tree_classifier_data"
+    __mapper_args__ = {
+        "polymorphic_identity": "surrogate_tree_classifier_data",
+    }
+
+    tree_model = Column(String)  # Encoded
+
+    tree_id = Column(Integer, ForeignKey("tree.id"), primary_key=True)
+    tree = relationship("Tree", uselist=False, back_populates="surrogate_tree")
+
+    explained_classifier_model_id = Column(
+        Integer, ForeignKey("explained_classifier_model.id")
+    )
+    explained_classifier_model = relationship(
+        "ExplainedClassifierModel",
+        uselist=False,
+        back_populates="surrogate_trees_data",
+    )
+
+
+class InnerTreeClassifierData(db.Model):
+
+    __tablename__ = "inner_tree_classifier_data"
+
+    __mapper_args__ = {
+        "polymorphic_identity": "inner_tree_classifier_data",
+    }
+
+    tree_number = Column(Integer)
+
+    tree_id = Column(Integer, ForeignKey("tree.id"), primary_key=True)
+    tree = relationship("Tree", uselist=False, back_populates="inner_tree")
+
+    explained_classifier_model_id = Column(
+        Integer, ForeignKey("explained_classifier_model.id")
+    )
+    explained_classifier_model = relationship(
+        "ExplainedClassifierModel",
+        uselist=False,
+        back_populates="inner_trees_data",
+    )
+
+
+class TreeClassifierRule(db.Model):
+    __tablename__ = "tree_classifier_rule"
+
+    id = Column(Integer, primary_key=True)
+    target_value = Column(String)
+    probability = Column(Float)
+    samples_amount = Column(Integer)
+
+    tree_id = Column(
+        Integer,
+        ForeignKey("tree.id"),
+    )
+    tree_classifier = relationship("Tree", back_populates="rules")
+
+    causes = relationship(
+        "TreeClassifierRuleCause", back_populates="tree_classifier_rule"
+    )
+
+
+class TreeClassifierRuleCause(db.Model):
+    __tablename__ = "tree_classifier_rule_cause"
+
+    id = Column(Integer, primary_key=True)
+    predictor = Column(String)
+    relation_sign = Column(String)
+    value = Column(String)
+
+    tree_classifier_rule_id = Column(
+        Integer,
+        ForeignKey("tree_classifier_rule.id"),
+    )
+    tree_classifier_rule = relationship("TreeClassifierRule", back_populates="causes")
+
 
 class ImportancesData(db.Model):
 
@@ -167,6 +283,7 @@ class ImportancesData(db.Model):
         "ExplainedClassifierModel", uselist=False, back_populates="importances_data"
     )
 
+
 class PermutationImportancesData(db.Model):
 
     __tablename__ = "permutation_importances_data"
@@ -177,13 +294,16 @@ class PermutationImportancesData(db.Model):
         Integer, ForeignKey("explained_classifier_model.id"), primary_key=True
     )
     explained_classifier_model = relationship(
-        "ExplainedClassifierModel", uselist=False, back_populates="permutation_importances_data"
+        "ExplainedClassifierModel",
+        uselist=False,
+        back_populates="permutation_importances_data",
     )
-    
+
     permutation_importances = relationship(
         "PermutationImportance", back_populates="permutation_importances_data"
     )
-    
+
+
 class PermutationImportance(db.Model):
 
     __tablename__ = "permutation_importance"
@@ -193,10 +313,14 @@ class PermutationImportance(db.Model):
     importance_std = Column(Float)
     predictor = Column(String)
 
-    permutation_importances_data_id = Column(Integer, ForeignKey("permutation_importances_data.explained_classifier_model_id"))
+    permutation_importances_data_id = Column(
+        Integer,
+        ForeignKey("permutation_importances_data.explained_classifier_model_id"),
+    )
     permutation_importances_data = relationship(
         "PermutationImportancesData", back_populates="permutation_importances"
     )
+
 
 class DataSetData(db.Model):
 
@@ -211,11 +335,12 @@ class DataSetData(db.Model):
     explained_classifier_model = relationship(
         "ExplainedClassifierModel", uselist=False, back_populates="data_set_data"
     )
-    
+
     data_set_data_distributions = relationship(
         "DataSetDataDistribution", back_populates="data_set_data"
     )
-    
+
+
 class DataSetDataDistribution(db.Model):
 
     __tablename__ = "data_set_data_distribution"
@@ -227,15 +352,18 @@ class DataSetDataDistribution(db.Model):
     isPrime = Column(Boolean, default=True)
     distribution_dataset = Column(String)  # Encoded
 
-    data_set_data_id = Column(Integer, ForeignKey("data_set_data.explained_classifier_model_id"))
+    data_set_data_id = Column(
+        Integer, ForeignKey("data_set_data.explained_classifier_model_id")
+    )
     data_set_data = relationship(
         "DataSetData", back_populates="data_set_data_distributions"
     )
 
+
 class ConfusionMatrixesData(db.Model):
 
     __tablename__ = "confusion_matrixes_data"
-    
+
     id = Column(Integer, primary_key=True)
     class_name = Column(String)
 
@@ -245,15 +373,16 @@ class ConfusionMatrixesData(db.Model):
     explained_classifier_model = relationship(
         "ExplainedClassifierModel", back_populates="confusion_matrixes_data"
     )
-    
+
     confusion_matrixes = relationship(
         "ConfusionMatrix", back_populates="confusion_matrixes_data"
     )
-    
+
+
 class ConfusionMatrix(db.Model):
 
     __tablename__ = "confusion_matrix"
-    
+
     id = Column(Integer, primary_key=True)
     matrix = Column(String)  # Encoded
     cut_off = Column(Integer)
@@ -264,15 +393,16 @@ class ConfusionMatrix(db.Model):
     confusion_matrixes_data = relationship(
         "ConfusionMatrixesData", back_populates="confusion_matrixes"
     )
-    
+
     explanation = relationship(
         "ConfusionMatrixExplanation", uselist=False, back_populates="confusion_matrix"
     )
-    
+
+
 class ConfusionMatrixExplanation(db.Model):
 
     __tablename__ = "confusion_matrix_explanation"
-    
+
     explanation_for_test = Column(String)  # Encoded
 
     confusion_matrix_id = Column(
@@ -281,3 +411,22 @@ class ConfusionMatrixExplanation(db.Model):
     confusion_matrix = relationship(
         "ConfusionMatrix", uselist=False, back_populates="explanation"
     )
+
+
+class ROCData(db.Model):
+
+    __tablename__ = "roc_data"
+
+    id = Column(Integer, primary_key=True)
+    class_name = Column(String) 
+    fpr = Column(String) # Encoded
+    tpr = Column(String) # Encoded
+    auc_score = Column(String) # Encoded
+
+    explained_classifier_model_id = Column(
+        Integer, ForeignKey("explained_classifier_model.id")
+    )
+    explained_classifier_model = relationship(
+        "ExplainedClassifierModel", back_populates="roc_data"
+    )
+
