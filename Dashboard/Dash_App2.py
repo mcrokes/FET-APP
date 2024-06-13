@@ -8,7 +8,8 @@ from dash import Dash, html
 
 from Dashboard.dataset.datasetLayout import datasetCallbacks, datasetLayout
 from Dashboard.importances.importancesLayout import importancesCallbacks, importancesLayout
-from Dashboard.metrics.metricsLayout import metricsCallbacks, metrics_layout
+from Dashboard.metrics.metricsLayout import metricsCallbacks, metricsLayout
+from Dashboard.surrogate.surrogateLayout import surrogateCallbacks, surrogateLayout
 
 from .Dash_fun import apply_layout_with_auth, load_object, save_object
 import dash_bootstrap_components as dbc
@@ -29,12 +30,12 @@ tab1_content = dbc.Card(
 )
 
 tab2_content = dbc.Card(
-    dbc.CardBody([html.Div([metrics_layout], id="graph-metrics-layout-output-upload")]),
+    dbc.CardBody([html.Div([metricsLayout], id="graph-metrics-layout-output-upload")]),
     className="mt-3 section-card",
 )
 
 tab3_content = dbc.Card(
-    dbc.CardBody([html.Div([holder], id="surrogate-layout-output-upload")]),
+    dbc.CardBody([html.Div([surrogateLayout], id="surrogate-layout-output-upload")]),
     className="mt-3 section-card",
 )
 
@@ -97,5 +98,6 @@ def Add_Dash(server):
     datasetCallbacks(app, furl)
     importancesCallbacks(app, furl)
     metricsCallbacks(app, furl)
+    surrogateCallbacks(app, furl)
 
     return app.server

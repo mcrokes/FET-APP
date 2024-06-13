@@ -30,9 +30,5 @@ class Importance:
             {k: permutation_importance_model[k] for k in ['importances_mean', 'importances_std']})
         df_permutation_importance['Predictor'] = features
         df_ordered_importance = df_permutation_importance.sort_values('importances_mean', ascending=True)
-        fig = px.bar(data_frame=df_ordered_importance, error_x=df_ordered_importance['importances_std'],
-                     x='importances_mean', y='Predictor',
-                     title='IMPORTANCIAS POR PERMUTACION',
-                     labels={'importances_mean': 'Incremento del error tras la permutacion'})
 
-        return fig
+        return df_ordered_importance

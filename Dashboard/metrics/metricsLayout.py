@@ -1,20 +1,19 @@
-import multiprocessing
 from pyclbr import Function
 from dash import dcc, html, dash_table
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 import pandas as pd
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.inspection import permutation_importance
 
 from app.proccessor.model.dataset_interaction_methods import update_y_pred
 from app.proccessor.models import ModelForProccess
 
 from sklearn import metrics
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 def get_target_dropdown(values_dict):
@@ -75,6 +74,45 @@ def initialize_matrix(
     return __create_matrix(y_test=y_test, y_pred=y_pred_new, class_names=class_names)
 
 
+def create_curve(y_scores, y_true, options):
+    # One hot encode the labels in order to plot them
+    # y_onehot = pd.get_dummies(y_true)
+    # print(y_onehot)
+
+    data = []
+    trace1 = go.Scatter(
+        x=[0, 1], y=[0, 1], mode="lines", line=dict(dash="dash"), showlegend=False
+    )
+
+    data.append(trace1)
+    cont = 0
+    for i in range(y_scores.shape[1]):
+        y_score = y_scores[:, i]
+
+        fpr, tpr, _ = metrics.roc_curve(y_true, y_score, pos_label=i)
+        auc_score = metrics.auc(fpr, tpr)
+
+        # print("fpr: ")
+        # print(fpr)
+        # print("tpr: ")
+        # print(tpr)
+
+        name = f"{options[cont]['label']} (AUC={auc_score:.2f})"
+        trace2 = go.Scatter(x=fpr, y=tpr, name=name, mode="lines")
+        data.append(trace2)
+        cont += 1
+
+    layout = go.Layout(
+        title="ROC-AUC curva",
+        yaxis=dict(title="Tasa de Positivos"),
+        xaxis=dict(title="Tasa de Falsos Positivos"),
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+
+    return fig
+
+
 cutoff = dbc.Switch(
     label="USAR COTOFF",
     value=False,
@@ -90,7 +128,7 @@ class_selector = dcc.Dropdown(
 
 slider = dcc.Slider(0.01, 0.99, 0.1, value=0.5, id="cutoff-slider", disabled=True)
 
-metrics_layout = html.Div(
+metricsLayout = html.Div(
     [
         dcc.Loading(
             [
@@ -180,7 +218,7 @@ def metricsCallbacks(app, furl: Function):
         Input("cutoff-slider", "value"),
         Input("path", "href"),
     )
-    def graph_explainers(cutoff, positive_class, slider, cl):
+    def graph_matrix(cutoff, positive_class, slider, cl):
         f = furl(cl)
         param1 = f.args["model_id"]
         try:
@@ -234,11 +272,63 @@ def metricsCallbacks(app, furl: Function):
                         )
                     )
                     if cutoff and positive_class is None:
-                        return div, True, False, get_target_dropdown(target_description["variables"])
+                        return (
+                            div,
+                            True,
+                            False,
+                            get_target_dropdown(target_description["variables"]),
+                        )
                     else:
-                        return div, True, True, get_target_dropdown(target_description["variables"])
+                        return (
+                            div,
+                            True,
+                            True,
+                            get_target_dropdown(target_description["variables"]),
+                        )
             else:
-                return None, None, None, get_target_dropdown(target_description["variables"])
+                return (
+                    None,
+                    None,
+                    None,
+                    get_target_dropdown(target_description["variables"]),
+                )
+        except Exception as e:
+            print(e)
+            raise PreventUpdate
+
+    @app.callback(
+        Output("roc-output-upload", "children"),
+        Output("roc-explanation", "children"),
+        Input("path", "href"),
+    )
+    def graph_roc(cl):
+        f = furl(cl)
+        param1 = f.args["model_id"]
+        try:
+            model_x: ModelForProccess = ModelForProccess.query.filter(
+                ModelForProccess.id == param1
+            ).first()
+
+            classifier_model: RandomForestClassifier = model_x.to_dict()["model"]
+            classifier_dataset: pd.DataFrame = model_x.to_dict()["dataset"]
+
+            target_description = {
+                "column_name": "Sobreviviente",
+                "variables": [
+                    {"old_value": 0, "new_value": "Muere"},
+                    {"old_value": 1, "new_value": "Vive"},
+                ],
+            }
+            
+            return (dcc.Graph(
+                figure=create_curve(
+                    y_scores=classifier_model.predict_proba(
+                        classifier_dataset.drop(columns=model_x.target_row)
+                    ),
+                    y_true=classifier_dataset[model_x.target_row],
+                    options=get_target_dropdown(target_description["variables"]),
+                )
+            ), 'Explanation')
         except Exception as e:
             print(e)
             raise PreventUpdate

@@ -1,25 +1,61 @@
 import base64
+import matplotlib
 
 from dtreeviz.trees import model
 from sklearn import tree
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import _tree
 import numpy as np
 
+matplotlib.use('SVG')
+
+q_variables_values_list = [
+    {
+        "column_name": "Genero",
+        "variables": [
+            {
+                "old_value": 0,
+                "new_value": "Masculino"
+            },
+            {
+                "old_value": 1,
+                "new_value": "Femenino"
+            },
+        ]
+    },
+    {
+        "column_name": "Clase",
+        "variables": [
+            {
+                "old_value": 1,
+                "new_value": "Primera Clase"
+            },
+            {
+                "old_value": 2,
+                "new_value": "Segunda Clase"
+            },
+            {
+                "old_value": 3,
+                "new_value": "Tercera Clase"
+            },
+        ]
+    }
+]
 
 class SurrogateTree:
-    def __init__(self, explainer_classifier, max_depth: int):
+    def __init__(self, x_train, model: RandomForestClassifier, df, class_names, target, max_depth: int):
         self.__surrogate_t = tree.DecisionTreeClassifier(max_depth=max_depth)
-        self.__x_train = explainer_classifier.get_x_train()
-        self.__y_train = explainer_classifier.predict(explainer_classifier.get_x_train())
+        self.__x_train = x_train
+        self.__y_train = model.predict(x_train)
         self.__surrogate_t.fit(self.__x_train, self.__y_train)
         # self.__importance = self.__surrogate_t.feature_importances_
         # self.__indices = np.argsort(self.__importance)
-        self.__q_variables = explainer_classifier.get_q_variables_values_names()
-        self.__q_variables_values = explainer_classifier.get_q_variables_values_list()
-        self.__target = explainer_classifier.get_target_classifier()
-        self.__class_names = explainer_classifier.get_target_class_names()
-        self.__feature_names = explainer_classifier.get_feature_names()
-        self.__df = explainer_classifier.get_dataframe()
+        self.__q_variables = [var['column_name'] for var in q_variables_values_list]
+        self.__q_variables_values = q_variables_values_list
+        self.__target = target
+        self.__class_names = class_names
+        self.__feature_names = model.feature_names_in_
+        self.__df = df
 
     # def get_text_representation(self):
     #     return tree.export_text(self.__cls_t, feature_names=self.features)
