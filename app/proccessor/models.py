@@ -17,6 +17,7 @@ ENCODED_FIELDS = [
     "q_variables_dict",
     "qualitative_variables_saved",
     "target_description",
+    "value"
 ]
 
 
@@ -91,6 +92,8 @@ class ModelForProccess(db.Model, dbInteractionMethods):
             "description",
             "target_row",
             "percent_processed",
+            "target_description",
+            "qualitative_variables_saved",
         ],
     ):
         return super().getElement(name)
@@ -324,7 +327,7 @@ class PermutationImportance(db.Model, dbInteractionMethods):
         return super().getElement(name)
 
 
-class Tree(db.Model):
+class Tree(db.Model, dbInteractionMethods):
 
     __tablename__ = "tree"
 
@@ -332,6 +335,9 @@ class Tree(db.Model):
     depth = Column(Integer)
     rules_amount = Column(Integer)
     inexact_rules_amount = Column(Integer)
+    
+    def __init__(self, **kwargs):
+        _initDB_model(self, kwargs)
 
     __mapper_args__ = {
         "polymorphic_identity": "tree",
@@ -348,7 +354,7 @@ class Tree(db.Model):
     rules = relationship("TreeClassifierRule", back_populates="tree_classifier")
 
 
-class SurrogateTreeClassifierData(db.Model):
+class SurrogateTreeClassifierData(db.Model, dbInteractionMethods):
 
     __tablename__ = "surrogate_tree_classifier_data"
     __mapper_args__ = {
@@ -356,6 +362,9 @@ class SurrogateTreeClassifierData(db.Model):
     }
 
     tree_model = Column(String)  # Encoded
+    
+    def __init__(self, **kwargs):
+        _initDB_model(self, kwargs)
 
     tree_id = Column(Integer, ForeignKey("tree.id"), primary_key=True)
     tree = relationship("Tree", uselist=False, back_populates="surrogate_tree")
@@ -370,7 +379,7 @@ class SurrogateTreeClassifierData(db.Model):
     )
 
 
-class InnerTreeClassifierData(db.Model):
+class InnerTreeClassifierData(db.Model, dbInteractionMethods):
 
     __tablename__ = "inner_tree_classifier_data"
 
@@ -379,6 +388,9 @@ class InnerTreeClassifierData(db.Model):
     }
 
     tree_number = Column(Integer)
+    
+    def __init__(self, **kwargs):
+        _initDB_model(self, kwargs)
 
     tree_id = Column(Integer, ForeignKey("tree.id"), primary_key=True)
     tree = relationship("Tree", uselist=False, back_populates="inner_tree")
@@ -393,13 +405,16 @@ class InnerTreeClassifierData(db.Model):
     )
 
 
-class TreeClassifierRule(db.Model):
+class TreeClassifierRule(db.Model, dbInteractionMethods):
     __tablename__ = "tree_classifier_rule"
 
     id = Column(Integer, primary_key=True)
     target_value = Column(String)
     probability = Column(Float)
     samples_amount = Column(Integer)
+    
+    def __init__(self, **kwargs):
+        _initDB_model(self, kwargs)
 
     tree_id = Column(
         Integer,
@@ -412,13 +427,16 @@ class TreeClassifierRule(db.Model):
     )
 
 
-class TreeClassifierRuleCause(db.Model):
+class TreeClassifierRuleCause(db.Model, dbInteractionMethods):
     __tablename__ = "tree_classifier_rule_cause"
 
     id = Column(Integer, primary_key=True)
     predictor = Column(String)
     relation_sign = Column(String)
-    value = Column(String)
+    value = Column(String) # encoded
+    
+    def __init__(self, **kwargs):
+        _initDB_model(self, kwargs)
 
     tree_classifier_rule_id = Column(
         Integer,
