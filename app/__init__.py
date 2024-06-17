@@ -4,7 +4,7 @@ from .extensions import db, login_manager
 from importlib import import_module
 from .base.models import User
 from Dashboard import Dash_App1, Dash_App2
-from os import path
+from os import path, environ
 import logging
 
 
@@ -14,7 +14,7 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
-    for module_name in ("base", "home", "DashExample", "setting"):
+    for module_name in ("base", "home", "DashExample", "setting", "proccessor", "API"):
         module = import_module("app.{}.routes".format(module_name))
         app.register_blueprint(module.blueprint)
 
@@ -105,12 +105,15 @@ def apply_themes(app):
                     values["filename"] = theme_file
         return url_for(endpoint, **values)
 
+def configure_file_upload(app):
+    app.config['UPLOAD_FOLDER'] = environ.get('UPLOAD_FOLDER')
 
 def create_app(config, selenium=False):
     app = Flask(__name__, static_folder="base/static")
     app.config.from_object(config)
     if selenium:
         app.config["LOGIN_DISABLED"] = True
+    configure_file_upload(app)
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)

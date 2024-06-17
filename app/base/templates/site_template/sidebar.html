@@ -23,6 +23,9 @@
         <li>
           <a href="/home"><i class="fa fa-home"></i> Home <span></span></a>
         </li>
+        <li>
+          <a href="/add_model/classifier"><i class="fa fa-home"></i> Add Model <span></span></a>
+        </li>
 
         <li>
           <a><i class="fa fa-bar-chart-o"></i> Pizarra <span class="fa fa-chevron-down"></span></a>
@@ -32,13 +35,7 @@
             </li>
             <li>
               <a><i class="fa fa-bar-chart-o"></i> Clasificación <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li>
-                  <a href="/DashExample/app1">dash app1</a>
-                </li>
-                <li>
-                  <a href="/DashExample/app2">dash app2</a>
-                </li>
+              <ul id="classification-models" class="nav child_menu">
               </ul>
             </li>
             <li>
@@ -46,9 +43,6 @@
               <ul class="nav child_menu">
                 <li>
                   <a href="/DashExample/app1">dash app1</a>
-                </li>
-                <li>
-                  <a href="/DashExample/app2">dash app2</a>
                 </li>
               </ul>
             </li>
@@ -88,4 +82,31 @@
     <a data-toggle="tooltip" data-placement="top" title="Logout" href="/logout"><span class="glyphicon glyphicon-off" aria-hidden="true"></span></a>
   </div>
   <!-- /menu footer buttons -->
+
+  <script>
+    const getModelsList = async () => {
+      // get
+      const user_id = 3
+    
+      const response = await fetch('http://127.0.0.1:5000/INTERNAL_API/classifier/list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: user_id
+      })
+      const models_data = await response.json().then((value) => {
+        // progress_bar.innerHTML = value[0]
+        // progress_bar.name = value[0]
+        console.log(value)
+        return value
+      })
+      const classifiers = document.getElementById("classification-models")
+      let classifiersList = ""
+      models_data.forEach((model) => {
+        classifiersList += "<li><a href='/DashExample/app2?model_id=" + model.id + "'>Explainer: " + model.name + "</a></li>"
+      })
+      classifiers.innerHTML = classifiersList
+    }    
+  
+    window.addEventListener('DOMContentLoaded', getModelsList)
+  </script>
 </div>
