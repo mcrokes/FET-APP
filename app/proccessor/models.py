@@ -17,7 +17,8 @@ ENCODED_FIELDS = [
     "q_variables_dict",
     "qualitative_variables_saved",
     "target_description",
-    "value"
+    "value",
+    "tree_model"
 ]
 
 
@@ -28,14 +29,11 @@ def _initDB_model(self, kwargs):
         # will be a 1-element list)
         if hasattr(value, "__iter__") and not isinstance(value, object):
             # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
-            print(property, ": Added Via Has iter")
             value = value[0]
         # if property == "model" or property == "dataset":
         if property in ENCODED_FIELDS:
-            print(property, ": Added Via pikle dumps")
             value = pickle.dumps(value)
 
-        print(property, ": Added")
         setattr(self, property, value)
 
 
@@ -155,8 +153,6 @@ class ExplainedClassifierModel(ExplainedModel):
     inner_trees_data = relationship(
         "InnerTreeClassifierData", back_populates="explained_classifier_model"
     )
-
-    type,
 
     def getElement(
         self,
@@ -352,6 +348,17 @@ class Tree(db.Model, dbInteractionMethods):
     )
 
     rules = relationship("TreeClassifierRule", back_populates="tree_classifier")
+    
+    def getElement(
+        self,
+        name: Literal[
+            "id",
+            "depth",
+            "rules_amount",
+            "inexact_rules_amount",
+        ],
+    ):
+        return super().getElement(name)
 
 
 class SurrogateTreeClassifierData(db.Model, dbInteractionMethods):
@@ -377,6 +384,14 @@ class SurrogateTreeClassifierData(db.Model, dbInteractionMethods):
         uselist=False,
         back_populates="surrogate_trees_data",
     )
+    
+    def getElement(
+        self,
+        name: Literal[
+            "tree_model",
+        ],
+    ):
+        return super().getElement(name)
 
 
 class InnerTreeClassifierData(db.Model, dbInteractionMethods):
@@ -403,6 +418,14 @@ class InnerTreeClassifierData(db.Model, dbInteractionMethods):
         uselist=False,
         back_populates="inner_trees_data",
     )
+    
+    def getElement(
+        self,
+        name: Literal[
+            "tree_number",
+        ],
+    ):
+        return super().getElement(name)
 
 
 class TreeClassifierRule(db.Model, dbInteractionMethods):
@@ -411,7 +434,7 @@ class TreeClassifierRule(db.Model, dbInteractionMethods):
     id = Column(Integer, primary_key=True)
     target_value = Column(String)
     probability = Column(Float)
-    samples_amount = Column(Integer)
+    samples_amount = Column(Float)
     
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
@@ -425,6 +448,17 @@ class TreeClassifierRule(db.Model, dbInteractionMethods):
     causes = relationship(
         "TreeClassifierRuleCause", back_populates="tree_classifier_rule"
     )
+    
+    def getElement(
+        self,
+        name: Literal[
+            "id",
+            "target_value",
+            "probability",
+            "samples_amount"
+        ],
+    ):
+        return super().getElement(name)
 
 
 class TreeClassifierRuleCause(db.Model, dbInteractionMethods):
@@ -443,7 +477,17 @@ class TreeClassifierRuleCause(db.Model, dbInteractionMethods):
         ForeignKey("tree_classifier_rule.id"),
     )
     tree_classifier_rule = relationship("TreeClassifierRule", back_populates="causes")
-
+    
+    def getElement(
+        self,
+        name: Literal[
+            "id",
+            "predictor",
+            "relation_sign",
+            "value",
+        ],
+    ):
+        return super().getElement(name)
 
 class ConfusionMatrixesData(db.Model):
 

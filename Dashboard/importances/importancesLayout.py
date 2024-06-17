@@ -68,8 +68,8 @@ def importancesCallbacks(app, furl:Function):
                 ModelForProccess.id == param1
             ).first()
             
-            classifier_model: RandomForestClassifier = model_x.to_dict()["model"]
-            classifier_dataset: pd.DataFrame = model_x.to_dict()["dataset"]
+            classifier_model: RandomForestClassifier = model_x.getElement("model")
+            classifier_dataset: pd.DataFrame = model_x.getElement("dataset")
             df_feature_importance: pd.DataFrame = pd.DataFrame({'Predictor': classifier_model.feature_names_in_, 'Importancia': classifier_model.feature_importances_})
             importances_fig = px.bar(data_frame=df_feature_importance.sort_values('Importancia', ascending=False), x='Importancia',
                      y='Predictor',
