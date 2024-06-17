@@ -17,6 +17,7 @@ from app.proccessor.models import (
     ModelForProccess,
     PermutationImportance,
     PermutationImportancesData,
+    SurrogateTreeClassifierData,
     Tree,
     TreeClassifierRule,
     TreeClassifierRuleCause,
@@ -37,8 +38,6 @@ def thread_function(model_id, app):
 
         db_model_classifier_model: RandomForestClassifier = db_model.getElement("model")
         db_model_classifier_dataset: pd.DataFrame = db_model.getElement("dataset")
-        db_model_classifier_description: str = db_model.getElement("description")
-        db_model_classifier_name: str = db_model.getElement("name")
         db_model_classifier_target_row: str = db_model.getElement("target_row")
         db_model_classifier_target_description: dict = db_model.getElement(
             "target_description"
@@ -143,6 +142,7 @@ def thread_function(model_id, app):
         estimator.get_depth()
 
         for index, tree in enumerate(db_model_classifier_model.estimators_):            
+            print("Inner Tree number: ", index)
             rules = ExplainSingleTree.get_rules(
                 model=tree.tree_,
                 q_variables=db_model_classifier_qualitative_column_names,
@@ -197,9 +197,74 @@ def thread_function(model_id, app):
             inner_tree_data.tree = db_tree
             inner_tree_data.explained_classifier_model = classifier_model_data
             inner_tree_data.add_to_db()
-
-
         
+        tree_depth = 3
+        surrogate_inexact_rules_amount = -1
+        while surrogate_inexact_rules_amount != 0:
+            print("Surrogate Tree depth: ", tree_depth)
+            surrogate_tree = ExplainSingleTree.createSurrogateTree(
+                model=db_model_classifier_model,
+                x_train=db_model_classifier_dataset.drop(
+                    columns=db_model_classifier_target_row
+                ),
+                max_depth=tree_depth
+            )
+            tree_depth+=1
+            rules = ExplainSingleTree.get_rules(
+                model=surrogate_tree.tree_,
+                q_variables=db_model_classifier_qualitative_column_names,
+                q_variables_values=db_model_classifier_qualitative_columns,
+                features=surrogate_tree.feature_names_in_,
+                class_names=db_model_classifier_target_class_names,
+                target=db_model_classifier_target_row,
+            )            
+                    
+            db_tree = Tree(
+                **{
+                    "depth": surrogate_tree.get_depth(), 
+                    "rules_amount": len(rules),
+                }
+            )
+            
+            surrogate_inexact_rules_amount = 0
+            for rule in rules:
+                db_rule = TreeClassifierRule(
+                    **{
+                        "target_value": rule["target_value"],
+                        "probability": rule["probability"],
+                        "samples_amount": rule["samples_amount"]                            
+                    }
+                )
+                db_rule.tree_classifier = db_tree
+                db_rule.add_to_db()
+                
+                for cause in rule["causes"]:
+                    db_cause = TreeClassifierRuleCause(
+                        **{
+                            "predictor": cause["item"],
+                            "relation_sign": cause["sign"],
+                            "value": cause["value"],
+                        }
+                    )
+                    db_cause.tree_classifier_rule = db_rule
+                    db_cause.add_to_db()
+                
+                if rule["probability"] < 100:
+                    surrogate_inexact_rules_amount += 1
+                
+            
+            db_tree.inexact_rules_amount = surrogate_inexact_rules_amount
+            db_tree.add_to_db()
+            
+            surrogate_tree_data = SurrogateTreeClassifierData(
+                **{
+                    "tree_model": surrogate_tree
+                }
+            )
+            surrogate_tree_data.tree = db_tree
+            surrogate_tree_data.explained_classifier_model = classifier_model_data
+            surrogate_tree_data.add_to_db()
+                    
 
         classifier_model_data.data_set_data = dataset_data
         classifier_model_data.importances_data = importances_data
@@ -215,9 +280,6 @@ def thread_function(model_id, app):
         permutation_importances_data.add_to_db()
         classifier_model_data.add_to_db()
 
-        print(
-            classifier_model_data.data_set_data.data_set_data_distributions[0].isNumeric
-        )
         # db_model.percent_processed = 10
         # db_model.db_commit()
         # time.sleep(5)

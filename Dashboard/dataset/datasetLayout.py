@@ -84,7 +84,7 @@ def datasetCallbacks(app, furl:Function):
             model_x: ModelForProccess = ModelForProccess.query.filter(
                 ModelForProccess.id == param1
             ).first()
-            df = model_x.to_dict()["dataset"]
+            df = model_x.getElement("dataset")
             dtt = "Title"
             return (
                 dtt,

@@ -74,43 +74,63 @@ def initialize_matrix(
     return __create_matrix(y_test=y_test, y_pred=y_pred_new, class_names=class_names)
 
 
-def create_curve(y_scores, y_true, options):
-    # One hot encode the labels in order to plot them
-    # y_onehot = pd.get_dummies(y_true)
-    # print(y_onehot)
+def create_curve(y_scores, y_true, options, pointers, useScatter=False):
+        data = []
+        trace1 = go.Scatter(x=[0, 1], y=[0, 1],
+                            mode='lines',
+                            line=dict(dash='dash'),
+                            showlegend=False
 
-    data = []
-    trace1 = go.Scatter(
-        x=[0, 1], y=[0, 1], mode="lines", line=dict(dash="dash"), showlegend=False
-    )
+                            )
 
-    data.append(trace1)
-    cont = 0
-    for i in range(y_scores.shape[1]):
-        y_score = y_scores[:, i]
+        data.append(trace1)
+        cont = 0
+        for i in range(y_scores.shape[1]):
+            y_score = y_scores[:, i]
+            
+            pointer = pointers[i]
 
-        fpr, tpr, _ = metrics.roc_curve(y_true, y_score, pos_label=i)
-        auc_score = metrics.auc(fpr, tpr)
+            fpr, tpr, _ = metrics.roc_curve(y_true, y_score, pos_label=i)
+            auc_score = metrics.auc(fpr, tpr)
+            
+            if pointer >= 0 or not useScatter:
+                name = f"{options[cont]['label']} (AUC={auc_score:.2f})"
+                trace2 = go.Scatter(x=fpr, y=tpr,
+                                    name=name,
+                                    mode='lines')
+                data.append(trace2)
+                
+                if useScatter:
+                    scatterPointer = int(len(fpr) * pointer)
+                    print(scatterPointer)
+                    trace3 = go.Scatter(x=[fpr[scatterPointer]], y=[tpr[scatterPointer]],
+                                        name=f"Sc{fpr[scatterPointer]}",)
+                    trace4 = go.Scatter(x=[0, fpr[scatterPointer]], y=[tpr[scatterPointer], tpr[scatterPointer]],
+                                    mode='lines',
+                                    name=f"Line{fpr[scatterPointer]}",
+                                    line=dict(dash='dash'),
 
-        # print("fpr: ")
-        # print(fpr)
-        # print("tpr: ")
-        # print(tpr)
+                                    )
+                    trace5 = go.Scatter(x=[fpr[scatterPointer], fpr[scatterPointer]], y=[0, tpr[scatterPointer]],
+                                    mode='lines',
+                                    name=f"Line{fpr[scatterPointer]}",
+                                    line=dict(dash='dash'),
 
-        name = f"{options[cont]['label']} (AUC={auc_score:.2f})"
-        trace2 = go.Scatter(x=fpr, y=tpr, name=name, mode="lines")
-        data.append(trace2)
-        cont += 1
+                                    )
+                    data.append(trace3)
+                    data.append(trace4)
+                    data.append(trace5)
+            cont += 1
 
-    layout = go.Layout(
-        title="ROC-AUC curva",
-        yaxis=dict(title="Tasa de Positivos"),
-        xaxis=dict(title="Tasa de Falsos Positivos"),
-    )
+        layout = go.Layout(
+            title='ROC-AUC curva',
+            yaxis=dict(title='Tasa de Positivos'),
+            xaxis=dict(title='Tasa de Falsos Positivos')
+        )
 
-    fig = go.Figure(data=data, layout=layout)
+        fig = go.Figure(data=data, layout=layout)
 
-    return fig
+        return fig
 
 
 cutoff = dbc.Switch(
@@ -128,9 +148,24 @@ class_selector = dcc.Dropdown(
 
 slider = dcc.Slider(0.01, 0.99, 0.1, value=0.5, id="cutoff-slider", disabled=True)
 
+ROCcutoff = dbc.Switch(
+    label="USAR COTOFF",
+    value=False,
+    id="ROC-check-cutoff",
+)
+
+ROCclass_selector = dcc.Dropdown(
+    value=None,
+    id="ROC-positive-class-selector",
+    placeholder="Seleccione como positiva la clase que desea analizar",
+    disabled=True,
+)
+
+ROCslider = dcc.Slider(0.01, 0.99, value=0.5, id="ROC-cutoff-slider", disabled=True)
+
 metricsLayout = html.Div(
     [
-        dcc.Loading(
+        html.Div(
             [
                 dbc.Row(
                     [
@@ -169,35 +204,12 @@ metricsLayout = html.Div(
                 ),
                 dbc.Row(
                     [
-                        dbc.Col(
-                            [
-                                dbc.Row(
-                                    [
-                                        html.Div(id="roc-output-upload"),
-                                    ]
-                                )
-                            ],
-                            xs=8,
-                            sm=8,
-                            md=8,
-                            lg=8,
-                            xl=8,
-                            xxl=8,
-                        ),
-                        dbc.Col(
-                            [
-                                html.Div(
-                                    ["TEXTO CON EXPLICACION DEL GRÁFICO"],
-                                    id="roc-explanation",
-                                )
-                            ],
-                            xs=4,
-                            sm=4,
-                            md=4,
-                            lg=4,
-                            xl=4,
-                            xxl=4,
-                        ),
+                        dbc.Row(id="roc-output-upload"),
+                        dbc.Row(
+                                    [html.Div([ROCcutoff], style={"padding-left": "20px"})]
+                                ),
+                                dbc.Row([ROCclass_selector]),
+                                dbc.Row([ROCslider], style={"padding-top": "20px"}),
                     ]
                 ),
             ]
@@ -226,8 +238,8 @@ def metricsCallbacks(app, furl: Function):
                 ModelForProccess.id == param1
             ).first()
 
-            classifier_model: RandomForestClassifier = model_x.to_dict()["model"]
-            classifier_dataset: pd.DataFrame = model_x.to_dict()["dataset"]
+            classifier_model: RandomForestClassifier = model_x.getElement("model")
+            classifier_dataset: pd.DataFrame = model_x.getElement("dataset")
 
             target_description = {
                 "column_name": "Sobreviviente",
@@ -236,6 +248,7 @@ def metricsCallbacks(app, furl: Function):
                     {"old_value": 1, "new_value": "Vive"},
                 ],
             }
+            class_names = [element["new_value"] for element in target_description["variables"]]
 
             if positive_class or slider or cutoff:
                 if cutoff and positive_class is not None:
@@ -249,9 +262,7 @@ def metricsCallbacks(app, furl: Function):
                                     columns=model_x.target_row
                                 ),
                                 classifier_model=classifier_model,
-                                class_names=list(
-                                    set(classifier_dataset[model_x.target_row])
-                                ),
+                                class_names=class_names,
                             )
                         ),
                         False,
@@ -266,9 +277,7 @@ def metricsCallbacks(app, furl: Function):
                             y_test=classifier_dataset[model_x.target_row],
                             x_test=classifier_dataset.drop(columns=model_x.target_row),
                             classifier_model=classifier_model,
-                            class_names=list(
-                                set(classifier_dataset[model_x.target_row])
-                            ),
+                            class_names=class_names,
                         )
                     )
                     if cutoff and positive_class is None:
@@ -297,11 +306,16 @@ def metricsCallbacks(app, furl: Function):
             raise PreventUpdate
 
     @app.callback(
-        Output("roc-output-upload", "children"),
-        Output("roc-explanation", "children"),
+        Output("roc-output-upload", "children"),        
+        Output("ROC-cutoff-slider", "disabled"),
+        Output("ROC-positive-class-selector", "disabled"),
+        Output("ROC-positive-class-selector", "options"),
+        Input("ROC-check-cutoff", "value"),
+        Input("ROC-positive-class-selector", "value"),
+        Input("ROC-cutoff-slider", "value"),
         Input("path", "href"),
     )
-    def graph_roc(cl):
+    def graph_roc(cutoff, positive_class, slider, cl):
         f = furl(cl)
         param1 = f.args["model_id"]
         try:
@@ -309,8 +323,8 @@ def metricsCallbacks(app, furl: Function):
                 ModelForProccess.id == param1
             ).first()
 
-            classifier_model: RandomForestClassifier = model_x.to_dict()["model"]
-            classifier_dataset: pd.DataFrame = model_x.to_dict()["dataset"]
+            classifier_model: RandomForestClassifier = model_x.getElement("model")
+            classifier_dataset: pd.DataFrame = model_x.getElement("dataset")
 
             target_description = {
                 "column_name": "Sobreviviente",
@@ -319,16 +333,60 @@ def metricsCallbacks(app, furl: Function):
                     {"old_value": 1, "new_value": "Vive"},
                 ],
             }
-            
-            return (dcc.Graph(
-                figure=create_curve(
-                    y_scores=classifier_model.predict_proba(
-                        classifier_dataset.drop(columns=model_x.target_row)
-                    ),
-                    y_true=classifier_dataset[model_x.target_row],
-                    options=get_target_dropdown(target_description["variables"]),
+
+            if positive_class or slider or cutoff:
+                if cutoff and positive_class is not None:
+                    pointers = [-1 for element in target_description["variables"]]
+                    pointers[positive_class] = slider
+                    return (
+                        dcc.Graph(
+                            figure=create_curve(
+                                y_scores=classifier_model.predict_proba(
+                                    classifier_dataset.drop(columns=model_x.target_row)
+                                ),
+                                y_true=classifier_dataset[model_x.target_row],
+                                options=get_target_dropdown(target_description["variables"]),
+                                pointers=pointers,
+                                useScatter=True
+                            )
+                        ),
+                        False,
+                        False,
+                        get_target_dropdown(target_description["variables"]),
+                    )
+                else:
+                    pointers = [-1 for element in target_description["variables"]]
+                    div = dcc.Graph(
+                            figure=create_curve(
+                                y_scores=classifier_model.predict_proba(
+                                    classifier_dataset.drop(columns=model_x.target_row)
+                                ),
+                                y_true=classifier_dataset[model_x.target_row],
+                                options=get_target_dropdown(target_description["variables"]),
+                                pointers=pointers,
+                            )
+                        ),
+                    if cutoff and positive_class is None:
+                        return (
+                            div,
+                            True,
+                            False,
+                            get_target_dropdown(target_description["variables"]),
+                        )
+                    else:
+                        return (
+                            div,
+                            True,
+                            True,
+                            get_target_dropdown(target_description["variables"]),
+                        )
+            else:
+                return (
+                    None,
+                    None,
+                    None,
+                    get_target_dropdown(target_description["variables"]),
                 )
-            ), 'Explanation')
         except Exception as e:
             print(e)
             raise PreventUpdate
