@@ -9,6 +9,7 @@ from dash import Dash, html
 from Dashboard.dataset.datasetLayout import datasetCallbacks, datasetLayout
 from Dashboard.importances.importancesLayout import importancesCallbacks, importancesLayout
 from Dashboard.metrics.metricsLayout import metricsCallbacks, metricsLayout
+from Dashboard.predictions.predictionsLayout import predictionsCallbacks, predictionsLayout
 from Dashboard.surrogate.surrogateLayout import surrogateCallbacks, surrogateLayout
 
 from .Dash_fun import apply_layout_with_auth, load_object, save_object
@@ -40,7 +41,7 @@ tab3_content = dbc.Card(
 )
 
 tab4_content = dbc.Card(
-    dbc.CardBody([html.Div([holder], id="tryit-yourself-layout-output-upload")]),
+    dbc.CardBody([html.Div([predictionsLayout], id="tryit-yourself-layout-output-upload")]),
     className="mt-3 section-card",
 )
 
@@ -99,5 +100,6 @@ def Add_Dash(server):
     importancesCallbacks(app, furl)
     metricsCallbacks(app, furl)
     surrogateCallbacks(app, furl)
+    predictionsCallbacks(app, furl)
 
     return app.server
