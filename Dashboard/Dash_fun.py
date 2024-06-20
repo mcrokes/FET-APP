@@ -7,7 +7,7 @@ Created on Fri Jan 25 22:34:51 2019
 
 from datetime import datetime, timedelta
 from flask_login import current_user
-from dash import html
+from dash import html, dcc
 import pandas as pd
 import uuid
 import os
@@ -43,7 +43,8 @@ def apply_layout_with_auth(app, layout):
             session_id = str(uuid.uuid4())
             clean_Dir_Store()
             return html.Div(
-                [
+                [                    
+                    dcc.Location(id='path'),
                     html.Div(session_id, id="session_id", style={"display": "none"}),
                     layout,
                 ]

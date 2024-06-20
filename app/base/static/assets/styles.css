@@ -12,7 +12,7 @@ body {
 }
 
 #classifier-tabs-container .tab-content {
-    margin: 0 auto;
+    margin: 5rem auto;
     width: 86%;
 }
 
@@ -22,11 +22,14 @@ div.section-card {
 
 #classifier-tabs {
     border: none !important;
-    margin-top: 1rem;
-    margin: 1rem auto;
     display: flex;
     justify-content: center;
     border-radius: 4px;
+    position: fixed;
+    z-index: 1000;
+    background-color: white;
+    width: 100%;
+    top: 0;
 }
 
 #classifier-tabs div {
