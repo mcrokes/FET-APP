@@ -5,54 +5,73 @@ from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 import pandas as pd
+import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 from app.proccessor.models import ModelForProccess
 
 from treeinterpreter import treeinterpreter as ti
-   
 
-def getTreeInterpreterParamethers(n, data, model: RandomForestClassifier | DecisionTreeClassifier, class_names, positive_class: int):
-    if n >= 1 and n <= len(data):
-        instance: pd.DataFrame = data[n-1:n]
-        df_dict = {
-            ("Instance", "Predictor"): [],
-            ("Instance", "Value"): [],
-        }
-        for feature in instance:
-            df_dict[("Instance", "Predictor")].append(feature)
-            df_dict[("Instance", "Value")].append(pd.Series(instance[feature]).values[0])
-        
-        
-        prediction, bias, contributions = ti.predict(model, instance)        
-        for index, class_name in enumerate(class_names):
-            df_dict[("Contribution" ,class_name)] = [contribution[index] for contribution in contributions[0]]
-            
-        print(df_dict)
-                
-                
-        interpretation = {
-            "prediction": prediction[0][positive_class],
-            "bias": bias[0][positive_class], # (trainset mean)
-            "contributions": []
-        }
-        for c, feature in sorted(
-            zip(contributions[0], model.feature_names_in_),
-            key=lambda x: -x[0][positive_class],
-        ):
-            interpretation["contributions"].append({
-                "predictor": feature,
-                "contribution": c[positive_class]
-            })
-        return interpretation, df_dict
-    else:
-        return None
+
+def getTreeInterpreterParamethers(
+    instance, model: RandomForestClassifier | DecisionTreeClassifier, class_names
+):
+
+    general_dict = {
+        ("Instance", "Predictor"): [],
+        ("Instance", "Value"): [],
+    }
+    contribution_graph_data = []
+
+    prediction, bias, contributions = ti.predict(model, instance)
+    predictions_graph_data = {
+        "labels": class_names,
+        "values": prediction[0],
+    }
+
+    for index, class_name in enumerate(class_names):
+        contribution_graph_data.append({"class_name": class_name, "graph_data": []})
+        general_dict[("Contribution", class_name)] = []
+        bar_base = bias[0][index]
+        media_array_x = ["Media Poblacional"]
+        media_array_y = [bias[0][index]]
+        sorted_contributions = sorted(
+            zip(contributions[0], instance),
+            key=lambda x: -max(x[0]),
+        )
+        for jIndex, (contribution, feature) in enumerate(sorted_contributions):
+            media_array_x.append(feature)
+            media_array_y.append(bar_base)
+            if feature not in general_dict[("Instance", "Predictor")]:
+                general_dict[("Instance", "Predictor")].append(feature)
+                general_dict[("Instance", "Value")].append(
+                    pd.Series(instance[feature]).values[0]
+                )
+            general_dict[("Contribution", class_name)].append(contribution[index])
+            x = [feature]
+            y = [feature]
+            for sorted_contribution in sorted_contributions[jIndex:]:
+                x.append(sorted_contribution[1])
+                y.append(contribution[index])
+            contribution_graph_data[index]["graph_data"].append(
+                go.Bar(name=feature, x=x, y=y)
+            )
+        general_dict[("Contribution", class_name)].append(bias[0][index])
+        contribution_graph_data[index]["graph_data"].insert(
+            0, go.Bar(name="Media", x=media_array_x, y=media_array_y)
+        )
+        contribution_graph_data[index]["graph_data"].append(
+            go.Bar(name="Prediction", x=["Predicción Final"], y=[prediction[0][index]])
+        )
+
+    general_dict[("Instance", "Predictor")].append("Media Poblacional")
+    general_dict[("Instance", "Value")].append("-")
+    return contribution_graph_data, general_dict, predictions_graph_data
 
 
 predictionsLayout = html.Div(
     [
-        dcc.Location(id='path'),
         dcc.Loading(
             [
                 dbc.Row(
@@ -62,7 +81,10 @@ predictionsLayout = html.Div(
                                 dbc.Row(
                                     [
                                         html.H3(
-                                            ["DATASET ", html.Span(id="predictions-title")],
+                                            [
+                                                "DATASET ",
+                                                html.Span(id="predictions-title"),
+                                            ],
                                             style={"text-align": "center"},
                                         ),
                                         html.Div(id="predictions-view"),
@@ -97,6 +119,8 @@ predictionsLayout = html.Div(
                     ],
                     style={"padding-top": "20px"},
                 ),
+                html.Div(id="contributions-output-upload"),
+                html.Div(id="predictions-output-upload"),
             ]
         )
     ],
@@ -104,10 +128,13 @@ predictionsLayout = html.Div(
     style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
 )
 
-def predictionsCallbacks(app, furl:Function):    
+
+def predictionsCallbacks(app, furl: Function):
     @app.callback(
         Output("predictions-title", "children"),
         Output("predictions-view", "children"),
+        Output("contributions-output-upload", "children"),
+        Output("predictions-output-upload", "children"),
         Input("path", "href"),
     )
     def graph_explainers(cl):
@@ -118,15 +145,29 @@ def predictionsCallbacks(app, furl:Function):
                 ModelForProccess.id == param1
             ).first()
             ds = model_x.getElement("dataset")
-            interpretation, general_dict = getTreeInterpreterParamethers(
-                data=ds.drop(columns=model_x.getElement("target_row")),
-                class_names=["m", "v"],
-                model=model_x.getElement("model"),
-                n=20,
-                positive_class = 0
+            n = 20
+            x_test = ds.drop(columns=model_x.getElement("target_row"))
+            instance: pd.DataFrame = (
+                x_test[n - 1 : n] if n >= 1 and n <= len(x_test) else x_test[-1:]
+            )
+            contribution_graph_data, general_dict, predictions_graph_data = (
+                getTreeInterpreterParamethers(
+                    instance=instance,
+                    class_names=["m", "v"],
+                    model=model_x.getElement("model"),
+                )
             )
             df = pd.DataFrame(general_dict)
             dtt = "Title"
+            pie_chart = go.Figure(
+                data=[
+                    go.Pie(
+                        labels=predictions_graph_data["labels"],
+                        values=predictions_graph_data["values"],
+                        hole=0.3,
+                    )
+                ]
+            )
             return (
                 dtt,
                 html.Div(
@@ -137,15 +178,35 @@ def predictionsCallbacks(app, furl:Function):
                                     **{f"{x1}_{x2}": y for (x1, x2), y in data},
                                 }
                                 for (n, data) in [
-                                    *enumerate([list(x.items()) for x in df.T.to_dict().values()])
+                                    *enumerate(
+                                        [
+                                            list(x.items())
+                                            for x in df.T.to_dict().values()
+                                        ]
+                                    )
                                 ]
                             ],
-                            columns=[{"name": [i, j], "id": f"{i}_{j}"} for i, j in df.columns],
+                            columns=[
+                                {"name": [i, j], "id": f"{i}_{j}"}
+                                for i, j in df.columns
+                            ],
                             page_size=10,
                             merge_duplicate_headers=True,
                         ),
                     ]
                 ),
+                [
+                    html.Div(
+                        id=f"contribution_graph_{data["class_name"]}",
+                        children=dcc.Graph(
+                            figure=go.Figure(
+                                data["graph_data"], layout=dict(barmode="stack")
+                            )
+                        ),
+                    )
+                    for data in contribution_graph_data
+                ],
+                dcc.Graph(figure=pie_chart),
             )
         except Exception as e:
             print(e)

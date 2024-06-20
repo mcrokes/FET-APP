@@ -9,7 +9,6 @@ from app.proccessor.models import ModelForProccess
 
 datasetLayout = html.Div(
     [
-        dcc.Location(id='path'),
         dcc.Loading(
             [
                 dbc.Row(

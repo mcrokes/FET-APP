@@ -1,15 +1,13 @@
 import multiprocessing
 from pyclbr import Function
-from dash import dcc, html, dash_table
+from dash import dcc, html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 
 import pandas as pd
-import numpy as np
 import plotly.express as px
-from pyparsing import col
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.inspection import permutation_importance
 
