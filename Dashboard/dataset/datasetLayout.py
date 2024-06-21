@@ -98,7 +98,8 @@ datasetLayout = html.Div(
                         html.H4("Variables Numericas"),
                         html.Div(id="numeric-plot"),
                         html.H4("Variables Objeto"),
-                        html.Div(id="object-plot"),
+                        html.Div(id="object-plot"), 
+                        html.Div(id="correlation-plot"),
                     ],
                     style={"padding-top": "20px"},
                 ),
@@ -116,6 +117,7 @@ def datasetCallbacks(app, furl: Function):
         Output("dataset-view", "children"),
         Output("numeric-plot", "children"),
         Output("object-plot", "children"),
+        Output("correlation-plot", "children"),
         Input("path", "href"),
     )
     def graph_explainers(cl):
@@ -130,6 +132,7 @@ def datasetCallbacks(app, furl: Function):
             qualitative_graphs_array, numeric_graphs_array = (
                 generateDataSetDistributions(df)
             )
+            corr_matrix = df.drop(columns="Sobreviviente").corr(method='pearson')
             return (
                 dtt,
                 html.Div(
@@ -173,6 +176,18 @@ def datasetCallbacks(app, furl: Function):
                     )
                     for data in qualitative_graphs_array
                 ],
+                dcc.Graph(
+                    figure= go.Figure(
+                        data=go.Heatmap(
+                            z=corr_matrix,
+                            x=corr_matrix.columns,
+                            y=corr_matrix.columns,
+                            text=round(corr_matrix, 2),
+                            texttemplate="%{text}",
+                        ),
+                        layout=dict(title="Variables Correlation")
+                    )
+                )
             )
         except Exception as e:
             print(e)
