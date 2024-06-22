@@ -1,9 +1,12 @@
+from math import nan
+import math
 from pyclbr import Function
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
+from numpy import NaN
 import pandas as pd
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
@@ -31,9 +34,95 @@ def get_y_test_transformed(y_test):
     return y_test
 
 
-def __create_matrix(y_test, y_pred, class_names):
-    # Generate the confusion matrix
-    cm = metrics.confusion_matrix(y_true=y_test, y_pred=y_pred)
+def generateMatrixExplanationLayout(matrix_explanation):
+    matrix_generals = matrix_explanation
+    matrix_explanation = matrix_generals.pop("matrix_explanation")
+    
+    generals_df = (
+        pd.DataFrame(matrix_generals, index=["Generals"])
+        .transpose()[1:]
+        .rename_axis("Parameters")
+        .reset_index()
+    )
+    expl = [
+        dbc.Table.from_dataframe(generals_df, striped=True, bordered=True, hover=True)
+    ]
+
+    def create_column(m):
+        return (
+            pd.DataFrame(m["explanation"], index=[m["current_class"]])
+            .transpose()
+            .rename_axis("Parameters")
+        )
+
+    if matrix_explanation != {}:
+
+        explanation_df = pd.concat(
+            [create_column(m) for m in matrix_explanation], axis=1
+        ).reset_index()
+        expl.append(
+            dbc.Table.from_dataframe(
+                explanation_df, striped=True, bordered=True, hover=True
+            )
+        )
+    return html.Div(expl)
+
+
+def get_matrix_explanation(cm, class_names, positive_class):
+    matrix_explanation = []
+    true_values = 0
+    false_values = 0
+    for current_class in range(len(class_names)):
+        other_indexes = list(range(len(cm)))
+        other_indexes.remove(current_class)
+        true_positive = cm[current_class][current_class]
+        true_negatives = []
+        false_positives = []
+        false_negatives = []
+        for index in other_indexes:
+            true_negatives.append(cm[index][index])
+            false_positives.append(cm[index][current_class])
+            false_negatives.append(cm[current_class][index])
+        if current_class == 0:
+            true_values = true_positive + sum(true_negatives)
+            false_values = sum(false_positives) + sum(false_negatives)
+
+        explanation = {
+            "precision": true_positive / (true_positive + sum(false_positives)),
+            "recall": true_positive / (true_positive + sum(false_negatives)),
+            "fp_rate": sum(false_positives)
+            / (sum(false_positives) + sum(true_negatives)),
+            "fn_rate": sum(false_negatives)
+            / (sum(false_negatives) + true_positive),
+        }
+
+        explanation["f1_score"] = (
+            2
+            * explanation["precision"]
+            * explanation["recall"]
+            / (explanation["precision"] + explanation["recall"])
+        )
+
+        for elm in explanation:
+            explanation[elm] = (
+                f"{round((explanation[elm] if not math.isnan(explanation[elm]) else 0) * 100, 2)} %"
+            )
+
+        matrix_explanation.append({
+            "current_class": class_names[current_class],
+            "explanation": explanation,
+        })
+
+    return {
+        "dtype": "object",
+        "true_values": true_values,
+        "false_values": false_values,
+        "accuracy": f"{round((true_values / (true_values + false_values)) *100, 2)} %",
+        "matrix_explanation": matrix_explanation,
+    }
+
+
+def __create_matrix(cm, class_names):
 
     fig = px.imshow(
         img=cm,
@@ -71,66 +160,71 @@ def initialize_matrix(
         except Exception as e:
             print(e)
 
-    return __create_matrix(y_test=y_test, y_pred=y_pred_new, class_names=class_names)
+    # Generate the confusion matrix
+    cm = metrics.confusion_matrix(y_true=y_test, y_pred=y_pred_new)
+
+    return __create_matrix(cm=cm, class_names=class_names), get_matrix_explanation(
+        cm, class_names, dropdown_value
+    )
 
 
 def create_curve(y_scores, y_true, options, pointers, useScatter=False):
-        data = []
-        trace1 = go.Scatter(x=[0, 1], y=[0, 1],
-                            mode='lines',
-                            line=dict(dash='dash'),
-                            showlegend=False
+    data = []
+    trace1 = go.Scatter(
+        x=[0, 1], y=[0, 1], mode="lines", line=dict(dash="dash"), showlegend=False
+    )
 
-                            )
+    data.append(trace1)
+    cont = 0
+    for i in range(y_scores.shape[1]):
+        y_score = y_scores[:, i]
 
-        data.append(trace1)
-        cont = 0
-        for i in range(y_scores.shape[1]):
-            y_score = y_scores[:, i]
-            
-            pointer = pointers[i]
+        pointer = pointers[i]
 
-            fpr, tpr, _ = metrics.roc_curve(y_true, y_score, pos_label=i)
-            auc_score = metrics.auc(fpr, tpr)
-            
-            if pointer >= 0 or not useScatter:
-                name = f"{options[cont]['label']} (AUC={auc_score:.2f})"
-                trace2 = go.Scatter(x=fpr, y=tpr,
-                                    name=name,
-                                    mode='lines')
-                data.append(trace2)
-                
-                if useScatter:
-                    scatterPointer = int(len(fpr) * pointer)
-                    print(scatterPointer)
-                    trace3 = go.Scatter(x=[fpr[scatterPointer]], y=[tpr[scatterPointer]],
-                                        name=f"Sc{fpr[scatterPointer]}",)
-                    trace4 = go.Scatter(x=[0, fpr[scatterPointer]], y=[tpr[scatterPointer], tpr[scatterPointer]],
-                                    mode='lines',
-                                    name=f"Line{fpr[scatterPointer]}",
-                                    line=dict(dash='dash'),
+        fpr, tpr, _ = metrics.roc_curve(y_true, y_score, pos_label=i)
+        auc_score = metrics.auc(fpr, tpr)
 
-                                    )
-                    trace5 = go.Scatter(x=[fpr[scatterPointer], fpr[scatterPointer]], y=[0, tpr[scatterPointer]],
-                                    mode='lines',
-                                    name=f"Line{fpr[scatterPointer]}",
-                                    line=dict(dash='dash'),
+        if pointer >= 0 or not useScatter:
+            name = f"{options[cont]['label']} (AUC={auc_score:.2f})"
+            trace2 = go.Scatter(x=fpr, y=tpr, name=name, mode="lines")
+            data.append(trace2)
 
-                                    )
-                    data.append(trace3)
-                    data.append(trace4)
-                    data.append(trace5)
-            cont += 1
+            if useScatter:
+                scatterPointer = int(len(fpr) * pointer)
+                print(scatterPointer)
+                trace3 = go.Scatter(
+                    x=[fpr[scatterPointer]],
+                    y=[tpr[scatterPointer]],
+                    name=f"Sc{fpr[scatterPointer]}",
+                )
+                trace4 = go.Scatter(
+                    x=[0, fpr[scatterPointer]],
+                    y=[tpr[scatterPointer], tpr[scatterPointer]],
+                    mode="lines",
+                    name=f"Line{fpr[scatterPointer]}",
+                    line=dict(dash="dash"),
+                )
+                trace5 = go.Scatter(
+                    x=[fpr[scatterPointer], fpr[scatterPointer]],
+                    y=[0, tpr[scatterPointer]],
+                    mode="lines",
+                    name=f"Line{fpr[scatterPointer]}",
+                    line=dict(dash="dash"),
+                )
+                data.append(trace3)
+                data.append(trace4)
+                data.append(trace5)
+        cont += 1
 
-        layout = go.Layout(
-            title='ROC-AUC curva',
-            yaxis=dict(title='Tasa de Positivos'),
-            xaxis=dict(title='Tasa de Falsos Positivos')
-        )
+    layout = go.Layout(
+        title="ROC-AUC curva",
+        yaxis=dict(title="Tasa de Positivos"),
+        xaxis=dict(title="Tasa de Falsos Positivos"),
+    )
 
-        fig = go.Figure(data=data, layout=layout)
+    fig = go.Figure(data=data, layout=layout)
 
-        return fig
+    return fig
 
 
 cutoff = dbc.Switch(
@@ -206,10 +300,10 @@ metricsLayout = html.Div(
                     [
                         dbc.Row(id="roc-output-upload"),
                         dbc.Row(
-                                    [html.Div([ROCcutoff], style={"padding-left": "20px"})]
-                                ),
-                                dbc.Row([ROCclass_selector]),
-                                dbc.Row([ROCslider], style={"padding-top": "20px"}),
+                            [html.Div([ROCcutoff], style={"padding-left": "20px"})]
+                        ),
+                        dbc.Row([ROCclass_selector]),
+                        dbc.Row([ROCslider], style={"padding-top": "20px"}),
                     ]
                 ),
             ]
@@ -222,6 +316,7 @@ metricsLayout = html.Div(
 def metricsCallbacks(app, furl: Function):
     @app.callback(
         Output("matrix-output-upload", "children"),
+        Output("matrix-explanation", "children"),
         Output("cutoff-slider", "disabled"),
         Output("positive-class-selector", "disabled"),
         Output("positive-class-selector", "options"),
@@ -248,41 +343,42 @@ def metricsCallbacks(app, furl: Function):
                     {"old_value": 1, "new_value": "Vive"},
                 ],
             }
-            class_names = [element["new_value"] for element in target_description["variables"]]
+            class_names = [
+                element["new_value"] for element in target_description["variables"]
+            ]
 
             if positive_class or slider or cutoff:
                 if cutoff and positive_class is not None:
+                    matrix_graph, matrix_explanation = initialize_matrix(
+                        dropdown_value=positive_class,
+                        slider_value=slider,
+                        y_test=classifier_dataset[model_x.target_row],
+                        x_test=classifier_dataset.drop(columns=model_x.target_row),
+                        classifier_model=classifier_model,
+                        class_names=class_names,
+                    )
                     return (
-                        dcc.Graph(
-                            figure=initialize_matrix(
-                                dropdown_value=positive_class,
-                                slider_value=slider,
-                                y_test=classifier_dataset[model_x.target_row],
-                                x_test=classifier_dataset.drop(
-                                    columns=model_x.target_row
-                                ),
-                                classifier_model=classifier_model,
-                                class_names=class_names,
-                            )
-                        ),
+                        dcc.Graph(figure=matrix_graph),
+                        generateMatrixExplanationLayout(matrix_explanation),
                         False,
                         False,
                         get_target_dropdown(target_description["variables"]),
                     )
                 else:
-                    div = dcc.Graph(
-                        figure=initialize_matrix(
-                            dropdown_value=None,
-                            slider_value=None,
-                            y_test=classifier_dataset[model_x.target_row],
-                            x_test=classifier_dataset.drop(columns=model_x.target_row),
-                            classifier_model=classifier_model,
-                            class_names=class_names,
-                        )
+                    matrix_graph, matrix_explanation = initialize_matrix(
+                        dropdown_value=None,
+                        slider_value=None,
+                        y_test=classifier_dataset[model_x.target_row],
+                        x_test=classifier_dataset.drop(columns=model_x.target_row),
+                        classifier_model=classifier_model,
+                        class_names=class_names,
                     )
+                    div = dcc.Graph(figure=matrix_graph)
+                    explanation = generateMatrixExplanationLayout(matrix_explanation)
                     if cutoff and positive_class is None:
                         return (
                             div,
+                            explanation,
                             True,
                             False,
                             get_target_dropdown(target_description["variables"]),
@@ -290,6 +386,7 @@ def metricsCallbacks(app, furl: Function):
                     else:
                         return (
                             div,
+                            explanation,
                             True,
                             True,
                             get_target_dropdown(target_description["variables"]),
@@ -306,7 +403,7 @@ def metricsCallbacks(app, furl: Function):
             raise PreventUpdate
 
     @app.callback(
-        Output("roc-output-upload", "children"),        
+        Output("roc-output-upload", "children"),
         Output("ROC-cutoff-slider", "disabled"),
         Output("ROC-positive-class-selector", "disabled"),
         Output("ROC-positive-class-selector", "options"),
@@ -345,9 +442,11 @@ def metricsCallbacks(app, furl: Function):
                                     classifier_dataset.drop(columns=model_x.target_row)
                                 ),
                                 y_true=classifier_dataset[model_x.target_row],
-                                options=get_target_dropdown(target_description["variables"]),
+                                options=get_target_dropdown(
+                                    target_description["variables"]
+                                ),
                                 pointers=pointers,
-                                useScatter=True
+                                useScatter=True,
                             )
                         ),
                         False,
@@ -356,16 +455,20 @@ def metricsCallbacks(app, furl: Function):
                     )
                 else:
                     pointers = [-1 for element in target_description["variables"]]
-                    div = dcc.Graph(
+                    div = (
+                        dcc.Graph(
                             figure=create_curve(
                                 y_scores=classifier_model.predict_proba(
                                     classifier_dataset.drop(columns=model_x.target_row)
                                 ),
                                 y_true=classifier_dataset[model_x.target_row],
-                                options=get_target_dropdown(target_description["variables"]),
+                                options=get_target_dropdown(
+                                    target_description["variables"]
+                                ),
                                 pointers=pointers,
                             )
                         ),
+                    )
                     if cutoff and positive_class is None:
                         return (
                             div,
