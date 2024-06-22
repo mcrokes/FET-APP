@@ -75,62 +75,65 @@ def initialize_matrix(
 
 
 def create_curve(y_scores, y_true, options, pointers, useScatter=False):
-        data = []
-        trace1 = go.Scatter(x=[0, 1], y=[0, 1],
-                            mode='lines',
-                            line=dict(dash='dash'),
-                            showlegend=False
+    data = []
+    trace1 = go.Scatter(
+        x=[0, 1], y=[0, 1], mode="lines", line=dict(dash="dash"), showlegend=False
+    )
 
-                            )
+    data.append(trace1)
+    cont = 0
+    for i in range(y_scores.shape[1]):
+        y_score = y_scores[:, i]
 
-        data.append(trace1)
-        cont = 0
-        for i in range(y_scores.shape[1]):
-            y_score = y_scores[:, i]
-            
-            pointer = pointers[i]
+        pointer = pointers[i]
 
-            fpr, tpr, _ = metrics.roc_curve(y_true, y_score, pos_label=i)
-            auc_score = metrics.auc(fpr, tpr)
-            
-            if pointer >= 0 or not useScatter:
-                name = f"{options[cont]['label']} (AUC={auc_score:.2f})"
-                trace2 = go.Scatter(x=fpr, y=tpr,
-                                    name=name,
-                                    mode='lines')
-                data.append(trace2)
-                
-                if useScatter:
-                    scatterPointer = int(len(fpr) * pointer)
-                    print(scatterPointer)
-                    trace3 = go.Scatter(x=[fpr[scatterPointer]], y=[tpr[scatterPointer]],
-                                        name=f"Sc{fpr[scatterPointer]}",)
-                    trace4 = go.Scatter(x=[0, fpr[scatterPointer]], y=[tpr[scatterPointer], tpr[scatterPointer]],
-                                    mode='lines',
-                                    name=f"Line{fpr[scatterPointer]}",
-                                    line=dict(dash='dash'),
+        fpr, tpr, _ = metrics.roc_curve(y_true, y_score, pos_label=i)
+        auc_score = metrics.auc(fpr, tpr)
 
-                                    )
-                    trace5 = go.Scatter(x=[fpr[scatterPointer], fpr[scatterPointer]], y=[0, tpr[scatterPointer]],
-                                    mode='lines',
-                                    name=f"Line{fpr[scatterPointer]}",
-                                    line=dict(dash='dash'),
+        if pointer >= 0 or not useScatter:
+            name = f"{options[cont]['label']} (AUC={auc_score*100:.2f} %)"
+            trace2 = go.Scatter(x=fpr, y=tpr, name=name, mode="lines")
+            data.append(trace2)
 
-                                    )
-                    data.append(trace3)
-                    data.append(trace4)
-                    data.append(trace5)
-            cont += 1
+            if useScatter:
+                scatterPointer = int(len(fpr) * pointer)
+                print(scatterPointer)
+                trace3 = go.Scatter(
+                    x=[fpr[scatterPointer]],
+                    y=[tpr[scatterPointer]],
+                    legendgroup=f"Marker {options[cont]['label']}",
+                    name=f"Marker {options[cont]['label']}",
+                )
+                trace4 = go.Scatter(
+                    x=[0, fpr[scatterPointer]],
+                    y=[tpr[scatterPointer], tpr[scatterPointer]],
+                    mode="lines",
+                    legendgroup=f"Marker {options[cont]['label']}",
+                    name=f"TPR {round(tpr[scatterPointer] * 100, 2)} %",
+                    line=dict(dash="dash"),
+                )
+                trace5 = go.Scatter(
+                    x=[fpr[scatterPointer], fpr[scatterPointer]],
+                    y=[0, tpr[scatterPointer]],
+                    mode="lines",
+                    legendgroup=f"Marker {options[cont]['label']}",
+                    name=f"FPR {round(fpr[scatterPointer] * 100, 2)} %",
+                    line=dict(dash="dash"),
+                )
+                data.append(trace3)
+                data.append(trace4)
+                data.append(trace5)
+        cont += 1
 
-        layout = go.Layout(
-            title='ROC-AUC curva',
-            yaxis=dict(title='Tasa de Positivos'),
-            xaxis=dict(title='Tasa de Falsos Positivos')
-        )
+    layout = go.Layout(
+        title="ROC-AUC curva",
+        yaxis=dict(title="Tasa de Positivos"),
+        xaxis=dict(title="Tasa de Falsos Positivos"),
+    )
 
-        fig = go.Figure(data=data, layout=layout)
+    fig = go.Figure(data=data, layout=layout)
 
-        return fig
+    return fig
 
 
 cutoff = dbc.Switch(
@@ -206,10 +209,10 @@ metricsLayout = html.Div(
                     [
                         dbc.Row(id="roc-output-upload"),
                         dbc.Row(
-                                    [html.Div([ROCcutoff], style={"padding-left": "20px"})]
-                                ),
-                                dbc.Row([ROCclass_selector]),
-                                dbc.Row([ROCslider], style={"padding-top": "20px"}),
+                            [html.Div([ROCcutoff], style={"padding-left": "20px"})]
+                        ),
+                        dbc.Row([ROCclass_selector]),
+                        dbc.Row([ROCslider], style={"padding-top": "20px"}),
                     ]
                 ),
             ]
@@ -248,7 +251,9 @@ def metricsCallbacks(app, furl: Function):
                     {"old_value": 1, "new_value": "Vive"},
                 ],
             }
-            class_names = [element["new_value"] for element in target_description["variables"]]
+            class_names = [
+                element["new_value"] for element in target_description["variables"]
+            ]
 
             if positive_class or slider or cutoff:
                 if cutoff and positive_class is not None:
@@ -306,7 +311,7 @@ def metricsCallbacks(app, furl: Function):
             raise PreventUpdate
 
     @app.callback(
-        Output("roc-output-upload", "children"),        
+        Output("roc-output-upload", "children"),
         Output("ROC-cutoff-slider", "disabled"),
         Output("ROC-positive-class-selector", "disabled"),
         Output("ROC-positive-class-selector", "options"),
@@ -336,7 +341,9 @@ def metricsCallbacks(app, furl: Function):
 
             if positive_class or slider or cutoff:
                 if cutoff and positive_class is not None:
-                    pointers = [-1 for element in target_description["variables"]]
+                    pointers = [
+                        1 - slider for element in target_description["variables"]
+                    ]
                     pointers[positive_class] = slider
                     return (
                         dcc.Graph(
@@ -345,9 +352,11 @@ def metricsCallbacks(app, furl: Function):
                                     classifier_dataset.drop(columns=model_x.target_row)
                                 ),
                                 y_true=classifier_dataset[model_x.target_row],
-                                options=get_target_dropdown(target_description["variables"]),
+                                options=get_target_dropdown(
+                                    target_description["variables"]
+                                ),
                                 pointers=pointers,
-                                useScatter=True
+                                useScatter=True,
                             )
                         ),
                         False,
@@ -356,16 +365,20 @@ def metricsCallbacks(app, furl: Function):
                     )
                 else:
                     pointers = [-1 for element in target_description["variables"]]
-                    div = dcc.Graph(
+                    div = (
+                        dcc.Graph(
                             figure=create_curve(
                                 y_scores=classifier_model.predict_proba(
                                     classifier_dataset.drop(columns=model_x.target_row)
                                 ),
                                 y_true=classifier_dataset[model_x.target_row],
-                                options=get_target_dropdown(target_description["variables"]),
+                                options=get_target_dropdown(
+                                    target_description["variables"]
+                                ),
                                 pointers=pointers,
                             )
                         ),
+                    )
                     if cutoff and positive_class is None:
                         return (
                             div,
