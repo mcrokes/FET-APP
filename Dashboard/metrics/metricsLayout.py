@@ -6,7 +6,6 @@ from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
-from numpy import NaN
 import pandas as pd
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier

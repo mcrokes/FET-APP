@@ -13,10 +13,12 @@ ENCODED_FIELDS = [
     "model",
     "indexesDict",
     "dataset",
+    "dataset_modified",
     "features_description",
     "q_variables_dict",
     "qualitative_variables_saved",
     "target_description",
+    "target_names_dict",
     "value",
     "tree_model"
 ]
@@ -90,8 +92,7 @@ class ModelForProccess(db.Model, dbInteractionMethods):
             "description",
             "target_row",
             "percent_processed",
-            "target_description",
-            "qualitative_variables_saved",
+            "q_variables_dict",
         ],
     ):
         return super().getElement(name)
@@ -109,6 +110,7 @@ class ExplainedModel(db.Model, dbInteractionMethods):
     model_description = Column(String)
     features_description = Column(String)  # Encoded
     target_row = Column(String)
+    target_description = Column(String)  # Encoded
     q_variables_dict = Column(String)  # Encoded
     test_size = Column(Float)
     random_state = Column(Integer)
@@ -164,6 +166,7 @@ class ExplainedClassifierModel(ExplainedModel):
             "indexColumnName",
             "model_description",
             "features_description",
+            "target_names_dict",
             "target_row",
             "q_variables_dict",
             "test_size",

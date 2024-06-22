@@ -82,9 +82,6 @@ layout = html.Div(
     style={"width": "100%"},
 )
 
-
-
-
 def Add_Dash(server):
     app = Dash(
         server=server,

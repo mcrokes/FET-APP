@@ -2,10 +2,12 @@ from ctypes import Array
 import time
 from tokenize import String
 
+from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 from app.proccessor.forms import add_classifier
+from app.proccessor.model.dataset_interaction_methods import get_modified_dataframe
 from app.proccessor.model.explainers.decision_tree_surrogate import ExplainSingleTree
 from app.proccessor.model.explainers.importance import Importance
 from app.proccessor.models import (
@@ -66,11 +68,10 @@ def thread_function(model_id, app):
                 "model_description": db_model.description,
                 "features_description": "description for the features",
                 "target_row": db_model.target_row,
-                "q_variables_dict": "dictionary for qualitative variables",
+                "q_variables_dict": db_model_classifier_qualitative_columns,
                 "test_size": 0.6,
                 "random_state": 123,
-                "target_names_dict": "dictionary for qualitative target names",
-                # "dataset": db_model.to_dict()["dataset"],
+                "target_names_dict": db_model_classifier_target_description,
             }
         )
 
@@ -80,7 +81,10 @@ def thread_function(model_id, app):
         dataset_data = DataSetData(
             **{
                 "dataset": db_model_classifier_dataset,
-                "dataset_modified": "db_model.to_dict()['dataset'] with q variables modification",
+                "dataset_modified": get_modified_dataframe(
+                    df=db_model_classifier_dataset,
+                    target_description=db_model_classifier_target_description,
+                    qualitative_columns=db_model_classifier_qualitative_columns),
             }
         )
 
@@ -137,66 +141,62 @@ def thread_function(model_id, app):
             )
             permutation_importance_list.append(permutation_importance)
 
-        estimator: DecisionTreeClassifier = db_model_classifier_model.estimators_[0]
-        
-        estimator.get_depth()
-
-        for index, tree in enumerate(db_model_classifier_model.estimators_):            
-            print("Inner Tree number: ", index)
-            rules = ExplainSingleTree.get_rules(
-                model=tree.tree_,
-                q_variables=db_model_classifier_qualitative_column_names,
-                q_variables_values=db_model_classifier_qualitative_columns,
-                features=db_model_classifier_model.feature_names_in_,
-                class_names=db_model_classifier_target_class_names,
-                target=db_model_classifier_target_row,
-            )            
+        # for index, tree in enumerate(db_model_classifier_model.estimators_):            
+        #     print("Inner Tree number: ", index)
+        #     rules = ExplainSingleTree.get_rules(
+        #         model=tree.tree_,
+        #         q_variables=db_model_classifier_qualitative_column_names,
+        #         q_variables_values=db_model_classifier_qualitative_columns,
+        #         features=db_model_classifier_model.feature_names_in_,
+        #         class_names=db_model_classifier_target_class_names,
+        #         target=db_model_classifier_target_row,
+        #     )            
                     
-            db_tree = Tree(
-                **{
-                    "depth": tree.get_depth(), 
-                    "rules_amount": len(rules),
-                }
-            )
+        #     db_tree = Tree(
+        #         **{
+        #             "depth": tree.get_depth(), 
+        #             "rules_amount": len(rules),
+        #         }
+        #     )
             
-            inexact_rules_amount = 0
-            for rule in rules:
-                db_rule = TreeClassifierRule(
-                    **{
-                        "target_value": rule["target_value"],
-                        "probability": rule["probability"],
-                        "samples_amount": rule["samples_amount"]                            
-                    }
-                )
-                db_rule.tree_classifier = db_tree
-                db_rule.add_to_db()
+        #     inexact_rules_amount = 0
+        #     for rule in rules:
+        #         db_rule = TreeClassifierRule(
+        #             **{
+        #                 "target_value": rule["target_value"],
+        #                 "probability": rule["probability"],
+        #                 "samples_amount": rule["samples_amount"]                            
+        #             }
+        #         )
+        #         db_rule.tree_classifier = db_tree
+        #         db_rule.add_to_db()
                 
-                for cause in rule["causes"]:
-                    db_cause = TreeClassifierRuleCause(
-                        **{
-                            "predictor": cause["item"],
-                            "relation_sign": cause["sign"],
-                            "value": cause["value"],
-                        }
-                    )
-                    db_cause.tree_classifier_rule = db_rule
-                    db_cause.add_to_db()
+        #         for cause in rule["causes"]:
+        #             db_cause = TreeClassifierRuleCause(
+        #                 **{
+        #                     "predictor": cause["item"],
+        #                     "relation_sign": cause["sign"],
+        #                     "value": cause["value"],
+        #                 }
+        #             )
+        #             db_cause.tree_classifier_rule = db_rule
+        #             db_cause.add_to_db()
                 
-                if rule["probability"] < 100:
-                    inexact_rules_amount += 1
+        #         if rule["probability"] < 100:
+        #             inexact_rules_amount += 1
                 
             
-            db_tree.inexact_rules_amount = inexact_rules_amount
-            db_tree.add_to_db()
+        #     db_tree.inexact_rules_amount = inexact_rules_amount
+        #     db_tree.add_to_db()
             
-            inner_tree_data = InnerTreeClassifierData(
-                **{
-                    "tree_number": index
-                }
-            )
-            inner_tree_data.tree = db_tree
-            inner_tree_data.explained_classifier_model = classifier_model_data
-            inner_tree_data.add_to_db()
+        #     inner_tree_data = InnerTreeClassifierData(
+        #         **{
+        #             "tree_number": index
+        #         }
+        #     )
+        #     inner_tree_data.tree = db_tree
+        #     inner_tree_data.explained_classifier_model = classifier_model_data
+        #     inner_tree_data.add_to_db()
         
         tree_depth = 3
         surrogate_inexact_rules_amount = -1
@@ -371,13 +371,16 @@ def save_classifier():
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == request.form["model_id"]
         ).first()
+        df = db_model.getElement("dataset")
         qualitative_variables_saved = []
         target_description: object
+        value_number: int = 0
 
         q_dict = {}
         for element in request.form:
             if element != "model_id":
                 if "Q-Variable" in element or element == "Add":
+                    value_number = 0
                     if q_dict != {}:
                         if q_dict["column_name"] == db_model.target_row:
                             target_description = q_dict
@@ -389,16 +392,21 @@ def save_classifier():
                             "variables": [],
                         }
                 else:
+                    old_value = element.replace(f"{q_dict['column_name']}-", "")
+                    new_value = request.form[element] if request.form[element] != "" else old_value
+                    try:
+                        old_value = int(old_value)
+                    except:  # noqa: E722
+                        if isinstance(old_value, str):
+                            old_value = value_number
+                    
                     q_dict["variables"].append(
                         {
-                            "old_value": element.replace(
-                                f"{q_dict['column_name']}-", ""
-                            ),
-                            "new_value": request.form[element],
+                            "old_value": old_value,
+                            "new_value": new_value,
                         }
                     )
-
-        print(target_description)
+                    value_number += 1
 
         test_size = 0.2
         random_state = 123

@@ -3,7 +3,7 @@ import threading
 import time
 
 from app.proccessor.forms import add_classifier
-from app.proccessor.model.model import ClassificationTrainedModel
+from app.proccessor.models import ExplainedClassifierModel
 from app.proccessor.models import ModelForProccess
 from . import blueprint
 from flask import current_app, make_response, render_template, request
@@ -24,8 +24,8 @@ def get_percent():
 @blueprint.route("/classifier/list", methods=["GET", "POST"])
 @login_required
 def get_list():
-    print(request.data.decode())
-    db_model: ModelForProccess = ModelForProccess.query.all()
+    db_model: ExplainedClassifierModel = ExplainedClassifierModel.query.all()
+    # db_model: ModelForProccess = ModelForProccess.query.all()
     response = []
     for model in db_model:
         response.append({"id": model.id, "name": model.name})
