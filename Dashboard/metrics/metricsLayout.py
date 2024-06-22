@@ -37,7 +37,7 @@ def get_y_test_transformed(y_test):
 def generateMatrixExplanationLayout(matrix_explanation):
     matrix_generals = matrix_explanation
     matrix_explanation = matrix_generals.pop("matrix_explanation")
-    
+
     generals_df = (
         pd.DataFrame(matrix_generals, index=["Generals"])
         .transpose()[1:]
@@ -87,20 +87,20 @@ def get_matrix_explanation(cm, class_names, positive_class):
             true_values = true_positive + sum(true_negatives)
             false_values = sum(false_positives) + sum(false_negatives)
 
+        keys = {"precision": "Precisión", "tpr": "TP Rate Recall (Sensibilidad)", "fpr": "FP Rate", "f1": "F1 Score"}
         explanation = {
-            "precision": true_positive / (true_positive + sum(false_positives)),
-            "recall": true_positive / (true_positive + sum(false_negatives)),
-            "fp_rate": sum(false_positives)
+            f"{keys["precision"]}": true_positive / (true_positive + sum(false_positives)),
+            f"{keys['tpr']}": true_positive
+            / (true_positive + sum(false_negatives)),
+            f"{keys['fpr']}": sum(false_positives)
             / (sum(false_positives) + sum(true_negatives)),
-            "fn_rate": sum(false_negatives)
-            / (sum(false_negatives) + true_positive),
         }
 
-        explanation["f1_score"] = (
+        explanation[keys["f1"]] = (
             2
-            * explanation["precision"]
-            * explanation["recall"]
-            / (explanation["precision"] + explanation["recall"])
+            * explanation[keys["precision"]]
+            * explanation[keys['tpr']]
+            / (explanation[keys["precision"]] + explanation[keys['tpr']])
         )
 
         for elm in explanation:
@@ -108,10 +108,12 @@ def get_matrix_explanation(cm, class_names, positive_class):
                 f"{round((explanation[elm] if not math.isnan(explanation[elm]) else 0) * 100, 2)} %"
             )
 
-        matrix_explanation.append({
-            "current_class": class_names[current_class],
-            "explanation": explanation,
-        })
+        matrix_explanation.append(
+            {
+                "current_class": class_names[current_class],
+                "explanation": explanation,
+            }
+        )
 
     return {
         "dtype": "object",
@@ -275,12 +277,12 @@ metricsLayout = html.Div(
                                 dbc.Row([class_selector]),
                                 dbc.Row([slider], style={"padding-top": "20px"}),
                             ],
-                            xs=8,
-                            sm=8,
-                            md=8,
-                            lg=8,
-                            xl=8,
-                            xxl=8,
+                            xs=12,
+                            sm=12,
+                            md=7,
+                            lg=7,
+                            xl=7,
+                            xxl=7,
                         ),
                         dbc.Col(
                             [
@@ -289,12 +291,12 @@ metricsLayout = html.Div(
                                     id="matrix-explanation",
                                 )
                             ],
-                            xs=4,
-                            sm=4,
-                            md=4,
-                            lg=4,
-                            xl=4,
-                            xxl=4,
+                            xs=12,
+                            sm=12,
+                            md=5,
+                            lg=5,
+                            xl=5,
+                            xxl=5,
                         ),
                     ],
                     style={"padding-top": "20px"},
@@ -437,9 +439,10 @@ def metricsCallbacks(app, furl: Function):
             if positive_class or slider or cutoff:
                 if cutoff and positive_class is not None:
                     pointers = [
-                        1 - slider for element in target_description["variables"]
+                        slider / (len(target_description["variables"]) - 1)
+                        for _ in target_description["variables"]
                     ]
-                    pointers[positive_class] = slider
+                    pointers[positive_class] = 1 - slider
                     return (
                         dcc.Graph(
                             figure=create_curve(
