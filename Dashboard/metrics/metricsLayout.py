@@ -185,7 +185,7 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
         auc_score = metrics.auc(fpr, tpr)
 
         if pointer >= 0 or not useScatter:
-            name = f"{options[cont]['label']} (AUC={auc_score:.2f})"
+            name = f"{options[cont]['label']} (AUC={auc_score*100:.2f} %)"
             trace2 = go.Scatter(x=fpr, y=tpr, name=name, mode="lines")
             data.append(trace2)
 
@@ -195,20 +195,23 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
                 trace3 = go.Scatter(
                     x=[fpr[scatterPointer]],
                     y=[tpr[scatterPointer]],
-                    name=f"Sc{fpr[scatterPointer]}",
+                    legendgroup=f"Marker {options[cont]['label']}",
+                    name=f"Marker {options[cont]['label']}",
                 )
                 trace4 = go.Scatter(
                     x=[0, fpr[scatterPointer]],
                     y=[tpr[scatterPointer], tpr[scatterPointer]],
                     mode="lines",
-                    name=f"Line{fpr[scatterPointer]}",
+                    legendgroup=f"Marker {options[cont]['label']}",
+                    name=f"TPR {round(tpr[scatterPointer] * 100, 2)} %",
                     line=dict(dash="dash"),
                 )
                 trace5 = go.Scatter(
                     x=[fpr[scatterPointer], fpr[scatterPointer]],
                     y=[0, tpr[scatterPointer]],
                     mode="lines",
-                    name=f"Line{fpr[scatterPointer]}",
+                    legendgroup=f"Marker {options[cont]['label']}",
+                    name=f"FPR {round(fpr[scatterPointer] * 100, 2)} %",
                     line=dict(dash="dash"),
                 )
                 data.append(trace3)
@@ -433,7 +436,9 @@ def metricsCallbacks(app, furl: Function):
 
             if positive_class or slider or cutoff:
                 if cutoff and positive_class is not None:
-                    pointers = [-1 for element in target_description["variables"]]
+                    pointers = [
+                        1 - slider for element in target_description["variables"]
+                    ]
                     pointers[positive_class] = slider
                     return (
                         dcc.Graph(
