@@ -11,7 +11,7 @@ import plotly.express as px
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.inspection import permutation_importance
 
-from app.proccessor.models import ModelForProccess
+from app.proccessor.models import ExplainedClassifierModel, ModelForProccess
 
 importancesLayout = html.Div(
     [
@@ -62,12 +62,12 @@ def importancesCallbacks(app, furl:Function):
         f = furl(cl)
         param1 = f.args["model_id"]
         try:
-            model_x: ModelForProccess = ModelForProccess.query.filter(
-                ModelForProccess.id == param1
+            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.id == param1
             ).first()
             
             classifier_model: RandomForestClassifier = model_x.getElement("model")
-            classifier_dataset: pd.DataFrame = model_x.getElement("dataset")
+            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
             df_feature_importance: pd.DataFrame = pd.DataFrame({'Predictor': classifier_model.feature_names_in_, 'Importancia': classifier_model.feature_importances_})
             importances_fig = px.bar(data_frame=df_feature_importance.sort_values('Importancia', ascending=False), x='Importancia',
                      y='Predictor',
@@ -89,7 +89,7 @@ def importancesCallbacks(app, furl:Function):
             permutation_fig = px.bar(data_frame=df_ordered_importance, error_x=df_ordered_importance['importances_std'],
                         x='importances_mean', y='Predictor',
                         title='IMPORTANCIAS POR PERMUTACION',
-                        labels={'importances_mean': 'Incremento del error tras la permutacion'})
+                        labels={'importances_mean': 'Importancia +- error: '})
             return (dcc.Graph(figure=importances_fig), explanation, dcc.Graph(figure=permutation_fig), explanation)
         except Exception as e:
             print(e)

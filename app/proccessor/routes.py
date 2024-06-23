@@ -110,36 +110,36 @@ def thread_function(model_id, app):
 
         #### IMPORTANCES DATA ####
 
-        importances_data = ImportancesData(**{"explanation": "Importace Explanation"})
+        # importances_data = ImportancesData(**{"explanation": "Importace Explanation"})
 
-        permutation_importances_data = PermutationImportancesData(
-            **{"explanation": "Permutation Importace Explanation"}
-        )
+        # permutation_importances_data = PermutationImportancesData(
+        #     **{"explanation": "Permutation Importace Explanation"}
+        # )
 
-        permutation_importances: pd.DataFrame = (
-            Importance.create_permutation_importance(
-                model=db_model_classifier_model,
-                features=db_model_classifier_model.feature_names_in_,
-                x_train=db_model_classifier_dataset.drop(
-                    columns=db_model_classifier_target_row
-                ),
-                y_train=db_model_classifier_dataset[db_model_classifier_target_row],
-            )
-        )
+        # permutation_importances: pd.DataFrame = (
+        #     Importance.create_permutation_importance(
+        #         model=db_model_classifier_model,
+        #         features=db_model_classifier_model.feature_names_in_,
+        #         x_train=db_model_classifier_dataset.drop(
+        #             columns=db_model_classifier_target_row
+        #         ),
+        #         y_train=db_model_classifier_dataset[db_model_classifier_target_row],
+        #     )
+        # )
 
-        permutation_importance_list = []
-        for _, row in permutation_importances.iterrows():
-            permutation_importance = PermutationImportance(
-                **{
-                    "importance_mean": row["importances_mean"],
-                    "importance_std": row["importances_std"],
-                    "predictor": row["Predictor"],
-                }
-            )
-            permutation_importance.permutation_importances_data = (
-                permutation_importances_data
-            )
-            permutation_importance_list.append(permutation_importance)
+        # permutation_importance_list = []
+        # for _, row in permutation_importances.iterrows():
+        #     permutation_importance = PermutationImportance(
+        #         **{
+        #             "importance_mean": row["importances_mean"],
+        #             "importance_std": row["importances_std"],
+        #             "predictor": row["Predictor"],
+        #         }
+        #     )
+        #     permutation_importance.permutation_importances_data = (
+        #         permutation_importances_data
+        #     )
+        #     permutation_importance_list.append(permutation_importance)
 
         # for index, tree in enumerate(db_model_classifier_model.estimators_):            
         #     print("Inner Tree number: ", index)
@@ -267,17 +267,17 @@ def thread_function(model_id, app):
                     
 
         classifier_model_data.data_set_data = dataset_data
-        classifier_model_data.importances_data = importances_data
-        classifier_model_data.permutation_importances_data = (
-            permutation_importances_data
-        )
+        # classifier_model_data.importances_data = importances_data
+        # classifier_model_data.permutation_importances_data = (
+        #     permutation_importances_data
+        # )
         dataset_data_distribution_numeric.add_to_db()
         dataset_data_distribution_qualitative.add_to_db()
         dataset_data.add_to_db()
-        for pi in permutation_importance_list:
-            pi.add_to_db()
-        importances_data.add_to_db()
-        permutation_importances_data.add_to_db()
+        # for pi in permutation_importance_list:
+        #     pi.add_to_db()
+        # importances_data.add_to_db()
+        # permutation_importances_data.add_to_db()
         classifier_model_data.add_to_db()
 
         # db_model.percent_processed = 10

@@ -1,6 +1,6 @@
 from pyclbr import Function
 from dash import dcc, html, dash_table
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-from app.proccessor.models import ModelForProccess
+from app.proccessor.models import ExplainedClassifierModel, ModelForProccess
 
 from treeinterpreter import treeinterpreter as ti
 
@@ -74,6 +74,7 @@ predictionsLayout = html.Div(
     [
         dcc.Loading(
             [
+                dbc.Row(id="instances-dropdown"),
                 dbc.Row(
                     [
                         dbc.Col(
@@ -131,83 +132,115 @@ predictionsLayout = html.Div(
 
 def predictionsCallbacks(app, furl: Function):
     @app.callback(
+        Output("instances-dropdown", "children"),
+        Input("path", "href"),
+    )
+    def load_data(cl):
+        f = furl(cl)
+        model_id = f.args["model_id"]
+        try:
+            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.id == model_id
+            ).first()
+            ds = model_x.data_set_data.getElement("dataset")
+            x_test = ds.drop(columns=model_x.getElement("target_row"))
+            options = []
+            for index, _ in x_test.iterrows():
+                options.append({"label": index, "value": index})
+
+            drop_down = dbc.Select(
+                id="select",
+                options=options,
+            )
+
+            return drop_down
+        except Exception as e:
+            print(e)
+            raise PreventUpdate
+
+    @app.callback(
         Output("predictions-title", "children"),
         Output("predictions-view", "children"),
         Output("contributions-output-upload", "children"),
         Output("predictions-output-upload", "children"),
-        Input("path", "href"),
+        State("path", "href"),
+        Input("select", "value"),
     )
-    def graph_explainers(cl):
-        f = furl(cl)
-        param1 = f.args["model_id"]
-        try:
-            model_x: ModelForProccess = ModelForProccess.query.filter(
-                ModelForProccess.id == param1
-            ).first()
-            ds = model_x.getElement("dataset")
-            n = 20
-            x_test = ds.drop(columns=model_x.getElement("target_row"))
-            instance: pd.DataFrame = (
-                x_test[n - 1 : n] if n >= 1 and n <= len(x_test) else x_test[-1:]
-            )
-            contribution_graph_data, general_dict, predictions_graph_data = (
-                getTreeInterpreterParamethers(
-                    instance=instance,
-                    class_names=["m", "v"],
-                    model=model_x.getElement("model"),
+    def graph_explainers(cl, n):
+        if n:
+            n = int(n)
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+                model_x: ExplainedClassifierModel = (
+                    ExplainedClassifierModel.query.filter(
+                        ExplainedClassifierModel.id == model_id
+                    ).first()
                 )
-            )
-            df = pd.DataFrame(general_dict)
-            dtt = "Title"
-            pie_chart = go.Figure(
-                data=[
-                    go.Pie(
-                        labels=predictions_graph_data["labels"],
-                        values=predictions_graph_data["values"],
-                        hole=0.3,
+                ds = model_x.data_set_data.getElement("dataset")
+                x_test = ds.drop(columns=model_x.getElement("target_row"))
+
+                instance: pd.DataFrame = (
+                    x_test[n - 1 : n] if n >= 1 and n <= len(x_test) else x_test[-1:]
+                )
+                contribution_graph_data, general_dict, predictions_graph_data = (
+                    getTreeInterpreterParamethers(
+                        instance=instance,
+                        class_names=["m", "v"],
+                        model=model_x.getElement("model"),
                     )
-                ]
-            )
-            return (
-                dtt,
-                html.Div(
-                    [
-                        dash_table.DataTable(
-                            data=[
-                                {
-                                    **{f"{x1}_{x2}": y for (x1, x2), y in data},
-                                }
-                                for (n, data) in [
-                                    *enumerate(
-                                        [
-                                            list(x.items())
-                                            for x in df.T.to_dict().values()
-                                        ]
-                                    )
-                                ]
-                            ],
-                            columns=[
-                                {"name": [i, j], "id": f"{i}_{j}"}
-                                for i, j in df.columns
-                            ],
-                            page_size=10,
-                            merge_duplicate_headers=True,
-                        ),
+                )
+                df = pd.DataFrame(general_dict)
+                dtt = "Title"
+                pie_chart = go.Figure(
+                    data=[
+                        go.Pie(
+                            labels=predictions_graph_data["labels"],
+                            values=predictions_graph_data["values"],
+                            hole=0.3,
+                        )
                     ]
-                ),
-                [
+                )
+                return (
+                    dtt,
                     html.Div(
-                        id=f"contribution_graph_{data["class_name"]}",
-                        children=dcc.Graph(
-                            figure=go.Figure(
-                                data["graph_data"], layout=dict(barmode="stack")
-                            )
-                        ),
-                    )
-                    for data in contribution_graph_data
-                ],
-                dcc.Graph(figure=pie_chart),
-            )
-        except Exception as e:
-            print(e)
-            raise PreventUpdate
+                        [
+                            dash_table.DataTable(
+                                data=[
+                                    {
+                                        **{f"{x1}_{x2}": y for (x1, x2), y in data},
+                                    }
+                                    for (n, data) in [
+                                        *enumerate(
+                                            [
+                                                list(x.items())
+                                                for x in df.T.to_dict().values()
+                                            ]
+                                        )
+                                    ]
+                                ],
+                                columns=[
+                                    {"name": [i, j], "id": f"{i}_{j}"}
+                                    for i, j in df.columns
+                                ],
+                                page_size=10,
+                                merge_duplicate_headers=True,
+                            ),
+                        ]
+                    ),
+                    [
+                        html.Div(
+                            id=f"contribution_graph_{data["class_name"]}",
+                            children=dcc.Graph(
+                                figure=go.Figure(
+                                    data["graph_data"], layout=dict(barmode="stack")
+                                )
+                            ),
+                        )
+                        for data in contribution_graph_data
+                    ],
+                    dcc.Graph(figure=pie_chart),
+                )
+            except Exception as e:
+                print(e)
+        raise PreventUpdate
