@@ -6,13 +6,12 @@ from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
-from numpy import NaN
 import pandas as pd
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 
 from app.proccessor.model.dataset_interaction_methods import update_y_pred
-from app.proccessor.models import ModelForProccess
+from app.proccessor.models import ExplainedClassifierModel, ModelForProccess
 
 from sklearn import metrics
 import plotly.express as px
@@ -193,7 +192,6 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
 
             if useScatter:
                 scatterPointer = int(len(fpr) * pointer)
-                print(scatterPointer)
                 trace3 = go.Scatter(
                     x=[fpr[scatterPointer]],
                     y=[tpr[scatterPointer]],
@@ -332,14 +330,14 @@ def metricsCallbacks(app, furl: Function):
     )
     def graph_matrix(cutoff, positive_class, slider, cl):
         f = furl(cl)
-        param1 = f.args["model_id"]
+        model_id = f.args["model_id"]
         try:
-            model_x: ModelForProccess = ModelForProccess.query.filter(
-                ModelForProccess.id == param1
+            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.id == model_id
             ).first()
 
             classifier_model: RandomForestClassifier = model_x.getElement("model")
-            classifier_dataset: pd.DataFrame = model_x.getElement("dataset")
+            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
 
             target_description = {
                 "column_name": "Sobreviviente",
@@ -419,22 +417,16 @@ def metricsCallbacks(app, furl: Function):
     )
     def graph_roc(cutoff, positive_class, slider, cl):
         f = furl(cl)
-        param1 = f.args["model_id"]
+        model_id = f.args["model_id"]
         try:
-            model_x: ModelForProccess = ModelForProccess.query.filter(
-                ModelForProccess.id == param1
+            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.id == model_id
             ).first()
 
             classifier_model: RandomForestClassifier = model_x.getElement("model")
-            classifier_dataset: pd.DataFrame = model_x.getElement("dataset")
+            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
 
-            target_description = {
-                "column_name": "Sobreviviente",
-                "variables": [
-                    {"old_value": 0, "new_value": "Muere"},
-                    {"old_value": 1, "new_value": "Vive"},
-                ],
-            }
+            target_description = model_x.getElement("target_names_dict")
 
             if positive_class or slider or cutoff:
                 if cutoff and positive_class is not None:

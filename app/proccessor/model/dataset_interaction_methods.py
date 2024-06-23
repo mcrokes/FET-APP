@@ -1,3 +1,5 @@
+from numbers import Number
+from unicodedata import numeric
 import numpy as np
 
 
@@ -43,24 +45,26 @@ def creating_qualitative_dict(variables):
     return qualitative_variables_list
 
 
-def get_modified_dataframe(model_c):
-    df = model_c.get_dataframe()
-    targets_modified = model_c.get_target_values_classification_dict()
-    target = targets_modified['column_name']
-    for value in targets_modified['variables']:
+def get_modified_dataframe(df, target_description, qualitative_columns):
+    new_df = df.copy()
+    target = target_description['column_name']
+    print(target)
+    for value in target_description['variables']:
+        print(value)
         # noinspection PyTypeChecker
-        df.replace({f'{target}': value['old_value']},
+        new_df.replace({f'{target}': value['old_value']},
                    {f'{target}': value['new_value']},
                    inplace=True)
 
-    q_variables_modified_list = model_c.get_q_variables_values_list()
-
-    for q_variables_modified in q_variables_modified_list:
+    for q_variables_modified in qualitative_columns:
+        print(q_variables_modified)
         for q_variable_modified in q_variables_modified['variables']:
-            df.replace({f'{q_variables_modified["column_name"]}': q_variable_modified['old_value']},
+            new_df.replace({f'{q_variables_modified["column_name"]}': q_variable_modified['old_value']},
                        {f'{q_variables_modified["column_name"]}': q_variable_modified['new_value']},
                        inplace=True)
-    return df
+            
+        print(new_df.head(3))
+    return new_df
 
 
 def update_y_pred(prediction: list, probability_predictions, cut_off, positive_class):

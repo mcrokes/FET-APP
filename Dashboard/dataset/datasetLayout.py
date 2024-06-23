@@ -6,7 +6,8 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objects as go
-from app.proccessor.models import ModelForProccess
+from app.proccessor.model.dataset_interaction_methods import get_modified_dataframe
+from app.proccessor.models import ExplainedClassifierModel, ModelForProccess
 
 
 def generateDataSetDistributions(df: pd.DataFrame):
@@ -122,17 +123,20 @@ def datasetCallbacks(app, furl: Function):
     )
     def graph_explainers(cl):
         f = furl(cl)
-        param1 = f.args["model_id"]
+        model_id = f.args["model_id"]
         try:
-            model_x: ModelForProccess = ModelForProccess.query.filter(
-                ModelForProccess.id == param1
+            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.id == model_id
             ).first()
-            df = model_x.getElement("dataset")
-            dtt = "Title"
+            
+            
+            original_df = model_x.data_set_data.getElement("dataset")
+            df = model_x.data_set_data.getElement("dataset_modified")
+            dtt = model_x.getElement("name")
             qualitative_graphs_array, numeric_graphs_array = (
                 generateDataSetDistributions(df)
             )
-            corr_matrix = df.drop(columns="Sobreviviente").corr(method='pearson')
+            corr_matrix = original_df.drop(columns=model_x.getElement("target_row")).corr(method='pearson')
             return (
                 dtt,
                 html.Div(
@@ -141,14 +145,6 @@ def datasetCallbacks(app, furl: Function):
                             data=df.to_dict("records"),
                             columns=[{"name": i, "id": i} for i in df.columns],
                             page_size=10,
-                            # style_header={
-                            #     "backgroundColor": "rgb(30, 30, 30)",
-                            #     "color": "white",
-                            # },
-                            # style_data={
-                            #     "backgroundColor": "rgb(50, 50, 50)",
-                            #     "color": "white",
-                            # },
                         ),
                     ]
                 ),
