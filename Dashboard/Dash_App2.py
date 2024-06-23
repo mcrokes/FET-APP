@@ -11,6 +11,8 @@ from Dashboard.importances.importancesLayout import importancesCallbacks, import
 from Dashboard.metrics.metricsLayout import metricsCallbacks, metricsLayout
 from Dashboard.predictions.predictionsLayout import predictionsCallbacks, predictionsLayout
 from Dashboard.surrogate.surrogateLayout import surrogateCallbacks, surrogateLayout
+from Dashboard.specificTrees.specificTreesLayout import specificTreesCallbacks, specificTreesLayout
+
 
 from .Dash_fun import apply_layout_with_auth, load_object, save_object
 import dash_bootstrap_components as dbc
@@ -45,6 +47,11 @@ tab4_content = dbc.Card(
     className="mt-3 section-card",
 )
 
+tab5_content = dbc.Card(
+    dbc.CardBody([html.Div([specificTreesLayout], id="specificTrees-layout-output-upload")]),
+    className="mt-3 section-card",
+)
+
 tabs = dbc.Tabs(
     [
         dbc.Tab(
@@ -70,6 +77,11 @@ tabs = dbc.Tabs(
         dbc.Tab(
             tab4_content,
             label="Predicciones",
+            className="classifier-tab",
+        ),        
+        dbc.Tab(
+            tab5_content,
+            label="Specific Trees",
             className="classifier-tab",
         ),
     ],
@@ -97,6 +109,7 @@ def Add_Dash(server):
     importancesCallbacks(app, furl)
     metricsCallbacks(app, furl)
     surrogateCallbacks(app, furl)
+    specificTreesCallbacks(app, furl)
     predictionsCallbacks(app, furl)
 
     return app.server
