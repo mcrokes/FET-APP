@@ -13,7 +13,9 @@ body {
 
 #classifier-tabs-container .tab-content {
     margin: 5rem auto;
-    width: 86%;
+    margin-top: 10rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 
 div.section-card {
@@ -71,4 +73,8 @@ div.section-card {
 
 #toggle-modal-1 {
     max-width: 50%;
+}
+
+.section-content {
+    padding: 1rem;
 }

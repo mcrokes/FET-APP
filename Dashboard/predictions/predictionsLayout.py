@@ -23,7 +23,6 @@ def getTreeInterpreterParamethers(
     class_names,
     current_class,
 ):
-# TODO add initial marker
     general_dict = {
         ("Instance", "Predictor"): [],
         ("Instance", "Value"): [],
@@ -36,9 +35,9 @@ def getTreeInterpreterParamethers(
         "values": prediction[0],
     }
 
+    point = 0
+
     for index, class_name in enumerate(class_names):
-        if index == current_class:
-            contribution_graph_data.append({"class_name": class_name, "graph_data": []})
         general_dict[("Contribution", class_name)] = []
         bar_base = bias[0][index]
         media_array_x = ["Acumulado"]
@@ -47,6 +46,9 @@ def getTreeInterpreterParamethers(
             zip(contributions[0], instance),
             key=lambda x: -max(x[0]),
         )
+        if index == current_class:
+            contribution_graph_data.append({"class_name": class_name, "graph_data": []})
+            point += bar_base
 
         for jIndex, (contribution, feature) in enumerate(sorted_contributions):
             if feature not in general_dict[("Instance", "Predictor")]:
@@ -65,6 +67,7 @@ def getTreeInterpreterParamethers(
                 contribution_graph_data[0]["graph_data"].append(
                     go.Bar(name=feature, x=x, y=y)
                 )
+                point += contribution[index]
 
         general_dict[("Contribution", class_name)].append(
             f"{round(bias[0][index],3)} ({round(bias[0][index]*100,1)}%)"
@@ -78,6 +81,16 @@ def getTreeInterpreterParamethers(
                     name="Prediction", x=["Predicción Final"], y=[prediction[0][index]]
                 )
             )
+            contribution_graph_data[0]["graph_data"].append(
+                go.Scatter(
+                    x=["Acumulado", "Predicción Final"],
+                    y=[point, point],
+                    mode="lines",
+                    name=f"TPR {round(point * 100, 2)} %",
+                    line=dict(dash="dash"),
+                    marker_color=["blue", "blue"],
+                )
+            )
 
     general_dict[("Instance", "Predictor")].append("Media Poblacional")
     general_dict[("Instance", "Value")].append("-")
@@ -88,29 +101,38 @@ def getIndividualPredictions(model, class_names, instance, cut_point, current_cl
     figures = []
     index = current_class
     class_name = class_names[index]
-    # for index, class_name in enumerate(class_names):
     individual_predictions = [
         estimator.predict_proba(instance)[0] for estimator in model.estimators_
     ]
 
-    sorted_predictions = np.array(
-        sorted(individual_predictions, key=lambda x: -x[index])
+    markers = []
+    for val in np.array(individual_predictions)[:, index]:
+        if val * 100 > cut_point:
+            markers.append("blue")
+        else:
+            markers.append("red")
+
+    sorted_predictions = sorted(
+        zip(np.array(individual_predictions)[:, index], markers),
+        key=lambda x: (-x[0] if markers.count("blue") > markers.count("red") else x[0]),
     )
-    predictions_for_actual_clase = sorted_predictions[:, index]
-    x = list(range(len(predictions_for_actual_clase) + 1))[1:]
-    y = np.round(predictions_for_actual_clase * 100, 2)
+    predictions_for_actual_clase = np.array(sorted_predictions)[:, 0]
+    prev_x = list(range(len(predictions_for_actual_clase) + 1))
+    x = prev_x[1:] if markers.count("blue") > markers.count("red") else prev_x[::-1][:-1]
+    y = np.round(predictions_for_actual_clase.astype(np.float64) * 100, 2)
+
     data = [
         go.Bar(
             name="Árboles",
             y=y,
             x=x,
-            marker_color=["blue" if val > cut_point else "red" for val in y],
+            marker_color=np.array(sorted_predictions)[:, 1],
         )
     ]
     data.append(
         go.Scatter(
-            name="Punto de Corte",
-            x=[0, x[-1]],
+            name="Corte",
+            x=[1, x[0]] if markers.count("blue") < markers.count("red") else [x[-1], 1],
             y=[cut_point, cut_point],
             mode="lines",
             line=dict(dash="dash"),
@@ -122,6 +144,11 @@ def getIndividualPredictions(model, class_names, instance, cut_point, current_cl
         xaxis_title="Número de Árbol",
         yaxis_title="Certeza de Predicción %",
         bargap=0.1,
+        xaxis=dict(
+            autorange=(
+                "reversed" if markers.count("blue") > markers.count("red") else True
+            )
+        ),
     )
     figures.append({"class_name": class_name, "graph_data": fig})
 
@@ -146,7 +173,19 @@ slider = dcc.Slider(
 
 predictionsLayout = html.Div(
     [
-        dbc.Row(id="instances-dropdown"),
+        dbc.Row(
+            [
+                dbc.Col(
+                    id="instances-dropdown",
+                    xs=12,
+                    sm=12,
+                    md=5,
+                    lg=5,
+                    xl=5,
+                    xxl=5,
+                )
+            ]
+        ),
         dbc.Row(
             [
                 dbc.Col(
@@ -155,7 +194,7 @@ predictionsLayout = html.Div(
                             [
                                 html.H3(
                                     [
-                                        html.Span(
+                                        html.Plaintext(
                                             id="predictions-title",
                                             style={
                                                 "color": "black",
@@ -194,19 +233,33 @@ predictionsLayout = html.Div(
             [
                 dbc.Col(
                     [
+                        html.Plaintext(
+                            id="predictions-class_selector-title",
+                            children=["Seleccione la Clase a Analizar"],
+                            style={"color": "black"},
+                        ),
+                    ],
+                    xs=12,
+                    sm=12,
+                    md=12,
+                    lg=8,
+                    xl=4,
+                    xxl=4,
+                ),
+                dbc.Col(
+                    [
                         html.Div(
                             id="predictions-class_selector-container",
                             children=[class_selector],
-                            hidden=True,
                         ),
                     ],
-                    xs=4,
-                    sm=4,
-                    md=4,
-                    lg=4,
+                    xs=12,
+                    sm=12,
+                    md=12,
+                    lg=8,
                     xl=4,
                     xxl=4,
-                )
+                ),
             ],
             style={"padding-top": "20px"},
         ),
@@ -222,35 +275,40 @@ predictionsLayout = html.Div(
 
 def predictionsCallbacks(app, furl: Function):
     @app.callback(
-        # Output("test", "children"),
         Output("test_graph", "figure"),
         State("test_graph", "figure"),
         Input("test_graph", "restyleData"),
         prevent_initial_call=True,
     )
     def update_point(figure, restyleData):
-        if restyleData and (restyleData[1][-1] != len(figure["data"])-1 or restyleData[0]['visible'][restyleData[1][-1]]):
+        if restyleData and (
+            restyleData[1][-1] != len(figure["data"]) - 1
+            or restyleData[0]["visible"][restyleData[1][-1]]
+        ):
+
             def isDisabled(data):
                 if data["name"].upper().find("PREDICTION") == 0:
                     return True
                 elif data["name"].upper().find("TPR", 0) == 0:
                     figure["data"].remove(data)
                     return True
-                elif data.get("visible") == "legendonly":                    
+                elif data.get("visible") == "legendonly":
                     return True
                 return False
-            
-            point = sum(data["y"][0] if not isDisabled(data) else 0 for data in figure["data"])
+
+            point = sum(
+                data["y"][0] if not isDisabled(data) else 0 for data in figure["data"]
+            )
             trace = go.Scatter(
-                    x=["Acumulado", "Predicción Final"],
-                    y=[point, point],
-                    mode="lines",
-                    name=f"TPR {round(point * 100, 2)} %",
-                    line=dict(dash="dash"),
-                )
+                x=["Acumulado", "Predicción Final"],
+                y=[point, point],
+                mode="lines",
+                name=f"TPR {round(point * 100, 2)} %",
+                line=dict(dash="dash"),
+            )
             figure["data"].append(trace)
             return figure
-        else: 
+        else:
             raise PreventUpdate
 
     @app.callback(
@@ -274,8 +332,9 @@ def predictionsCallbacks(app, furl: Function):
             for index, _ in x_test.iterrows():
                 options.append({"label": index, "value": index})
 
-            drop_down = dbc.Select(
+            drop_down = dcc.Dropdown(
                 id="select",
+                placeholder="Seleccione la Instancia a Analizar",
                 options=options,
             )
             class_names = [var["new_value"] for var in target_description["variables"]]
@@ -342,7 +401,9 @@ def predictionsCallbacks(app, furl: Function):
 
             except Exception as e:
                 print(e)
-        raise PreventUpdate
+                raise PreventUpdate
+        else:
+            return []
 
     @app.callback(
         Output("predictions-title", "children"),
@@ -351,6 +412,7 @@ def predictionsCallbacks(app, furl: Function):
         Output("predictions-output-upload", "children"),
         Output("trees-slider-container", "hidden"),
         Output("predictions-class_selector-container", "hidden"),
+        Output("predictions-class_selector-title", "hidden"),
         State("path", "href"),
         Input("select", "value"),
         Input("prediction-positive-class-selector", "value"),
@@ -429,11 +491,14 @@ def predictionsCallbacks(app, furl: Function):
                                     "font-size": "16px",
                                     "font-weight": "bold",
                                     "text-align": "center",
+                                    "color": "black"
+                                
                                 },
                                 style_data={
                                     "whiteSpace": "normal",
                                     "font-size": "14px",
                                     "text-align": "center",
+                                    "color": "black"
                                 },
                                 fill_width=True,
                                 style_table={"overflow": "scroll"},
@@ -458,7 +523,11 @@ def predictionsCallbacks(app, furl: Function):
                     dcc.Graph(figure=pie_chart),
                     False,
                     False,
+                    False,
                 )
             except Exception as e:
                 print(e)
-        raise PreventUpdate
+                raise PreventUpdate
+
+        else:
+            return [], [], [], [], True, True, True
