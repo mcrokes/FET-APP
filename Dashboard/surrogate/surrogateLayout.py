@@ -78,7 +78,7 @@ surrogateLayout = html.Div(
             ]
         )
     ],
-    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
+    style={"margin": "auto"},
 )
 
 
@@ -128,7 +128,13 @@ def surrogateCallbacks(app, furl: Function):
         for index, rule in enumerate(rules):
             causes = []
             for cause in rule["causes"]:
-                causes.append(
+                value_cell = ""
+                for jindex, value in enumerate(cause["value"]):
+                    if jindex > 0:
+                        value_cell += f" o {value}"
+                    else:
+                        value_cell += value
+                causes.append(                    
                     html.Tr(
                         [
                             html.Td(cause["item"], style={"width": "40%"}),
@@ -136,12 +142,12 @@ def surrogateCallbacks(app, furl: Function):
                                 cause["sign"],
                                 style={"width": "20%"},
                             ),
-                            html.Td(cause["value"], style={"width": "40%"}),
+                            html.Td(f"{value_cell}", style={"width": "40%"}),
                         ]
                     )
                 )
             causes_body = [html.Tbody(causes)]
-            causes_table = dbc.Table(causes_body, bordered=True, style={"margin": "0"})
+            causes_table = dbc.Table(causes_body, style={"margin": "0"}, className='rules-table')
 
             rules_table.append(
                 html.Tr(
@@ -166,7 +172,7 @@ def surrogateCallbacks(app, furl: Function):
                 )
             )
         ]
-        sub_header_table = dbc.Table(sub_header, bordered=True, style={"margin": "0"})
+        sub_header_table = dbc.Table(sub_header, style={"margin": "0"}, className='rules-table')
 
         table_header = [
             html.Thead(
@@ -192,7 +198,7 @@ def surrogateCallbacks(app, furl: Function):
 
         table_body = [html.Tbody(rules_table)]
 
-        rg = dbc.Table(table_header + table_body, bordered=True)
+        rg = dbc.Table(table_header + table_body, bordered=True, className='rules-table')
 
         # model: DecisionTreeClassifier = surrogate_model.getElement("tree_model")
         # dataset: pd.DataFrame = (

@@ -44,7 +44,13 @@ def generateMatrixExplanationLayout(matrix_explanation):
         .reset_index()
     )
     expl = [
-        dbc.Table.from_dataframe(generals_df, striped=True, bordered=True, hover=True)
+        dbc.Table.from_dataframe(
+            generals_df,
+            striped=True,
+            bordered=True,
+            hover=True,
+            className="rules-table",
+        )
     ]
 
     def create_column(m):
@@ -61,7 +67,11 @@ def generateMatrixExplanationLayout(matrix_explanation):
         ).reset_index()
         expl.append(
             dbc.Table.from_dataframe(
-                explanation_df, striped=True, bordered=True, hover=True
+                explanation_df,
+                striped=True,
+                bordered=True,
+                hover=True,
+                className="rules-table",
             )
         )
     return html.Div(expl)
@@ -86,11 +96,16 @@ def get_matrix_explanation(cm, class_names, positive_class):
             true_values = true_positive + sum(true_negatives)
             false_values = sum(false_positives) + sum(false_negatives)
 
-        keys = {"precision": "Precisión", "tpr": "TP Rate Recall (Sensibilidad)", "fpr": "FP Rate", "f1": "F1 Score"}
+        keys = {
+            "precision": "Precisión",
+            "tpr": "TP Rate Recall (Sensibilidad)",
+            "fpr": "FP Rate",
+            "f1": "F1 Score",
+        }
         explanation = {
-            f"{keys["precision"]}": true_positive / (true_positive + sum(false_positives)),
-            f"{keys['tpr']}": true_positive
-            / (true_positive + sum(false_negatives)),
+            f"{keys["precision"]}": true_positive
+            / (true_positive + sum(false_positives)),
+            f"{keys['tpr']}": true_positive / (true_positive + sum(false_negatives)),
             f"{keys['fpr']}": sum(false_positives)
             / (sum(false_positives) + sum(true_negatives)),
         }
@@ -98,8 +113,8 @@ def get_matrix_explanation(cm, class_names, positive_class):
         explanation[keys["f1"]] = (
             2
             * explanation[keys["precision"]]
-            * explanation[keys['tpr']]
-            / (explanation[keys["precision"]] + explanation[keys['tpr']])
+            * explanation[keys["tpr"]]
+            / (explanation[keys["precision"]] + explanation[keys["tpr"]])
         )
 
         for elm in explanation:
@@ -337,7 +352,9 @@ def metricsCallbacks(app, furl: Function):
             ).first()
 
             classifier_model: RandomForestClassifier = model_x.getElement("model")
-            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
+            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
+                "dataset"
+            )
 
             target_description = {
                 "column_name": "Sobreviviente",
@@ -424,7 +441,9 @@ def metricsCallbacks(app, furl: Function):
             ).first()
 
             classifier_model: RandomForestClassifier = model_x.getElement("model")
-            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
+            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
+                "dataset"
+            )
 
             target_description = model_x.getElement("target_names_dict")
 

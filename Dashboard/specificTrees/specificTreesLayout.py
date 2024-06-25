@@ -1,23 +1,17 @@
 from pyclbr import Function
-from turtle import width
-from dash import dcc, html, dash_table
+from dash import dcc, html
 from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
-import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
-    SurrogateTree,
 )
 from app.proccessor.model.rules_uploader import graph_rules
 from app.proccessor.models import (
     ExplainedClassifierModel,
-    SurrogateTreeClassifierData,
-    Tree,
 )
 
 specificTreesLayout = html.Div(
@@ -78,7 +72,7 @@ specificTreesLayout = html.Div(
             ]
         )
     ],
-    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
+    style={"margin": "auto"},
 )
 
 
@@ -121,6 +115,13 @@ def specificTreesCallbacks(app, furl: Function):
         for index, rule in enumerate(rules):
             causes = []
             for cause in rule["causes"]:
+                value_cell = ""
+                for jindex, value in enumerate(cause["value"]):
+                    if jindex > 0:
+                        value_cell += f" o {value}"
+                    else:
+                        value_cell += value
+                    
                 causes.append(
                     html.Tr(
                         [
@@ -129,12 +130,12 @@ def specificTreesCallbacks(app, furl: Function):
                                 cause["sign"],
                                 style={"width": "20%"},
                             ),
-                            html.Td(cause["value"], style={"width": "40%"}),
+                            html.Td(f"{value_cell}", style={"width": "40%"}),
                         ]
                     )
                 )
             causes_body = [html.Tbody(causes)]
-            causes_table = dbc.Table(causes_body, bordered=True, style={"margin": "0"})
+            causes_table = dbc.Table(causes_body, style={"margin": "0"}, className='rules-table')
 
             rules_table.append(
                 html.Tr(
@@ -159,7 +160,7 @@ def specificTreesCallbacks(app, furl: Function):
                 )
             )
         ]
-        sub_header_table = dbc.Table(sub_header, bordered=True, style={"margin": "0"})
+        sub_header_table = dbc.Table(sub_header, style={"margin": "0"}, className='rules-table')
 
         table_header = [
             html.Thead(
@@ -185,7 +186,7 @@ def specificTreesCallbacks(app, furl: Function):
 
         table_body = [html.Tbody(rules_table)]
 
-        rg = dbc.Table(table_header + table_body, bordered=True)
+        rg = dbc.Table(table_header + table_body, bordered=True, className='rules-table')
 
         # model: DecisionTreeClassifier = surrogate_model.getElement("tree_model")
         # dataset: pd.DataFrame = (
