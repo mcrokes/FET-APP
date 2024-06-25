@@ -19,6 +19,7 @@ from treeinterpreter import treeinterpreter as ti
 
 def getTreeInterpreterParamethers(
     instance,
+    instanceModified,
     model: RandomForestClassifier | DecisionTreeClassifier,
     class_names,
     current_class,
@@ -50,12 +51,12 @@ def getTreeInterpreterParamethers(
             contribution_graph_data.append({"class_name": class_name, "graph_data": []})
             point += bar_base
 
-        for jIndex, (contribution, feature) in enumerate(sorted_contributions):
+        for jIndex, (contribution, feature) in enumerate(
+            sorted_contributions
+        ):
             if feature not in general_dict[("Instance", "Predictor")]:
                 general_dict[("Instance", "Predictor")].append(feature)
-                general_dict[("Instance", "Value")].append(
-                    pd.Series(instance[feature]).values[0]
-                )
+                general_dict[("Instance", "Value")].append(instanceModified[feature])
             general_dict[("Contribution", class_name)].append(
                 f"{round(contribution[index],3)} ({round(contribution[index]*100,1)}%)"
             )
@@ -118,7 +119,11 @@ def getIndividualPredictions(model, class_names, instance, cut_point, current_cl
     )
     predictions_for_actual_clase = np.array(sorted_predictions)[:, 0]
     prev_x = list(range(len(predictions_for_actual_clase) + 1))
-    x = prev_x[1:] if markers.count("blue") > markers.count("red") else prev_x[::-1][:-1]
+    x = (
+        prev_x[1:]
+        if markers.count("blue") > markers.count("red")
+        else prev_x[::-1][:-1]
+    )
     y = np.round(predictions_for_actual_clase.astype(np.float64) * 100, 2)
 
     data = [
@@ -429,15 +434,28 @@ def predictionsCallbacks(app, furl: Function):
                     ).first()
                 )
                 ds = model_x.data_set_data.getElement("dataset")
+                dsModified = model_x.data_set_data.getElement("dataset_modified")
                 x_test = ds.drop(columns=model_x.getElement("target_row"))
+                x_testModified = dsModified.drop(
+                    columns=model_x.getElement("target_row")
+                )
 
                 instance: pd.DataFrame = (
                     x_test[n - 1 : n] if n >= 1 and n <= len(x_test) else x_test[-1:]
                 )
+                print(instance)
+                instanceModified: pd.DataFrame = (
+                    x_testModified[n - 1 : n]
+                    if n >= 1 and n <= len(x_test)
+                    else x_testModified[-1:]
+                )
+                print(instanceModified)
+                print()
                 contribution_graph_data, general_dict, predictions_graph_data = (
                     getTreeInterpreterParamethers(
                         current_class=positive_class,
                         instance=instance,
+                        instanceModified=instanceModified,
                         class_names=[
                             var["new_value"]
                             for var in model_x.getElement("target_names_dict")[
@@ -491,14 +509,13 @@ def predictionsCallbacks(app, furl: Function):
                                     "font-size": "16px",
                                     "font-weight": "bold",
                                     "text-align": "center",
-                                    "color": "black"
-                                
+                                    "color": "black",
                                 },
                                 style_data={
                                     "whiteSpace": "normal",
                                     "font-size": "14px",
                                     "text-align": "center",
-                                    "color": "black"
+                                    "color": "black",
                                 },
                                 fill_width=True,
                                 style_table={"overflow": "scroll"},
