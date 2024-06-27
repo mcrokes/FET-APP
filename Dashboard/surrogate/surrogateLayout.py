@@ -1,19 +1,14 @@
 from pyclbr import Function
-from turtle import width
-from dash import dcc, html, dash_table
+from dash import dcc, html
 from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
-    SurrogateTree,
 )
-from app.proccessor.model.rules_uploader import graph_rules
 from app.proccessor.models import (
     ExplainedClassifierModel,
     SurrogateTreeClassifierData,
@@ -24,34 +19,27 @@ surrogateLayout = html.Div(
     [
         dcc.Loading(
             [
-                dbc.Row(
+                html.Div(
                     [
-                        dbc.Label(
-                            "Profundidad máxima del árbol subrogado",
-                            style={"text-align": "center", "font-weight": "bold"},
-                            html_for="max-depth-input-row",
-                            width=5,
+                        html.Plaintext(
+                            "Profundidad",
+                            className="tree-creator-label",
                         ),
-                        dbc.Col(
-                            dbc.Input(
-                                type="number",
-                                id="max-depth-input-row",
-                                min=3,
-                                value=3,
-                                style={"width": "80px", "margin": "auto"},
-                            ),
-                            width=2,
+                        dbc.Input(
+                            type="number",
+                            id="max-depth-input-row",
+                            min=3,
+                            value=3,
+                            className="tree-creator-input",
                         ),
-                        dbc.Col(
-                            dbc.Button(
-                                "Reconstruir Árbol",
-                                id="surrogate-tree-reconstruction-btn",
-                                n_clicks=0,
-                                className="btn-secondary",
-                            ),
+                        html.Button(
+                            "Reconstruir Árbol",
+                            id="surrogate-tree-reconstruction-btn",
+                            n_clicks=0,
+                            className="tree-btn tree-creator-btn",
                         ),
                     ],
-                    style={"margin-left": "6rem"},
+                    className="tree-creator",
                 ),
                 dbc.Row(
                     [
@@ -59,8 +47,13 @@ surrogateLayout = html.Div(
                             [
                                 dbc.Row(
                                     [
-                                        html.H3("REGLAS DEL MODELO"),
-                                        html.Div(id="rules-output-upload"),
+                                        html.Plaintext(
+                                            "REGLAS DEL MODELO", className="rules-title"
+                                        ),
+                                        html.Div(
+                                            id="rules-output-upload",
+                                            className="rules-table-container",
+                                        ),
                                     ]
                                 )
                             ]
@@ -70,15 +63,48 @@ surrogateLayout = html.Div(
                 ),
                 dbc.Row(
                     [
-                        html.H3("VISUALIZACION DEL ARBOL"),
-                        html.Img(id="tree-visual-output-upload"),
+                        html.Plaintext(
+                            "VISUALIZACION DEL ARBOL", className="rules-title"
+                        ),
+                        html.Button(
+                            "MOSTRAR",
+                            id="build-tree-btn",
+                            n_clicks=0,
+                            className="tree-btn tree-creator-btn",
+                            style={"margin-left": "3rem"},
+                        ),
+                        dbc.Tooltip(
+                            [
+                                html.Plaintext(
+                                    [
+                                        "* Para visualizar el árbol deberá instalar el software ",
+                                        html.Strong("Graphviz"),
+                                        " en su ordenador.",
+                                    ]
+                                ),
+                                html.Plaintext(
+                                    [
+                                        "* Las muestras con las que se hace la visualización ",
+                                        html.Strong("no son las mismas"),
+                                        " que las de las reglas de modelo.",
+                                    ]
+                                ),
+                            ],
+                            className="personalized-tooltip",
+                            target="build-tree-btn",
+                        ),
                     ],
-                    style={"padding-top": "20px"},
+                    className="tree-creator",
+                    style={"padding-top": "20px", "justify-content": "flex-start"},
+                ),
+                html.Div(
+                    [html.Img(id="tree-visual-output-upload")],
+                    className="tree-img-container",
                 ),
             ]
         )
     ],
-    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
+    style={"margin": "auto"},
 )
 
 
@@ -86,11 +112,12 @@ def surrogateCallbacks(app, furl: Function):
     @app.callback(
         Output("rules-output-upload", "children"),
         Output("max-depth-input-row", "max"),
-        Input("surrogate-tree-reconstruction-btn", "n_clicks"),
+        Output("tree-visual-output-upload", "src"),
         State("max-depth-input-row", "value"),
+        Input("surrogate-tree-reconstruction-btn", "n_clicks"),
         Input("path", "href"),
     )
-    def refresh_surrogate_layout(n, max_depht, cl):
+    def refresh_surrogate_layout(max_depht, n, cl):
         f = furl(cl)
         model_id = f.args["model_id"]
 
@@ -128,6 +155,12 @@ def surrogateCallbacks(app, furl: Function):
         for index, rule in enumerate(rules):
             causes = []
             for cause in rule["causes"]:
+                value_cell = ""
+                for jindex, value in enumerate(cause["value"]):
+                    if jindex > 0:
+                        value_cell += f" o {value}"
+                    else:
+                        value_cell += value
                 causes.append(
                     html.Tr(
                         [
@@ -136,12 +169,16 @@ def surrogateCallbacks(app, furl: Function):
                                 cause["sign"],
                                 style={"width": "20%"},
                             ),
-                            html.Td(cause["value"], style={"width": "40%"}),
+                            html.Td(f"{value_cell}", style={"width": "40%"}),
                         ]
                     )
                 )
             causes_body = [html.Tbody(causes)]
-            causes_table = dbc.Table(causes_body, bordered=True, style={"margin": "0"})
+            causes_table = dbc.Table(
+                causes_body,
+                style={"margin": "0", "border": "solid #2A3F54 1pt"},
+                className="rules-table",
+            )
 
             rules_table.append(
                 html.Tr(
@@ -166,7 +203,9 @@ def surrogateCallbacks(app, furl: Function):
                 )
             )
         ]
-        sub_header_table = dbc.Table(sub_header, bordered=True, style={"margin": "0"})
+        sub_header_table = dbc.Table(
+            sub_header, style={"margin": "0"}, className="rules-table"
+        )
 
         table_header = [
             html.Thead(
@@ -192,22 +231,52 @@ def surrogateCallbacks(app, furl: Function):
 
         table_body = [html.Tbody(rules_table)]
 
-        rg = dbc.Table(table_header + table_body, bordered=True)
+        rg = dbc.Table(
+            table_header + table_body, bordered=True, className="rules-table"
+        )
 
-        # model: DecisionTreeClassifier = surrogate_model.getElement("tree_model")
-        # dataset: pd.DataFrame = (
-        #     surrogate_model.explained_classifier_model.data_set_data.getElement(
-        #         "dataset"
-        #     )
-        # )
-        # target_row: str = surrogate_model.explained_classifier_model.getElement(
-        #     "target_row"
-        # )
-        # tg = ExplainSingleTree.graph_tree(
-        #     x_train=dataset.drop(columns=target_row),
-        #     y_train=dataset[target_row],
-        #     tree=model,
-        #     class_names=["muere", "vive"],
-        #     feature_names=model.feature_names_in_,
-        # )
-        return rg, lenght + 2
+        return rg, lenght + 2, ""
+
+    @app.callback(
+        Output("tree-visual-output-upload", "src", allow_duplicate=True),
+        State("max-depth-input-row", "value"),
+        State("path", "href"),
+        Input("build-tree-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def build_img_tree(max_depht, cl, build):
+        f = furl(cl)
+        model_id = f.args["model_id"]
+
+        surrogate_model: SurrogateTreeClassifierData = (
+            SurrogateTreeClassifierData.query.filter(
+                SurrogateTreeClassifierData.explained_classifier_model_id == model_id
+            )
+            .join(SurrogateTreeClassifierData.tree)
+            .filter(Tree.depth == max_depht)
+            .first()
+        )
+
+        model_x: ExplainedClassifierModel = surrogate_model.explained_classifier_model
+
+        model: DecisionTreeClassifier = surrogate_model.getElement("tree_model")
+        dataset: pd.DataFrame = (
+            surrogate_model.explained_classifier_model.data_set_data.getElement(
+                "dataset"
+            )
+        )
+        target_row: str = surrogate_model.explained_classifier_model.getElement(
+            "target_row"
+        )
+        target_description = model_x.getElement("target_names_dict")
+        class_names = [
+            element["new_value"] for element in target_description["variables"]
+        ]
+        tg = ExplainSingleTree.graph_tree(
+            x_train=dataset.drop(columns=target_row)[: int(len(dataset) / 2)],
+            y_train=dataset[target_row][: int(len(dataset) / 2)],
+            tree=model,
+            class_names=class_names,
+            feature_names=model.feature_names_in_,
+        )
+        return tg

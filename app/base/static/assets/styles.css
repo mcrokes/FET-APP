@@ -1,80 +1,160 @@
 body {
-    /*background-image: url("/assets/images/general_background.jpg");*/
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: top;
-    color: #000000 !important;
-    background-color: transparent;
-    margin: 0;
-}
+  --green-color-200: rgb(28, 196, 84);
 
-#classifier-tabs-container {
-}
-
-#classifier-tabs-container .tab-content {
-    margin: 5rem auto;
-    margin-top: 10rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
+  /*background-image: url("/assets/images/general_background.jpg");*/
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top;
+  color: #000000 !important;
+  background-color: transparent;
+  margin: 0;
 }
 
 div.section-card {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 #classifier-tabs {
-    border: none !important;
-    display: flex;
-    justify-content: center;
-    border-radius: 4px;
-    position: fixed;
-    z-index: 1000;
-    background-color: white;
-    width: 100%;
-    top: 0;
+  border: none !important;
+  display: flex;
+  justify-content: center;
+  border-radius: 4px;
+  position: sticky;
+  z-index: 1000;
+  background-color: white;
+  width: 100%;
+  top: 0;
+  gap: 8px;
 }
 
 #classifier-tabs div {
-    width: 9rem;
-    font-size: 1rem;
-    text-align: center;
-    margin-left: 0.2rem;
-    margin-right: 0.2rem;
+  width: 9rem;
+  font-size: 1rem;
+  text-align: center;
+  margin-left: 0.2rem;
+  margin-right: 0.2rem;
 }
 
-#classifier-tabs div a {
-    border-radius: 4px;
-    margin: 0;    
-    font-weight: 700;
-    text-transform: uppercase;
-    color: rgb(39, 55, 102);
-    padding: 0.3rem 0;
-    border: dashed #4b474769 1pt;
+#classifier-tabs div a, .tree-btn {
+  border-radius: 4px;
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgb(39, 55, 102);
+  background-color: white;
+  padding: 0.3rem 0;
+  border: dashed #4b474769 1pt;
 }
 
-#classifier-tabs div a:hover {
-    background-color: rgba(181, 230, 230, 0.767);
-    border: solid #000000 1pt;
+#classifier-tabs div a:hover, .tree-btn:hover{
+  background-color: rgba(181, 230, 230, 0.767);
+  border: solid #000000 1pt;
 }
 
 #classifier-tabs div a.active {
-    background-color: rgb(39, 55, 102);
-    color: aliceblue;
-    border: solid transparent 1pt;
+  background-color: rgb(39, 55, 102);
+  color: aliceblue;
+  border: solid transparent 1pt;
 }
 
 .classifier-tab {
-    margin-top: 2rem;
-    width: 100%;
-    font-size: 1rem !important;
-    text-transform: uppercase;
-    text-align: center;
+  margin-top: 2rem;
+  width: 100%;
+  font-size: 1rem !important;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 #toggle-modal-1 {
-    max-width: 50%;
+  max-width: 50%;
 }
 
 .section-content {
-    padding: 1rem;
+  padding: 1rem;
+}
+
+.rules-table-container {
+  overflow: scroll;
+}
+
+.rules-table th,
+.rules-table td,
+.rules-table thead,
+.rules-table tbody,
+.rules-table tfoot,
+.rules-table tr {
+  border-style: dotted;
+  background-color: rgb(251, 254, 255);
+  color: #000000;
+  font-size: small;
+  line-height: 12px;
+  padding: 4px 1px;
+  vertical-align: middle;
+  width: min-content;
+}
+
+.rules-table tr th {
+    background-color: #a2b1f75b;
+
+}
+
+.rules-title {
+  color: #070b55e5;
+  font-weight: bolder;
+  font-size: 24px;
+  text-align: initial;
+  padding-left: 3rem;
+  width: min-content;
+}
+
+.tree-creator {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tree-creator-label {
+  width: 120px;
+  text-align: center;
+  font-weight: bold;
+  color: black;
+}
+
+.tree-creator-input {
+  width: 55px;
+  padding: 0 8px;
+  margin-right: 4px;
+}
+
+.tree-creator-btn {
+  width: fit-content;
+  height: fit-content;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.personalized-tooltip {
+  width: 300px;
+  background-color: rgb(210, 205, 255);
+  border-radius: 10px;
+  padding: 1rem;
+  border: dashed black 1pt;
+}
+
+.personalized-tooltip div {
+  background-color: transparent;
+  max-width: 100% !important;
+  padding: 0;
+}
+
+.personalized-tooltip div plaintext {
+  white-space: initial;  
+  text-transform: uppercase;
+}
+
+.tree-img-container {
+  width: 100%;
+  overflow: scroll;
 }
