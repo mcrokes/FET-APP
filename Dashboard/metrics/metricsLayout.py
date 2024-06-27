@@ -16,6 +16,17 @@ from sklearn import metrics
 import plotly.express as px
 import plotly.graph_objects as go
 
+keys = {
+    "precision": "Precisión",
+    "tpr": "Sensibilidad",
+    "fpr": "Tasa FP",
+    "f1": "Medición F1",
+    "tv": "Predicciones Correctas",
+    "fv": "Predicciones Fallidas",
+    "accuracy": "Precisión Global",
+}
+
+
 
 def get_target_dropdown(values_dict):
     return [
@@ -37,15 +48,14 @@ def generateMatrixExplanationLayout(matrix_explanation):
     matrix_explanation = matrix_generals.pop("matrix_explanation")
 
     generals_df = (
-        pd.DataFrame(matrix_generals, index=["Generals"])
+        pd.DataFrame(matrix_generals, index=["Factores Generales"])
         .transpose()[1:]
-        .rename_axis("Parameters")
+        .rename_axis("Valor")
         .reset_index()
     )
     expl = [
         dbc.Table.from_dataframe(
             generals_df,
-            striped=True,
             bordered=True,
             hover=True,
             className="rules-table",
@@ -56,27 +66,61 @@ def generateMatrixExplanationLayout(matrix_explanation):
         return (
             pd.DataFrame(m["explanation"], index=[m["current_class"]])
             .transpose()
-            .rename_axis("Parameters")
+            .rename_axis("Parámetros Individuales")
         )
 
     if matrix_explanation != {}:
-
+        
+        
+        descriptions = {
+            f"{keys['tpr']}": "Proporción de predicciones correctas entre todos los valores reales de la clase. (Mayor es Mejor)",
+            f"{keys['fpr']}": "Proporción de predicciones erroneas entre todos los valores reales de otras clases clase. (Menor es Mejor)",
+            f"{keys['f1']}": "Media armónica de la precisión y la sensibilidad. (Mayor es Mejor)",
+            f"{keys['precision']}": "Proporción de verdaderos positivos entre todos los positivos predichos. (Mayor es Mejor)",
+        }
+        
         explanation_df = pd.concat(
             [create_column(m) for m in matrix_explanation], axis=1
         ).reset_index()
         expl.append(
-            dbc.Table.from_dataframe(
-                explanation_df,
-                striped=True,
+            dbc.Table(
+                [
+                    html.Thead(
+                        html.Tr([html.Th(col) for col in explanation_df.columns])
+                    ),
+                    html.Tbody(
+                        [
+                            html.Tr(
+                                [
+                                    html.Td(
+                                        [
+                                            html.Span(cell, id=f"{cell}-{row}-{index}"),
+                                            dbc.Tooltip(
+                                                f"{descriptions[cell]}",
+                                                target=f"{cell}-{row}-{index}",
+                                            ),
+                                        ]
+                                        if index == 0
+                                        else cell
+                                    )
+                                    for index, (col, cell) in enumerate(
+                                        zip(explanation_df.columns, row)
+                                    )
+                                ]
+                            )
+                            for row in explanation_df.values.tolist()
+                        ]
+                    ),
+                ],
+                className="rules-table",
                 bordered=True,
                 hover=True,
-                className="rules-table",
             )
         )
     return html.Div(expl)
 
 
-def get_matrix_explanation(cm, class_names, positive_class):
+def get_matrix_explanation(cm, class_names):
     matrix_explanation = []
     true_values = 0
     false_values = 0
@@ -95,12 +139,6 @@ def get_matrix_explanation(cm, class_names, positive_class):
             true_values = true_positive + sum(true_negatives)
             false_values = sum(false_positives) + sum(false_negatives)
 
-        keys = {
-            "precision": "Precisión",
-            "tpr": "TP Rate Recall (Sensibilidad)",
-            "fpr": "FP Rate",
-            "f1": "F1 Score",
-        }
         explanation = {
             f"{keys["precision"]}": true_positive
             / (true_positive + sum(false_positives)),
@@ -130,9 +168,9 @@ def get_matrix_explanation(cm, class_names, positive_class):
 
     return {
         "dtype": "object",
-        "true_values": true_values,
-        "false_values": false_values,
-        "accuracy": f"{round((true_values / (true_values + false_values)) *100, 2)} %",
+        f"{keys["tv"]}": true_values,
+        f"{keys["fv"]}": false_values,
+        f"{keys["accuracy"]}": f"{round((true_values / (true_values + false_values)) *100, 2)} %",
         "matrix_explanation": matrix_explanation,
     }
 
@@ -179,7 +217,7 @@ def initialize_matrix(
     cm = metrics.confusion_matrix(y_true=y_test, y_pred=y_pred_new)
 
     return __create_matrix(cm=cm, class_names=class_names), get_matrix_explanation(
-        cm, class_names, dropdown_value
+        cm, class_names
     )
 
 
@@ -298,10 +336,12 @@ metricsLayout = html.Div(
                         ),
                         dbc.Col(
                             [
+                                html.Plaintext(
+                                    "Parámetros Obtenidos", style={"color": "black"}
+                                ),
                                 html.Div(
-                                    ["TEXTO CON EXPLICACION DEL GRÁFICO"],
                                     id="matrix-explanation",
-                                )
+                                ),
                             ],
                             xs=12,
                             sm=12,
