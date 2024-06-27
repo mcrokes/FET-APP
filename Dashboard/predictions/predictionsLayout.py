@@ -1,3 +1,5 @@
+import json
+import pickle
 from pyclbr import Function
 from re import M
 from dash import dcc, html, dash_table
@@ -51,9 +53,7 @@ def getTreeInterpreterParamethers(
             contribution_graph_data.append({"class_name": class_name, "graph_data": []})
             point += bar_base
 
-        for jIndex, (contribution, feature) in enumerate(
-            sorted_contributions
-        ):
+        for jIndex, (contribution, feature) in enumerate(sorted_contributions):
             if feature not in general_dict[("Instance", "Predictor")]:
                 general_dict[("Instance", "Predictor")].append(feature)
                 general_dict[("Instance", "Value")].append(instanceModified[feature])
@@ -64,9 +64,9 @@ def getTreeInterpreterParamethers(
             if index == current_class:
                 x = ["Acumulado"]
                 y = [contribution[index]]
-
+                
                 contribution_graph_data[0]["graph_data"].append(
-                    go.Bar(name=feature, x=x, y=y)
+                    go.Bar(name=f"{feature}({round(y[0], 3)}) {round(y[0]/prediction[0][index] * 100, 2)}%", x=x, y=y)
                 )
                 point += contribution[index]
 
@@ -75,11 +75,11 @@ def getTreeInterpreterParamethers(
         )
         if index == current_class:
             contribution_graph_data[0]["graph_data"].insert(
-                0, go.Bar(name="Media", x=media_array_x, y=media_array_y)
+                0, go.Bar(name=f"Media ({round(media_array_y[0], 3)}) {round(media_array_y[0]/prediction[0][index] * 100, 3)}%", x=media_array_x, y=media_array_y)
             )
             contribution_graph_data[0]["graph_data"].append(
                 go.Bar(
-                    name="Prediction", x=["Predicción Final"], y=[prediction[0][index]]
+                    name=f"Prediction ({round(prediction[0][index], 3)}) 100%", x=["Predicción Final"], y=[prediction[0][index]]
                 )
             )
             contribution_graph_data[0]["graph_data"].append(
@@ -87,7 +87,7 @@ def getTreeInterpreterParamethers(
                     x=["Acumulado", "Predicción Final"],
                     y=[point, point],
                     mode="lines",
-                    name=f"TPR {round(point * 100, 2)} %",
+                    name=f"Actual ({round(point,3)}) {round(point/prediction[0][index] * 100, 2)} %",
                     line=dict(dash="dash"),
                     marker_color=["blue", "blue"],
                 )
@@ -178,6 +178,7 @@ slider = dcc.Slider(
 
 predictionsLayout = html.Div(
     [
+        dcc.Store(id="current-class-data"),
         dbc.Row(
             [
                 dbc.Col(
@@ -248,8 +249,8 @@ predictionsLayout = html.Div(
                     sm=12,
                     md=12,
                     lg=8,
-                    xl=4,
-                    xxl=4,
+                    xl=8,
+                    xxl=8,
                 ),
                 dbc.Col(
                     [
@@ -262,8 +263,8 @@ predictionsLayout = html.Div(
                     sm=12,
                     md=12,
                     lg=8,
-                    xl=4,
-                    xxl=4,
+                    xl=8,
+                    xxl=8,
                 ),
             ],
             style={"padding-top": "20px"},
@@ -281,11 +282,12 @@ predictionsLayout = html.Div(
 def predictionsCallbacks(app, furl: Function):
     @app.callback(
         Output("test_graph", "figure"),
+        State("current-class-data", "data"),
         State("test_graph", "figure"),
         Input("test_graph", "restyleData"),
         prevent_initial_call=True,
     )
-    def update_point(figure, restyleData):
+    def update_point(data, figure, restyleData):
         if restyleData and (
             restyleData[1][-1] != len(figure["data"]) - 1
             or restyleData[0]["visible"][restyleData[1][-1]]
@@ -294,7 +296,7 @@ def predictionsCallbacks(app, furl: Function):
             def isDisabled(data):
                 if data["name"].upper().find("PREDICTION") == 0:
                     return True
-                elif data["name"].upper().find("TPR", 0) == 0:
+                elif data["name"].upper().find("ACTUAL", 0) == 0:
                     figure["data"].remove(data)
                     return True
                 elif data.get("visible") == "legendonly":
@@ -304,11 +306,12 @@ def predictionsCallbacks(app, furl: Function):
             point = sum(
                 data["y"][0] if not isDisabled(data) else 0 for data in figure["data"]
             )
+            data = json.loads(data)
             trace = go.Scatter(
                 x=["Acumulado", "Predicción Final"],
                 y=[point, point],
                 mode="lines",
-                name=f"TPR {round(point * 100, 2)} %",
+                name=f"Actual ({round(point, 3)}) {round(point/data["prediction"] * 100, 2)}%",
                 line=dict(dash="dash"),
             )
             figure["data"].append(trace)
@@ -417,7 +420,8 @@ def predictionsCallbacks(app, furl: Function):
         Output("predictions-output-upload", "children"),
         Output("trees-slider-container", "hidden"),
         Output("predictions-class_selector-container", "hidden"),
-        Output("predictions-class_selector-title", "hidden"),
+        Output("predictions-class_selector-title", "hidden"),        
+        Output("current-class-data", "data"),
         State("path", "href"),
         Input("select", "value"),
         Input("prediction-positive-class-selector", "value"),
@@ -443,25 +447,21 @@ def predictionsCallbacks(app, furl: Function):
                 instance: pd.DataFrame = (
                     x_test[n - 1 : n] if n >= 1 and n <= len(x_test) else x_test[-1:]
                 )
-                print(instance)
                 instanceModified: pd.DataFrame = (
                     x_testModified[n - 1 : n]
                     if n >= 1 and n <= len(x_test)
                     else x_testModified[-1:]
                 )
-                print(instanceModified)
-                print()
+                class_names = [
+                    var["new_value"]
+                    for var in model_x.getElement("target_names_dict")["variables"]
+                ]
                 contribution_graph_data, general_dict, predictions_graph_data = (
                     getTreeInterpreterParamethers(
                         current_class=positive_class,
                         instance=instance,
                         instanceModified=instanceModified,
-                        class_names=[
-                            var["new_value"]
-                            for var in model_x.getElement("target_names_dict")[
-                                "variables"
-                            ]
-                        ],
+                        class_names=class_names,
                         model=model_x.getElement("model"),
                     )
                 )
@@ -479,6 +479,11 @@ def predictionsCallbacks(app, furl: Function):
                 )
 
                 def getFigure(fig):
+                    fig.update_layout(
+                        title=f"Cotribucion individual por predictor para clase {class_names[positive_class]}",
+                        xaxis_title="Influeyentes",
+                        yaxis_title="Certeza de Predicción %",
+                    )
                     return fig
 
                 return (
@@ -541,10 +546,11 @@ def predictionsCallbacks(app, furl: Function):
                     False,
                     False,
                     False,
+                    json.dumps({"prediction": predictions_graph_data["values"][positive_class] })
                 )
             except Exception as e:
                 print(e)
                 raise PreventUpdate
 
         else:
-            return [], [], [], [], True, True, True
+            return [], [], [], [], True, True, True, None

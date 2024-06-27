@@ -1,4 +1,6 @@
 body {
+  --green-color-200: rgb(28, 196, 84);
+
   /*background-image: url("/assets/images/general_background.jpg");*/
   background-repeat: no-repeat;
   background-size: cover;
@@ -6,16 +8,6 @@ body {
   color: #000000 !important;
   background-color: transparent;
   margin: 0;
-}
-
-#classifier-tabs-container {
-}
-
-#classifier-tabs-container .tab-content {
-  margin: 5rem auto;
-  margin-top: 10rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
 }
 
 div.section-card {
@@ -27,11 +19,12 @@ div.section-card {
   display: flex;
   justify-content: center;
   border-radius: 4px;
-  position: fixed;
+  position: sticky;
   z-index: 1000;
   background-color: white;
   width: 100%;
   top: 0;
+  gap: 8px;
 }
 
 #classifier-tabs div {
@@ -42,17 +35,18 @@ div.section-card {
   margin-right: 0.2rem;
 }
 
-#classifier-tabs div a {
+#classifier-tabs div a, .tree-btn {
   border-radius: 4px;
   margin: 0;
   font-weight: 700;
   text-transform: uppercase;
   color: rgb(39, 55, 102);
+  background-color: white;
   padding: 0.3rem 0;
   border: dashed #4b474769 1pt;
 }
 
-#classifier-tabs div a:hover {
+#classifier-tabs div a:hover, .tree-btn:hover{
   background-color: rgba(181, 230, 230, 0.767);
   border: solid #000000 1pt;
 }
@@ -79,6 +73,10 @@ div.section-card {
   padding: 1rem;
 }
 
+.rules-table-container {
+  overflow: scroll;
+}
+
 .rules-table th,
 .rules-table td,
 .rules-table thead,
@@ -92,8 +90,71 @@ div.section-card {
   line-height: 12px;
   padding: 4px 1px;
   vertical-align: middle;
+  width: min-content;
 }
 
 .rules-table tr th {
-    background-color: rgba(0, 0, 0, 0.062);
+    background-color: #a2b1f75b;
+
+}
+
+.rules-title {
+  color: #070b55e5;
+  font-weight: bolder;
+  font-size: 24px;
+  text-align: initial;
+  padding-left: 3rem;
+  width: min-content;
+}
+
+.tree-creator {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tree-creator-label {
+  width: 120px;
+  text-align: center;
+  font-weight: bold;
+  color: black;
+}
+
+.tree-creator-input {
+  width: 55px;
+  padding: 0 8px;
+  margin-right: 4px;
+}
+
+.tree-creator-btn {
+  width: fit-content;
+  height: fit-content;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.personalized-tooltip {
+  width: 300px;
+  background-color: rgb(210, 205, 255);
+  border-radius: 10px;
+  padding: 1rem;
+  border: dashed black 1pt;
+}
+
+.personalized-tooltip div {
+  background-color: transparent;
+  max-width: 100% !important;
+  padding: 0;
+}
+
+.personalized-tooltip div plaintext {
+  white-space: initial;  
+  text-transform: uppercase;
+}
+
+.tree-img-container {
+  width: 100%;
+  overflow: scroll;
 }

@@ -1,7 +1,6 @@
-from math import nan
 import math
 from pyclbr import Function
-from dash import dcc, html, dash_table
+from dash import dcc, html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
@@ -11,7 +10,7 @@ from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 
 from app.proccessor.model.dataset_interaction_methods import update_y_pred
-from app.proccessor.models import ExplainedClassifierModel, ModelForProccess
+from app.proccessor.models import ExplainedClassifierModel
 
 from sklearn import metrics
 import plotly.express as px

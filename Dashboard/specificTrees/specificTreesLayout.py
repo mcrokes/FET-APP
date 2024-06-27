@@ -3,13 +3,13 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
 import dash_bootstrap_components as dbc
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
-from app.proccessor.model.rules_uploader import graph_rules
 from app.proccessor.models import (
     ExplainedClassifierModel,
 )
@@ -18,34 +18,27 @@ specificTreesLayout = html.Div(
     [
         dcc.Loading(
             [
-                dbc.Row(
+                html.Div(
                     [
-                        dbc.Label(
-                            "Seleccione el árbol",
-                            style={"text-align": "center", "font-weight": "bold"},
-                            html_for="max-depth-input-row",
-                            width=5,
+                        html.Plaintext(
+                            "Árbol No.",
+                            className="tree-creator-label",
                         ),
-                        dbc.Col(
-                            dbc.Input(
-                                type="number",
-                                id="s-max-depth-input-row",
-                                min=0,
-                                value=0,
-                                style={"width": "80px", "margin": "auto"},
-                            ),
-                            width=2,
+                        dbc.Input(
+                            type="number",
+                            id="s-max-depth-input-row",
+                            min=0,
+                            value=0,
+                            className="tree-creator-input",
                         ),
-                        dbc.Col(
-                            dbc.Button(
-                                "Realizar Estudio del Árbol",
-                                id="s-surrogate-tree-reconstruction-btn",
-                                n_clicks=0,
-                                className="btn-secondary",
-                            ),
+                        html.Button(
+                            "Realizar Estudio",
+                            id="s-surrogate-tree-reconstruction-btn",
+                            n_clicks=0,
+                            className="tree-btn tree-creator-btn",
                         ),
                     ],
-                    style={"margin-left": "6rem"},
+                    className="tree-creator",
                 ),
                 dbc.Row(
                     [
@@ -53,8 +46,13 @@ specificTreesLayout = html.Div(
                             [
                                 dbc.Row(
                                     [
-                                        html.H3("REGLAS DEL MODELO"),
-                                        html.Div(id="s-rules-output-upload"),
+                                        html.Plaintext(
+                                            "REGLAS DEL MODELO", className="rules-title"
+                                        ),
+                                        html.Div(
+                                            id="s-rules-output-upload",
+                                            className="rules-table-container",
+                                        ),
                                     ]
                                 )
                             ]
@@ -64,10 +62,43 @@ specificTreesLayout = html.Div(
                 ),
                 dbc.Row(
                     [
-                        html.H3("VISUALIZACION DEL ARBOL"),
-                        html.Img(id="s-tree-visual-output-upload"),
+                        html.Plaintext(
+                            "VISUALIZACION DEL ARBOL", className="rules-title"
+                        ),
+                        html.Button(
+                            "MOSTRAR",
+                            id="s-build-tree-btn",
+                            n_clicks=0,
+                            className="tree-btn tree-creator-btn",
+                            style={"margin-left": "3rem"},
+                        ),
+                        dbc.Tooltip(
+                            [
+                                html.Plaintext(
+                                    [
+                                        "* Para visualizar el árbol deberá instalar el software ",
+                                        html.Strong("Graphviz"),
+                                        " en su ordenador.",
+                                    ]
+                                ),
+                                html.Plaintext(
+                                    [
+                                        "* Las muestras con las que se hace la visualización ",
+                                        html.Strong("no son las mismas"),
+                                        " que las de las reglas de modelo.",
+                                    ]
+                                ),
+                            ],
+                            className="personalized-tooltip",
+                            target="s-build-tree-btn",
+                        ),
                     ],
-                    style={"padding-top": "20px"},
+                    className="tree-creator",
+                    style={"padding-top": "20px", "justify-content": "flex-start"},
+                ),
+                html.Div(
+                    [html.Img(id="s-tree-visual-output-upload")],
+                    className="tree-img-container",
                 ),
             ]
         )
@@ -80,6 +111,7 @@ def specificTreesCallbacks(app, furl: Function):
     @app.callback(
         Output("s-rules-output-upload", "children"),
         Output("s-max-depth-input-row", "max"),
+        Output("s-tree-visual-output-upload", "src"),
         Input("s-surrogate-tree-reconstruction-btn", "n_clicks"),
         State("s-max-depth-input-row", "value"),
         Input("path", "href"),
@@ -91,12 +123,11 @@ def specificTreesCallbacks(app, furl: Function):
         model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
             ExplainedClassifierModel.id == model_id
         ).first()
-        
+
         model: RandomForestClassifier = model_x.getElement("model")
-        
-        
+
         lenght = len(model.estimators_)
-        
+
         rules = ExplainSingleTree.get_rules(
             model=model.estimators_[tree_number].tree_,
             q_variables=[
@@ -121,7 +152,7 @@ def specificTreesCallbacks(app, furl: Function):
                         value_cell += f" o {value}"
                     else:
                         value_cell += value
-                    
+
                 causes.append(
                     html.Tr(
                         [
@@ -135,7 +166,11 @@ def specificTreesCallbacks(app, furl: Function):
                     )
                 )
             causes_body = [html.Tbody(causes)]
-            causes_table = dbc.Table(causes_body, style={"margin": "0"}, className='rules-table')
+            causes_table = dbc.Table(
+                causes_body,
+                style={"margin": "0", "border": "solid #2A3F54 1pt"},
+                className="rules-table",
+            )
 
             rules_table.append(
                 html.Tr(
@@ -160,7 +195,9 @@ def specificTreesCallbacks(app, furl: Function):
                 )
             )
         ]
-        sub_header_table = dbc.Table(sub_header, style={"margin": "0"}, className='rules-table')
+        sub_header_table = dbc.Table(
+            sub_header, style={"margin": "0"}, className="rules-table"
+        )
 
         table_header = [
             html.Thead(
@@ -186,22 +223,42 @@ def specificTreesCallbacks(app, furl: Function):
 
         table_body = [html.Tbody(rules_table)]
 
-        rg = dbc.Table(table_header + table_body, bordered=True, className='rules-table')
+        rg = dbc.Table(
+            table_header + table_body, bordered=True, className="rules-table"
+        )
+        return rg, lenght, ""
 
-        # model: DecisionTreeClassifier = surrogate_model.getElement("tree_model")
-        # dataset: pd.DataFrame = (
-        #     surrogate_model.explained_classifier_model.data_set_data.getElement(
-        #         "dataset"
-        #     )
-        # )
-        # target_row: str = surrogate_model.explained_classifier_model.getElement(
-        #     "target_row"
-        # )
-        # tg = ExplainSingleTree.graph_tree(
-        #     x_train=dataset.drop(columns=target_row),
-        #     y_train=dataset[target_row],
-        #     tree=model,
-        #     class_names=["muere", "vive"],
-        #     feature_names=model.feature_names_in_,
-        # )
-        return rg, lenght
+    @app.callback(
+        Output("s-tree-visual-output-upload", "src", allow_duplicate=True),
+        State("s-max-depth-input-row", "value"),
+        State("path", "href"),
+        Input("s-build-tree-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def build_img_tree(tree_number, cl, build):
+        f = furl(cl)
+        model_id = f.args["model_id"]
+
+        model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+            ExplainedClassifierModel.id == model_id
+        ).first()
+
+        model: RandomForestClassifier = model_x.getElement("model")
+
+        model: DecisionTreeClassifier = model.estimators_[tree_number]
+        dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
+        target_row: str = model_x.getElement("target_row")
+        target_description = model_x.getElement("target_names_dict")
+        class_names = [
+            element["new_value"] for element in target_description["variables"]
+        ]
+        x_train = dataset.drop(columns=target_row)
+        tg = ExplainSingleTree.graph_tree(
+            x_train=x_train,
+            y_train=dataset[target_row],
+            tree=model,
+            class_names=class_names,
+            feature_names=x_train.columns,
+        )
+
+        return tg
