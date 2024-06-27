@@ -25,6 +25,7 @@ div.section-card {
   width: 100%;
   top: 0;
   gap: 8px;
+  padding-bottom: 0.5rem;
 }
 
 #classifier-tabs div {
@@ -61,8 +62,8 @@ div.section-card {
   margin-top: 2rem;
   width: 100%;
   font-size: 1rem !important;
-  text-transform: uppercase;
   text-align: center;
+  font-family: monospace;
 }
 
 #toggle-modal-1 {

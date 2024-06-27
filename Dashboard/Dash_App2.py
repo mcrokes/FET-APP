@@ -43,12 +43,12 @@ tab3_content = dbc.Card(
 )
 
 tab4_content = dbc.Card(
-    dbc.CardBody([html.Div([predictionsLayout], id="tryit-yourself-layout-output-upload")]),
+    dbc.CardBody([html.Div([specificTreesLayout], id="specificTrees-layout-output-upload")]),
     className="mt-3 section-card",
 )
 
 tab5_content = dbc.Card(
-    dbc.CardBody([html.Div([specificTreesLayout], id="specificTrees-layout-output-upload")]),
+    dbc.CardBody([html.Div([predictionsLayout], id="tryit-yourself-layout-output-upload")]),
     className="mt-3 section-card",
 )
 
@@ -76,12 +76,12 @@ tabs = dbc.Tabs(
         ),
         dbc.Tab(
             tab4_content,
-            label="Predicciones",
+            label="Arboles",
             className="classifier-tab",
         ),        
         dbc.Tab(
             tab5_content,
-            label="Specific Trees",
+            label="Predicciones",
             className="classifier-tab",
         ),
     ],
