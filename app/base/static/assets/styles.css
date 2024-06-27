@@ -7,6 +7,7 @@ body {
   background-position: top;
   color: #000000 !important;
   background-color: transparent;
+  font-family: monospace;
   margin: 0;
 }
 
@@ -35,7 +36,8 @@ div.section-card {
   margin-right: 0.2rem;
 }
 
-#classifier-tabs div a, .tree-btn {
+#classifier-tabs div a,
+.tree-btn {
   border-radius: 4px;
   margin: 0;
   font-weight: 700;
@@ -46,7 +48,8 @@ div.section-card {
   border: dashed #4b474769 1pt;
 }
 
-#classifier-tabs div a:hover, .tree-btn:hover{
+#classifier-tabs div a:hover,
+.tree-btn:hover {
   background-color: rgba(181, 230, 230, 0.767);
   border: solid #000000 1pt;
 }
@@ -91,11 +94,12 @@ div.section-card {
   padding: 4px 1px;
   vertical-align: middle;
   width: min-content;
+  text-align: center !important;
 }
 
 .rules-table tr th {
-    background-color: #a2b1f75b;
-
+  background-color: #a2b1f75b !important;
+  font-weight: bolder !important;
 }
 
 .rules-title {
@@ -150,7 +154,7 @@ div.section-card {
 }
 
 .personalized-tooltip div plaintext {
-  white-space: initial;  
+  white-space: initial;
   text-transform: uppercase;
 }
 
