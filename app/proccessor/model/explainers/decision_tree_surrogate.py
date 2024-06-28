@@ -1,7 +1,9 @@
 import base64
+import json
+import pickle
 import matplotlib
 
-from dtreeviz.trees import model
+from dtreeviz import model
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier, _tree
 import numpy as np
@@ -175,7 +177,7 @@ class ExplainSingleTree:
     
     @staticmethod
     def createSurrogateTree(x_train, model: RandomForestClassifier, max_depth: int):
-        surrogate: DecisionTreeClassifier = DecisionTreeClassifier(max_depth=max_depth)
+        surrogate: DecisionTreeClassifier = DecisionTreeClassifier(max_depth=max_depth, random_state=123)
         surrogate.fit(X=x_train, y=model.predict(x_train))
         return surrogate
      

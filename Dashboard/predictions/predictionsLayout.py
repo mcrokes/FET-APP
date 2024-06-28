@@ -19,6 +19,13 @@ from app.proccessor.models import ExplainedClassifierModel
 from treeinterpreter import treeinterpreter as ti
 
 
+def setBottomLegend(fig):
+    fig.update_layout(
+        legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1)
+    )
+    return fig
+
+
 def getTreeInterpreterParamethers(
     instance,
     instanceModified,
@@ -64,9 +71,13 @@ def getTreeInterpreterParamethers(
             if index == current_class:
                 x = ["Acumulado"]
                 y = [contribution[index]]
-                
+
                 contribution_graph_data[0]["graph_data"].append(
-                    go.Bar(name=f"{feature}({round(y[0], 3)}) {round(y[0]/prediction[0][index] * 100, 2)}%", x=x, y=y)
+                    go.Bar(
+                        name=f"{feature}({round(y[0], 3)}) {round(y[0]/prediction[0][index] * 100, 2)}%",
+                        x=x,
+                        y=y,
+                    )
                 )
                 point += contribution[index]
 
@@ -75,11 +86,18 @@ def getTreeInterpreterParamethers(
         )
         if index == current_class:
             contribution_graph_data[0]["graph_data"].insert(
-                0, go.Bar(name=f"Media ({round(media_array_y[0], 3)}) {round(media_array_y[0]/prediction[0][index] * 100, 3)}%", x=media_array_x, y=media_array_y)
+                0,
+                go.Bar(
+                    name=f"Media ({round(media_array_y[0], 3)}) {round(media_array_y[0]/prediction[0][index] * 100, 3)}%",
+                    x=media_array_x,
+                    y=media_array_y,
+                ),
             )
             contribution_graph_data[0]["graph_data"].append(
                 go.Bar(
-                    name=f"Prediction ({round(prediction[0][index], 3)}) 100%", x=["Predicción Final"], y=[prediction[0][index]]
+                    name=f"Prediction ({round(prediction[0][index], 3)}) 100%",
+                    x=["Predicción Final"],
+                    y=[prediction[0][index]],
                 )
             )
             contribution_graph_data[0]["graph_data"].append(
@@ -315,7 +333,7 @@ def predictionsCallbacks(app, furl: Function):
                 line=dict(dash="dash"),
             )
             figure["data"].append(trace)
-            return figure
+            return setBottomLegend(figure)
         else:
             raise PreventUpdate
 
@@ -399,9 +417,9 @@ def predictionsCallbacks(app, furl: Function):
                     html.Div(
                         id=f"contribution_graph_{data["class_name"]}",
                         children=dcc.Graph(
-                            figure=go.Figure(
+                            figure=setBottomLegend(go.Figure(
                                 data["graph_data"], layout=dict(barmode="stack")
-                            )
+                            ))
                         ),
                     )
                     for data in individual_predictions_graph
@@ -420,7 +438,7 @@ def predictionsCallbacks(app, furl: Function):
         Output("predictions-output-upload", "children"),
         Output("trees-slider-container", "hidden"),
         Output("predictions-class_selector-container", "hidden"),
-        Output("predictions-class_selector-title", "hidden"),        
+        Output("predictions-class_selector-title", "hidden"),
         Output("current-class-data", "data"),
         State("path", "href"),
         Input("select", "value"),
@@ -482,9 +500,9 @@ def predictionsCallbacks(app, furl: Function):
                     fig.update_layout(
                         title=f"Cotribucion individual por predictor para clase {class_names[positive_class]}",
                         xaxis_title="Influeyentes",
-                        yaxis_title="Certeza de Predicción %",
+                        yaxis_title="Certeza de Predicción de 0 a 1",
                     )
-                    return fig
+                    return setBottomLegend(fig)
 
                 return (
                     dtt,
@@ -546,7 +564,9 @@ def predictionsCallbacks(app, furl: Function):
                     False,
                     False,
                     False,
-                    json.dumps({"prediction": predictions_graph_data["values"][positive_class] })
+                    json.dumps(
+                        {"prediction": predictions_graph_data["values"][positive_class]}
+                    ),
                 )
             except Exception as e:
                 print(e)

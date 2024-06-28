@@ -260,6 +260,7 @@ def surrogateCallbacks(app, furl: Function):
         model_x: ExplainedClassifierModel = surrogate_model.explained_classifier_model
 
         model: DecisionTreeClassifier = surrogate_model.getElement("tree_model")
+
         dataset: pd.DataFrame = (
             surrogate_model.explained_classifier_model.data_set_data.getElement(
                 "dataset"
@@ -273,8 +274,8 @@ def surrogateCallbacks(app, furl: Function):
             element["new_value"] for element in target_description["variables"]
         ]
         tg = ExplainSingleTree.graph_tree(
-            x_train=dataset.drop(columns=target_row)[: int(len(dataset) / 2)],
-            y_train=dataset[target_row][: int(len(dataset) / 2)],
+            x_train=dataset.drop(columns=target_row),
+            y_train=model_x.getElement("model").predict(dataset.drop(columns=target_row)),
             tree=model,
             class_names=class_names,
             feature_names=model.feature_names_in_,

@@ -7,7 +7,7 @@ body {
   background-position: top;
   color: #000000 !important;
   background-color: transparent;
-  font-family: monospace;
+  font-family: monospace !important;
   margin: 0;
 }
 
@@ -105,7 +105,7 @@ div.section-card {
 
 .rules-title {
   color: #070b55e5;
-  font-weight: bolder;
+  font-weight: 500;
   font-size: 24px;
   text-align: initial;
   padding-left: 3rem;
@@ -162,4 +162,20 @@ div.section-card {
 .tree-img-container {
   width: 100%;
   overflow: scroll;
+}
+
+.title-hint-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.info-icon {
+  color: coral;
+  margin-right: 2rem;
+}
+
+.info-icon:hover {
+  color: rgb(230, 146, 115);
+  cursor: pointer;
 }

@@ -27,6 +27,12 @@ keys = {
 }
 
 
+def setBottomLegend(fig):
+    fig.update_layout(
+        legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1)
+    )
+    return fig
+
 
 def get_target_dropdown(values_dict):
     return [
@@ -70,15 +76,14 @@ def generateMatrixExplanationLayout(matrix_explanation):
         )
 
     if matrix_explanation != {}:
-        
-        
+
         descriptions = {
             f"{keys['tpr']}": "Proporción de predicciones correctas entre todos los valores reales de la clase. (Mayor es Mejor)",
             f"{keys['fpr']}": "Proporción de predicciones erroneas entre todos los valores reales de otras clases clase. (Menor es Mejor)",
             f"{keys['f1']}": "Media armónica de la precisión y la sensibilidad. (Mayor es Mejor)",
             f"{keys['precision']}": "Proporción de verdaderos positivos entre todos los positivos predichos. (Mayor es Mejor)",
         }
-        
+
         explanation_df = pd.concat(
             [create_column(m) for m in matrix_explanation], axis=1
         ).reset_index()
@@ -279,7 +284,7 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
 
     fig = go.Figure(data=data, layout=layout)
 
-    return fig
+    return setBottomLegend(fig)
 
 
 cutoff = dbc.Switch(
