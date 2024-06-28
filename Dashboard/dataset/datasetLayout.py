@@ -51,30 +51,14 @@ datasetLayout = html.Div(
     [
         dcc.Loading(
             [
-                dbc.Row(
+                html.Div(
                     [
-                        dbc.Col(
-                            [
-                                dbc.Row(
-                                    [
-                                        html.H3(
-                                            ["DATASET ", html.Span(id="dataset-title")],
-                                            style={"text-align": "center"},
-                                        ),
-                                        html.Div(id="dataset-view"),
-                                    ]
-                                )
-                            ],
-                            style={"margin": "auto"},
-                            xs=8,
-                            sm=8,
-                            md=8,
-                            lg=8,
-                            xl=8,
-                            xxl=8,
-                        )
-                    ],
-                    style={"padding-top": "20px"},
+                        html.H3(
+                            ["DATASET ", html.Span(id="dataset-title")],
+                            style={"text-align": "center"},
+                        ),
+                        html.Div(id="dataset-view", style={"overflow": "scroll"}),
+                    ]
                 ),
                 dbc.Row(
                     [
@@ -99,7 +83,7 @@ datasetLayout = html.Div(
                         html.H4("Variables Numericas"),
                         html.Div(id="numeric-plot"),
                         html.H4("Variables Objeto"),
-                        html.Div(id="object-plot"), 
+                        html.Div(id="object-plot"),
                         html.Div(id="correlation-plot"),
                     ],
                     style={"padding-top": "20px"},
@@ -108,7 +92,7 @@ datasetLayout = html.Div(
         )
     ],
     className="section-content",
-    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
+    style={"margin": "auto"},
 )
 
 
@@ -128,15 +112,16 @@ def datasetCallbacks(app, furl: Function):
             model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
                 ExplainedClassifierModel.id == model_id
             ).first()
-            
-            
+
             original_df = model_x.data_set_data.getElement("dataset")
             df = model_x.data_set_data.getElement("dataset_modified")
             dtt = model_x.getElement("name")
             qualitative_graphs_array, numeric_graphs_array = (
                 generateDataSetDistributions(df)
             )
-            corr_matrix = original_df.drop(columns=model_x.getElement("target_row")).corr(method='pearson')
+            corr_matrix = original_df.drop(
+                columns=model_x.getElement("target_row")
+            ).corr(method="pearson")
             return (
                 dtt,
                 html.Div(
@@ -146,7 +131,8 @@ def datasetCallbacks(app, furl: Function):
                             columns=[{"name": i, "id": i} for i in df.columns],
                             page_size=10,
                         )
-                    ], className="rules-table"
+                    ],
+                    className="rules-table",
                 ),
                 [
                     html.Div(
@@ -173,7 +159,7 @@ def datasetCallbacks(app, furl: Function):
                     for data in qualitative_graphs_array
                 ],
                 dcc.Graph(
-                    figure= go.Figure(
+                    figure=go.Figure(
                         data=go.Heatmap(
                             z=corr_matrix,
                             x=corr_matrix.columns,
@@ -181,9 +167,9 @@ def datasetCallbacks(app, furl: Function):
                             text=round(corr_matrix, 2),
                             texttemplate="%{text}",
                         ),
-                        layout=dict(title="Variables Correlation")
+                        layout=dict(title="Variables Correlation"),
                     )
-                )
+                ),
             )
         except Exception as e:
             print(e)
