@@ -255,7 +255,7 @@ def specificTreesCallbacks(app, furl: Function):
         x_train = dataset.drop(columns=target_row)
         tg = ExplainSingleTree.graph_tree(
             x_train=x_train,
-            y_train=dataset[target_row],
+            y_train=model_x.getElement("model").predict(dataset.drop(columns=target_row)),
             tree=model,
             class_names=class_names,
             feature_names=x_train.columns,

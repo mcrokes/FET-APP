@@ -6,8 +6,7 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objects as go
-from app.proccessor.model.dataset_interaction_methods import get_modified_dataframe
-from app.proccessor.models import ExplainedClassifierModel, ModelForProccess
+from app.proccessor.models import ExplainedClassifierModel
 
 
 def generateDataSetDistributions(df: pd.DataFrame):
@@ -51,30 +50,59 @@ datasetLayout = html.Div(
     [
         dcc.Loading(
             [
-                dbc.Row(
+                html.Plaintext(
                     [
-                        dbc.Col(
-                            [
-                                dbc.Row(
-                                    [
-                                        html.H3(
-                                            ["DATASET ", html.Span(id="dataset-title")],
-                                            style={"text-align": "center"},
-                                        ),
-                                        html.Div(id="dataset-view"),
-                                    ]
-                                )
-                            ],
-                            style={"margin": "auto"},
-                            xs=8,
-                            sm=8,
-                            md=8,
-                            lg=8,
-                            xl=8,
-                            xxl=8,
-                        )
+                        "Métricas del Conjunto de Datos: ",
+                        html.Strong(id="dataset-title"),
                     ],
-                    style={"padding-top": "20px"},
+                    className="rules-title",
+                    style={"font-size": "30px"},
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Plaintext(
+                                    "Conjunto de Datos Modificado",
+                                    className="rules-title",
+                                ),
+                                html.I(
+                                    id="dataset-info",
+                                    className="fa fa-info-circle info-icon",
+                                ),
+                                dbc.Tooltip(
+                                    [
+                                        html.Plaintext(
+                                            [
+                                                "* Si desea filtrar las columnas ",
+                                                html.Strong("Numéricas"),
+                                                " deberá ingresar los símbolos (",
+                                                html.Strong(">"),
+                                                ") - (",
+                                                html.Strong("<"),
+                                                ") antes del número.",
+                                            ]
+                                        ),
+                                    ],
+                                    className="personalized-tooltip",
+                                    target="dataset-info",
+                                ),
+                            ],
+                            className="title-hint-container",
+                        ),
+                        html.Div(
+                            id="modified-dataset-view", style={"overflow": "scroll"}
+                        ),
+                    ]
+                ),
+                html.Div(
+                    [
+                        html.Plaintext(
+                            "Conjunto de Datos Original",
+                            className="rules-title",
+                        ),
+                        html.Div(id="dataset-view", style={"overflow": "scroll"}),
+                    ]
                 ),
                 dbc.Row(
                     [
@@ -95,26 +123,35 @@ datasetLayout = html.Div(
                 ),
                 dbc.Row(
                     [
-                        html.H3("METRICAS DEL DATA SET"),
-                        html.H4("Variables Numericas"),
-                        html.Div(id="numeric-plot"),
-                        html.H4("Variables Objeto"),
-                        html.Div(id="object-plot"), 
+                        html.Plaintext(
+                            "Variables Numéricas",
+                            className="rules-title",
+                        ),
+                        dbc.Row(id="numeric-plot"),
+                        html.Plaintext(
+                            "Variables Objeto",
+                            className="rules-title",
+                        ),
+                        dbc.Row(id="object-plot"),
+                        html.Plaintext(
+                            "Correlación de Variables",
+                            className="rules-title",
+                        ),
                         html.Div(id="correlation-plot"),
                     ],
-                    style={"padding-top": "20px"},
                 ),
             ]
         )
     ],
     className="section-content",
-    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
+    style={"margin": "auto"},
 )
 
 
 def datasetCallbacks(app, furl: Function):
     @app.callback(
         Output("dataset-title", "children"),
+        Output("modified-dataset-view", "children"),
         Output("dataset-view", "children"),
         Output("numeric-plot", "children"),
         Output("object-plot", "children"),
@@ -128,62 +165,112 @@ def datasetCallbacks(app, furl: Function):
             model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
                 ExplainedClassifierModel.id == model_id
             ).first()
-            
-            
-            original_df = model_x.data_set_data.getElement("dataset")
-            df = model_x.data_set_data.getElement("dataset_modified")
+
+            original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
+            original_df_with_index = original_df.rename_axis("Índice").reset_index()
+            df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
+            df_with_index = df.rename_axis("Índice").reset_index()
             dtt = model_x.getElement("name")
             qualitative_graphs_array, numeric_graphs_array = (
                 generateDataSetDistributions(df)
             )
-            corr_matrix = original_df.drop(columns=model_x.getElement("target_row")).corr(method='pearson')
+            corr_matrix = original_df.drop(
+                columns=model_x.getElement("target_row")
+            ).corr(method="pearson")
+
+            def setBottomLegend(fig):
+                fig.update_layout(
+                    legend=dict(
+                        orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1
+                    )
+                )
+                return fig
+
             return (
                 dtt,
                 html.Div(
                     [
                         dash_table.DataTable(
-                            data=df.to_dict("records"),
-                            columns=[{"name": i, "id": i} for i in df.columns],
+                            data=df_with_index.to_dict("records"),
+                            columns=[{"name": i, "id": i} for i in df_with_index.columns],
                             page_size=10,
-                        ),
-                    ]
+                            filter_action="native",
+                            filter_options={"placeholder_text": "Filtrar..."},
+                            sort_action="native",
+                            sort_mode="multi",
+                            row_selectable="single",
+                        )
+                    ],
+                    className="rules-table",
+                ),
+                html.Div(
+                    [
+                        dash_table.DataTable(
+                            data=original_df_with_index.to_dict("records"),
+                            columns=[{"name": i, "id": i} for i in original_df_with_index.columns],
+                            page_size=10,
+                            filter_action="native",
+                            filter_options={"placeholder_text": "Filtrar..."},
+                            sort_action="native",
+                            sort_mode="multi",
+                            row_selectable="single",
+                        )
+                    ],
+                    className="rules-table",
                 ),
                 [
-                    html.Div(
+                    dbc.Col(
                         id=f"contribution_graph_{data["predictor"]}",
                         children=dcc.Graph(
-                            figure=go.Figure(
-                                data=data["graph_data"],
-                                layout=dict(title=data["predictor"]),
+                            figure=setBottomLegend(
+                                go.Figure(
+                                    data=data["graph_data"],
+                                    layout=dict(title=data["predictor"]),
+                                )
                             )
                         ),
+                        xs=12,
+                        sm=12,
+                        md=6,
+                        lg=6,
+                        xl=6,
+                        xxl=6,
                     )
                     for data in numeric_graphs_array
                 ],
                 [
-                    html.Div(
+                    dbc.Col(
                         id=f"contribution_graph_{data["predictor"]}",
                         children=dcc.Graph(
-                            figure=go.Figure(
-                                data=data["graph_data"],
-                                layout=dict(title=data["predictor"]),
+                            figure=setBottomLegend(
+                                go.Figure(
+                                    data=data["graph_data"],
+                                    layout=dict(title=data["predictor"]),
+                                )
                             )
                         ),
+                        xs=12,
+                        sm=12,
+                        md=12,
+                        lg=6,
+                        xl=6,
+                        xxl=6,
                     )
                     for data in qualitative_graphs_array
                 ],
                 dcc.Graph(
-                    figure= go.Figure(
-                        data=go.Heatmap(
-                            z=corr_matrix,
-                            x=corr_matrix.columns,
-                            y=corr_matrix.columns,
-                            text=round(corr_matrix, 2),
-                            texttemplate="%{text}",
-                        ),
-                        layout=dict(title="Variables Correlation")
+                    figure=setBottomLegend(
+                        go.Figure(
+                            data=go.Heatmap(
+                                z=corr_matrix,
+                                x=corr_matrix.columns,
+                                y=corr_matrix.columns,
+                                text=round(corr_matrix, 2),
+                                texttemplate="%{text}",
+                            ),
+                        )
                     )
-                )
+                ),
             )
         except Exception as e:
             print(e)

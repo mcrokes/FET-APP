@@ -7,6 +7,7 @@ body {
   background-position: top;
   color: #000000 !important;
   background-color: transparent;
+  font-family: monospace !important;
   margin: 0;
 }
 
@@ -36,7 +37,8 @@ div.section-card {
   margin-right: 0.2rem;
 }
 
-#classifier-tabs div a, .tree-btn {
+#classifier-tabs div a,
+.tree-btn {
   border-radius: 4px;
   margin: 0;
   font-weight: 700;
@@ -47,7 +49,8 @@ div.section-card {
   border: dashed #4b474769 1pt;
 }
 
-#classifier-tabs div a:hover, .tree-btn:hover{
+#classifier-tabs div a:hover,
+.tree-btn:hover {
   background-color: rgba(181, 230, 230, 0.767);
   border: solid #000000 1pt;
 }
@@ -71,7 +74,7 @@ div.section-card {
 }
 
 .section-content {
-  padding: 1rem;
+  
 }
 
 .rules-table-container {
@@ -92,16 +95,17 @@ div.section-card {
   padding: 4px 1px;
   vertical-align: middle;
   width: min-content;
+  text-align: center !important;
 }
 
 .rules-table tr th {
-    background-color: #a2b1f75b;
-
+  background-color: #a2b1f75b !important;
+  font-weight: bolder !important;
 }
 
 .rules-title {
   color: #070b55e5;
-  font-weight: bolder;
+  font-weight: 500;
   font-size: 24px;
   text-align: initial;
   padding-left: 3rem;
@@ -151,11 +155,27 @@ div.section-card {
 }
 
 .personalized-tooltip div plaintext {
-  white-space: initial;  
+  white-space: initial;
   text-transform: uppercase;
 }
 
 .tree-img-container {
   width: 100%;
   overflow: scroll;
+}
+
+.title-hint-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.info-icon {
+  color: coral;
+  margin-right: 2rem;
+}
+
+.info-icon:hover {
+  color: rgb(230, 146, 115);
+  cursor: pointer;
 }
