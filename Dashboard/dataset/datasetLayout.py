@@ -1,6 +1,6 @@
 from pyclbr import Function
 from dash import dcc, html, dash_table
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
@@ -93,6 +93,7 @@ datasetLayout = html.Div(
                         html.Div(
                             id="modified-dataset-view", style={"overflow": "scroll"}
                         ),
+                        html.Div(id="test-tert"),
                     ]
                 ),
                 html.Div(
@@ -192,7 +193,9 @@ def datasetCallbacks(app, furl: Function):
                     [
                         dash_table.DataTable(
                             data=df_with_index.to_dict("records"),
-                            columns=[{"name": i, "id": i} for i in df_with_index.columns],
+                            columns=[
+                                {"name": i, "id": i} for i in df_with_index.columns
+                            ],
                             page_size=10,
                             filter_action="native",
                             filter_options={"placeholder_text": "Filtrar..."},
@@ -207,7 +210,10 @@ def datasetCallbacks(app, furl: Function):
                     [
                         dash_table.DataTable(
                             data=original_df_with_index.to_dict("records"),
-                            columns=[{"name": i, "id": i} for i in original_df_with_index.columns],
+                            columns=[
+                                {"name": i, "id": i}
+                                for i in original_df_with_index.columns
+                            ],
                             page_size=10,
                             filter_action="native",
                             filter_options={"placeholder_text": "Filtrar..."},

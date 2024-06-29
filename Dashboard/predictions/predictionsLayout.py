@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-from app.proccessor.model.values import get_target_dropdown
+from Dashboard.metrics.metricsLayout import get_target_dropdown
 from app.proccessor.models import ExplainedClassifierModel
 
 from treeinterpreter import treeinterpreter as ti
@@ -74,7 +74,7 @@ def getTreeInterpreterParamethers(
 
                 contribution_graph_data[0]["graph_data"].append(
                     go.Bar(
-                        name=f"{feature}({round(y[0], 3)}) {round(y[0]/prediction[0][index] * 100, 2)}%",
+                        name=f"{feature}({round(y[0], 3)}) {round(y[0]/(prediction[0][index] if prediction[0][index] > 0 else 1) * 100, 2)}%",
                         x=x,
                         y=y,
                     )
@@ -88,7 +88,7 @@ def getTreeInterpreterParamethers(
             contribution_graph_data[0]["graph_data"].insert(
                 0,
                 go.Bar(
-                    name=f"Media ({round(media_array_y[0], 3)}) {round(media_array_y[0]/prediction[0][index] * 100, 3)}%",
+                    name=f"Media ({round(media_array_y[0], 3)}) {round(media_array_y[0]/(prediction[0][index] if prediction[0][index] > 0 else 1) * 100, 3)}%",
                     x=media_array_x,
                     y=media_array_y,
                 ),
@@ -105,7 +105,7 @@ def getTreeInterpreterParamethers(
                     x=["Acumulado", "Predicción Final"],
                     y=[point, point],
                     mode="lines",
-                    name=f"Actual ({round(point,3)}) {round(point/prediction[0][index] * 100, 2)} %",
+                    name=f"Actual ({round(point,3)}) {round((point/(prediction[0][index] if prediction[0][index] > 0 else 1) * 100), 2)} %",
                     line=dict(dash="dash"),
                     marker_color=["blue", "blue"],
                 )
@@ -126,7 +126,7 @@ def getIndividualPredictions(model, class_names, instance, cut_point, current_cl
 
     markers = []
     for val in np.array(individual_predictions)[:, index]:
-        if val * 100 > cut_point:
+        if val * 100 >= cut_point:
             markers.append("blue")
         else:
             markers.append("red")
@@ -329,11 +329,11 @@ def predictionsCallbacks(app, furl: Function):
                 x=["Acumulado", "Predicción Final"],
                 y=[point, point],
                 mode="lines",
-                name=f"Actual ({round(point, 3)}) {round(point/data["prediction"] * 100, 2)}%",
+                name=f"Actual ({round(point, 3)}) {round(point/(data["prediction"] if data["prediction"] > 0 else 1) * 100, 2)}%",
                 line=dict(dash="dash"),
             )
             figure["data"].append(trace)
-            return setBottomLegend(figure)
+            return figure
         else:
             raise PreventUpdate
 
@@ -365,12 +365,13 @@ def predictionsCallbacks(app, furl: Function):
             )
             class_names = [var["new_value"] for var in target_description["variables"]]
             slider_initial_value = 100 / len(class_names) + 1
-
+            
+            target_dropdown = get_target_dropdown(target_description["variables"])
             return (
                 drop_down,
                 slider_initial_value,
-                get_target_dropdown(target_description["variables"]),
-                target_description["variables"][0]["old_value"],
+                target_dropdown,
+                target_dropdown[0]["value"],
             )
         except Exception as e:
             print(e)
@@ -384,7 +385,6 @@ def predictionsCallbacks(app, furl: Function):
         Input("prediction-positive-class-selector", "value"),
     )
     def graph_trees_predictions(cl, n, cut_point, positive_class):
-        print(positive_class)
         if n:
             n = int(n)
             f = furl(cl)
@@ -417,9 +417,11 @@ def predictionsCallbacks(app, furl: Function):
                     html.Div(
                         id=f"contribution_graph_{data["class_name"]}",
                         children=dcc.Graph(
-                            figure=setBottomLegend(go.Figure(
-                                data["graph_data"], layout=dict(barmode="stack")
-                            ))
+                            figure=setBottomLegend(
+                                go.Figure(
+                                    data["graph_data"], layout=dict(barmode="stack")
+                                )
+                            )
                         ),
                     )
                     for data in individual_predictions_graph

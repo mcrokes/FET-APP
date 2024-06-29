@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 
-from app.proccessor.model.dataset_interaction_methods import update_y_pred
+from app.proccessor.model.dataset_interaction_methods import get_y_transformed, update_y_pred
 from app.proccessor.models import ExplainedClassifierModel
 
 from sklearn import metrics
@@ -36,8 +36,8 @@ def setBottomLegend(fig):
 
 def get_target_dropdown(values_dict):
     return [
-        {"label": value["new_value"], "value": value["old_value"]}
-        for value in values_dict
+        {"label": value["new_value"], "value": index}
+        for index, value in enumerate(values_dict)
     ]
 
 
@@ -145,18 +145,29 @@ def get_matrix_explanation(cm, class_names):
             false_values = sum(false_positives) + sum(false_negatives)
 
         explanation = {
-            f"{keys["precision"]}": true_positive
-            / (true_positive + sum(false_positives)),
-            f"{keys['tpr']}": true_positive / (true_positive + sum(false_negatives)),
+            f"{keys["precision"]}": (
+                (true_positive / (true_positive + sum(false_positives)))
+                if true_positive > 0
+                else 0
+            ),
+            f"{keys['tpr']}": (
+                (true_positive / (true_positive + sum(false_negatives)))
+                if true_positive > 0
+                else 0
+            ),
             f"{keys['fpr']}": sum(false_positives)
             / (sum(false_positives) + sum(true_negatives)),
         }
 
         explanation[keys["f1"]] = (
-            2
-            * explanation[keys["precision"]]
-            * explanation[keys["tpr"]]
-            / (explanation[keys["precision"]] + explanation[keys["tpr"]])
+            (
+                2
+                * explanation[keys["precision"]]
+                * explanation[keys["tpr"]]
+                / (explanation[keys["precision"]] + explanation[keys["tpr"]])
+            )
+            if (explanation[keys["precision"]] + explanation[keys["tpr"]]) > 0
+            else 0
         )
 
         for elm in explanation:
@@ -181,7 +192,7 @@ def get_matrix_explanation(cm, class_names):
 
 
 def __create_matrix(cm, class_names):
-
+    
     fig = px.imshow(
         img=cm,
         title="MATRIZ DE CONFUSION",
@@ -201,15 +212,20 @@ def initialize_matrix(
     x_test,
     classifier_model: RandomForestClassifier,
     class_names,
+    old_class_names,
 ):
     y_pred_new = classifier_model.predict(x_test)
 
     if dropdown_value is not None:
-        positive_class = int(dropdown_value)
+        try:
+            positive_class = int(dropdown_value)
+        except:  # noqa: E722
+            positive_class = dropdown_value
         probability_predictions = classifier_model.predict_proba(x_test)
 
         try:
             y_pred_new = update_y_pred(
+                old_class_names=old_class_names,
                 prediction=y_pred_new,
                 probability_predictions=probability_predictions,
                 cut_off=slider_value,
@@ -220,7 +236,6 @@ def initialize_matrix(
 
     # Generate the confusion matrix
     cm = metrics.confusion_matrix(y_true=y_test, y_pred=y_pred_new)
-
     return __create_matrix(cm=cm, class_names=class_names), get_matrix_explanation(
         cm, class_names
     )
@@ -238,8 +253,7 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
         y_score = y_scores[:, i]
 
         pointer = pointers[i]
-
-        fpr, tpr, _ = metrics.roc_curve(y_true, y_score, pos_label=i)
+        fpr, tpr, _ = metrics.roc_curve(get_y_transformed(y_true), y_score, pos_label=i)
         auc_score = metrics.auc(fpr, tpr)
 
         if pointer >= 0 or not useScatter:
@@ -400,15 +414,12 @@ def metricsCallbacks(app, furl: Function):
                 "dataset"
             )
 
-            target_description = {
-                "column_name": "Sobreviviente",
-                "variables": [
-                    {"old_value": 0, "new_value": "Muere"},
-                    {"old_value": 1, "new_value": "Vive"},
-                ],
-            }
+            target_description = model_x.getElement("target_names_dict")
             class_names = [
                 element["new_value"] for element in target_description["variables"]
+            ]
+            old_class_names = [
+                element["old_value"] for element in target_description["variables"]
             ]
 
             if positive_class or slider or cutoff:
@@ -420,6 +431,7 @@ def metricsCallbacks(app, furl: Function):
                         x_test=classifier_dataset.drop(columns=model_x.target_row),
                         classifier_model=classifier_model,
                         class_names=class_names,
+                        old_class_names=old_class_names,
                     )
                     return (
                         dcc.Graph(figure=matrix_graph),
@@ -436,6 +448,7 @@ def metricsCallbacks(app, furl: Function):
                         x_test=classifier_dataset.drop(columns=model_x.target_row),
                         classifier_model=classifier_model,
                         class_names=class_names,
+                        old_class_names=old_class_names,
                     )
                     div = dcc.Graph(figure=matrix_graph)
                     explanation = generateMatrixExplanationLayout(matrix_explanation)

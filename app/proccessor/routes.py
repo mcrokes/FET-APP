@@ -313,7 +313,11 @@ def save_classifier():
             name = request.form["name"]
             description = request.form["description"]
             model = joblib.load(request.files["model"])
-            training_df = pd.read_csv(request.files["dataset"])
+            training_df: pd.DataFrame
+            try:
+                training_df = pd.read_csv(request.files["dataset"])
+            except:   # noqa: E722
+                training_df = pd.read_excel(request.files["dataset"])
             db_model = ModelForProccess(
                 **{
                     "name": name,
@@ -348,7 +352,7 @@ def save_classifier():
             qualitative_variables_form = []
             df = db_model.getElement("dataset")
             for column in df:
-                if len(set(df[column])) < 5:
+                if len(set(df[column])) < 5 or column == request.form["target"]:
                     qualitative_variables_form.append(
                         {
                             "name": column,
@@ -360,6 +364,7 @@ def save_classifier():
             return render_template(
                 "add_models.html",
                 form=qualitative_variables_form,
+                variables = list(df.columns),
                 status=status,
                 model_id=db_model.id,
             )
@@ -397,8 +402,9 @@ def save_classifier():
                     try:
                         old_value = int(old_value)
                     except:  # noqa: E722
-                        if isinstance(old_value, str):
-                            old_value = value_number
+                        pass
+                        # if isinstance(old_value, str):
+                        #     old_value = value_number
                     
                     q_dict["variables"].append(
                         {

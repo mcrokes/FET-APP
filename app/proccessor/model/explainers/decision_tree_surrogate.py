@@ -8,6 +8,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier, _tree
 import numpy as np
 
+from app.proccessor.model.dataset_interaction_methods import get_y_transformed
+
 matplotlib.use('SVG')
 
 class ExplainSingleTree:
@@ -162,12 +164,13 @@ class ExplainSingleTree:
         viz = model(
             model=tree,
             X_train=x_train,
-            y_train=y_train,
+            y_train=get_y_transformed(y_train),
             feature_names=feature_names,
             class_names=class_names
         )
         try:
             svg = open(viz.view().save_svg(), "rb").read()
+            print("HERE")
             encoded = base64.b64encode(svg)
             svg_encoded = "data:image/svg+xml;base64,{}".format(encoded.decode())
             return svg_encoded
@@ -178,11 +181,10 @@ class ExplainSingleTree:
     @staticmethod
     def createSurrogateTree(x_train, model: RandomForestClassifier, max_depth: int):
         surrogate: DecisionTreeClassifier = DecisionTreeClassifier(max_depth=max_depth, random_state=123)
-        surrogate.fit(X=x_train, y=model.predict(x_train))
+        surrogate.fit(X=x_train, y=get_y_transformed(model.predict(x_train)))
         return surrogate
      
-class SurrogateTree:
-    
+class SurrogateTree:  
     
     
     def __init__(self, x_train, model: RandomForestClassifier, df, class_names, target, max_depth: int):

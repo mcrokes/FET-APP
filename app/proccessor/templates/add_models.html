@@ -107,6 +107,15 @@
                           </select>
                         </div>
                       {% elif status == 'Add' %}
+                      <h2>Establezca descripciones a las vatiables.</h2>
+                        {% for var in variables %}
+                          <div class="" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                            <label for="">{{ var }}</label>
+                            <div class="col custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                              <input class="form-control custom-input" placeholder="Descripción..." type="text" name="{{ var }}" />
+                            </div>
+                          </div>
+                        {% endfor %}
                         <h2>Establezca valores a las posibles variables cualitativas.</h2>
                         {% for col in form %}
                           <input type="text" name="Q-Variable-{{ col.name }}" value="{{ col.name }}" hidden />

@@ -1,3 +1,4 @@
+from logging import exception
 import math
 import multiprocessing
 from pyclbr import Function
@@ -7,11 +8,15 @@ from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 
+import copy
+import numpy as np
 import pandas as pd
 import plotly.express as px
+from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.inspection import permutation_importance
 
+from app.proccessor.model.dataset_interaction_methods import get_y_transformed
 from app.proccessor.model.values import get_target_dropdown
 from app.proccessor.models import ExplainedClassifierModel, ModelForProccess
 
@@ -58,6 +63,10 @@ def importancesCallbacks(app, furl: Function):
                 "dataset"
             )
             target_description = model_x.getElement("target_names_dict")
+            old_class_names = [
+                element["old_value"] for element in target_description["variables"]
+            ]
+            
             df_feature_importance: pd.DataFrame = pd.DataFrame(
                 {
                     "Predictor": classifier_model.feature_names_in_,
@@ -72,22 +81,26 @@ def importancesCallbacks(app, furl: Function):
                 y="Predictor",
                 title="Importance GINI",
             )
-            positive_class = (
-                int(positive_class)
-                if positive_class is not None
-                else classifier_dataset[model_x.target_row]
-            )
+            
+            try:
+                positive_class = old_class_names[int(positive_class)]
+            except:  # noqa: E722
+                if positive_class is None:
+                    positive_class = classifier_dataset[model_x.target_row]
+
+            y = classifier_dataset[
+                classifier_dataset[model_x.target_row] == positive_class
+            ][model_x.target_row]
 
             permutation_importance_model = permutation_importance(
                 estimator=classifier_model,
                 X=classifier_dataset.drop(columns=model_x.target_row)[
                     classifier_dataset[model_x.target_row] == positive_class
                 ],
-                y=classifier_dataset[
-                    classifier_dataset[model_x.target_row] == positive_class
-                ][model_x.target_row],
+                y=y,
                 n_repeats=5,
-                scoring="neg_root_mean_squared_error",
+                # scoring="neg_root_mean_squared_error",
+                scoring="accuracy",
                 n_jobs=multiprocessing.cpu_count() - 1,
                 random_state=123,
             )
@@ -116,4 +129,5 @@ def importancesCallbacks(app, furl: Function):
             )
         except Exception as e:
             print(e)
+            exception(e)
             raise PreventUpdate

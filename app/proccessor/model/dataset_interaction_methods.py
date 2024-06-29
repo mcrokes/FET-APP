@@ -1,6 +1,15 @@
 from numbers import Number
 from unicodedata import numeric
 import numpy as np
+from sklearn.calibration import LabelEncoder
+
+def get_y_transformed(y):
+        for value in y:
+            if value is not int:
+                y = LabelEncoder().fit_transform(y)
+                break
+        print(y)
+        return y
 
 
 def creating_qualitative_dict(variables):
@@ -48,9 +57,7 @@ def creating_qualitative_dict(variables):
 def get_modified_dataframe(df, target_description, qualitative_columns):
     new_df = df.copy()
     target = target_description['column_name']
-    print(target)
     for value in target_description['variables']:
-        print(value)
         # noinspection PyTypeChecker
         new_df.replace({f'{target}': value['old_value']},
                    {f'{target}': value['new_value']},
@@ -67,17 +74,17 @@ def get_modified_dataframe(df, target_description, qualitative_columns):
     return new_df
 
 
-def update_y_pred(prediction: list, probability_predictions, cut_off, positive_class):
+def update_y_pred(prediction: list, probability_predictions, cut_off, positive_class, old_class_names):
     total: int = len(probability_predictions)
     predictions = prediction
     for i in range(0, total):
         if cut_off <= probability_predictions[i][positive_class]:
-            predictions[i] = positive_class
+            predictions[i] = old_class_names[positive_class]
         else:
             prob = 0
             for probability in probability_predictions[i]:
                 if probability != probability_predictions[i][positive_class] and probability > prob:
                     prob = probability
 
-            predictions[i] = np.where(probability_predictions[i] == prob)[0]
+            predictions[i] = old_class_names[int(np.where(probability_predictions[i] == prob)[0])]
     return predictions
