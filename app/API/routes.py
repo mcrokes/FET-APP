@@ -15,11 +15,13 @@ import joblib
 @blueprint.route("/classifier/percent", methods=["GET", "POST"])
 @login_required
 def get_percent():
-    print(request.data)
     db_model: ModelForProccess = ModelForProccess.query.filter(
                 ModelForProccess.id == request.data.decode()
     ).first()
-    return make_response([db_model.percent_processed])
+    return make_response([{
+        "percent": db_model.percent_processed,
+        "message": db_model.process_message
+    }])
 
 @blueprint.route("/classifier/list", methods=["GET", "POST"])
 @login_required

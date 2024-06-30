@@ -15,7 +15,13 @@
       margin: auto !important;
       max-width: 100%;
     }
-    @media (max-width: 1200px) {
+    @media (min-width: 800px) {
+      .custom-col {
+        width: 50%;
+      }
+    }
+    
+    @media (max-width: 800px) {
       .custom-col {
         float: unset !important;
       }
@@ -85,7 +91,10 @@
                       <input type="text" id="model_id" name="model_id" value="{{ model_id }}" data-status="{{ status }}" hidden />
                     {% endif %}
                     {% if status == 'Create' %}
-                      Creating %<p id="progress_bar">0</p>
+                      <div class="progress" style="width: 70vw;">
+                        <div id="progress_bar" class="progress-bar" style="width: 0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                      </div>
+                      <div id="progress-message">Creating Dataset Distributions</div>
                     {% else %}
                       {% if status == 'Initial' %}
                         {% for field in form if field.widget.input_type != 'hidden' %}
@@ -107,7 +116,7 @@
                           </select>
                         </div>
                       {% elif status == 'Add' %}
-                      <h2>Establezca descripciones a las vatiables.</h2>
+                        <h2>Establezca descripciones a las vatiables.</h2>
                         {% for var in variables %}
                           <div class="" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
                             <label for="">{{ var }}</label>
@@ -132,9 +141,18 @@
                     {% endif %}
                   </section>
 
-                  <div class="navbar-right">
-                    <button type="submit" id="submit" class="btn btn-default submit" name="{{ status }}">
-                      {% if status != 'Add' %}
+                  <div class="navbar-right" style="padding-right: 5rem; justify-content: center; display: flex; padding-left: 5rem;">
+                    <button type="submit" id="cancel" class="btn btn-warning submit" name="cancel" value="{{ status }}">
+                      {% if status == 'Create' %}
+                        Cancelar
+                      {% else %}
+                        Atrás
+                      {% endif %}
+                    </button>
+                    <button type="submit" id="submit" disabled class="btn btn-default submit" name="{{ status }}">
+                      {% if status == 'Create' %}
+                        Aceptar
+                      {% elif status != 'Add' %}
                         Siguiente
                       {% else %}
                         Crear
@@ -158,6 +176,7 @@
     const getProgressPercent = async () => {
       // get
       const progress_bar = document.getElementById('progress_bar')
+      const progress_message = document.getElementById('progress-message')
       const model_id = document.getElementById('model_id')
     
       response = await fetch('http://127.0.0.1:5000/INTERNAL_API/classifier/percent', {
@@ -165,31 +184,57 @@
         headers: { 'Content-Type': 'application/json' },
         body: model_id.value
       })
+    
       res = await response.json().then((value) => {
-        progress_bar.innerHTML = value[0]
-        progress_bar.name = value[0]
+        progress_bar.style.width = `${value[0].percent}%`
+        progress_bar.ariaValueNow = value[0].percent
+        progress_bar.innerHTML = `${value[0].percent}%`
+        progress_message.innerHTML = value[0].message
         console.log(value[0])
-        return value
+        return value[0].percent
       })
     
       if (res >= 100) {
         clearInterval(interval)
+        add_button.disabled = false
+      } else {
+        add_button.disabled = true
       }
     }
     
     const add_button = document.getElementById('submit')
+    const cancel_button = document.getElementById('cancel')
+    
+    cancel_button.addEventListener('click', () => {
+      //cancel_button.value = 'cancel'
+    })
+    
+    const model_name_field = document.getElementById('model-name')
+    const model_field = document.getElementById('model')
+    const model_description_field = document.getElementById('model-description')
+    const model_data_set_field = document.getElementById('model-data-set')
+    
+    const verify_imputs = () => {
+      if (model_name_field == null || (model_name_field.value && model_field.value && model_description_field.value && model_data_set_field.value)) {
+        add_button.disabled = false
+        if (model_name_field == null) cancel_button.style.display = ''
+        console.log('ACTIVATED')
+      } else {
+        add_button.disabled = true
+        cancel_button.style.display = 'none'
+        console.log('DEACTIVATED')
+      }
+    }
     
     const manage_percent = async () => {
       const model_id = document.getElementById('model_id')
-      console.log('works')
-      console.log(model_id.dataset.status)
       if (model_id && model_id.dataset.status == 'Create') {
-        
         interval = setInterval(await getProgressPercent, 3000)
-        console.log(interval)
       }
     }
     
     window.addEventListener('DOMContentLoaded', manage_percent)
+    window.addEventListener('DOMContentLoaded', verify_imputs)
+    window.addEventListener('input', verify_imputs)
   </script>
 {% endblock %}

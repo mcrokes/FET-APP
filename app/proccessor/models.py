@@ -1,3 +1,4 @@
+from email import message
 from typing import Literal
 from cycler import K
 from sqlalchemy import BINARY, Column, Float, ForeignKey, Integer, String, Boolean
@@ -73,8 +74,11 @@ class ModelForProccess(db.Model, dbInteractionMethods):
     description = Column(String)
     target_row = Column(String)
     percent_processed = Column(Integer, default=0)
+    process_message = Column(String)
     qualitative_variables_saved = Column(String)  # Encoded
     target_description = Column(String)  # Encoded
+    features_description = Column(String)  # Encoded
+    should_stop = Column(Boolean, default=False)
 
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
@@ -92,6 +96,8 @@ class ModelForProccess(db.Model, dbInteractionMethods):
             "description",
             "target_row",
             "percent_processed",
+            "process_message",
+            "features_description",
             "q_variables_dict",
         ],
     ):

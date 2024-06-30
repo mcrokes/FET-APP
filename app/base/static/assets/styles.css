@@ -78,7 +78,7 @@ div.section-card {
 }
 
 .rules-table-container {
-  overflow: scroll;
+  /* overflow: scroll; */
 }
 
 .rules-table th,
@@ -178,4 +178,8 @@ div.section-card {
 .info-icon:hover {
   color: rgb(230, 146, 115);
   cursor: pointer;
+}
+
+.dash-spreadsheet-container {
+  overflow: scroll;
 }

@@ -21,7 +21,7 @@ from treeinterpreter import treeinterpreter as ti
 
 def setBottomLegend(fig):
     fig.update_layout(
-        legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1)
+        legend=dict(orientation="h", yanchor="top", y=-0.5, xanchor="right", x=1)
     )
     return fig
 

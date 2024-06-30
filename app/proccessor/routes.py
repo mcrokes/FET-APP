@@ -1,4 +1,5 @@
 from ctypes import Array
+import threading
 import time
 from tokenize import String
 
@@ -37,6 +38,14 @@ def thread_function(model_id, app):
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == model_id
         ).first()
+        
+        if db_model.should_stop:
+            db_model.percent_processed = 0
+            print("db_model.should_stop: ", db_model.should_stop)
+            return db_model.should_stop
+        db_model.percent_processed = 10
+        db_model.process_message = "Sincronizando datos..."
+        db_model.db_commit()
 
         db_model_classifier_model: RandomForestClassifier = db_model.getElement("model")
         db_model_classifier_dataset: pd.DataFrame = db_model.getElement("dataset")
@@ -57,8 +66,16 @@ def thread_function(model_id, app):
             db_model_classifier_qualitative_column_names.append(column["column_name"])
             
             
+        if db_model.should_stop:
+            db_model.percent_processed = 0
+            print("db_model.should_stop: ", db_model.should_stop)
+            return db_model.should_stop
+        db_model.percent_processed = 20
+        db_model.process_message = "Generando modelo base..."
+        db_model.db_commit()
+
         #### BASE MODEL ####
-        
+
         classifier_model_data = ExplainedClassifierModel(
             **{
                 "name": db_model.name,
@@ -66,7 +83,7 @@ def thread_function(model_id, app):
                 "indexesDict": "dict of indexes",
                 "indexColumnName": "column name for indexes",
                 "model_description": db_model.description,
-                "features_description": "description for the features",
+                "features_description": db_model.getElement("features_description"),
                 "target_row": db_model.target_row,
                 "q_variables_dict": db_model_classifier_qualitative_columns,
                 "test_size": 0.6,
@@ -74,7 +91,14 @@ def thread_function(model_id, app):
                 "target_names_dict": db_model_classifier_target_description,
             }
         )
-
+        
+        if db_model.should_stop:
+            db_model.percent_processed = 0
+            print("db_model.should_stop: ", db_model.should_stop)
+            return db_model.should_stop
+        db_model.percent_processed = 30
+        db_model.process_message = "Cargando metricas del conjunto de datos..."
+        db_model.db_commit()
 
         #### DATASET DATA ####
 
@@ -84,7 +108,8 @@ def thread_function(model_id, app):
                 "dataset_modified": get_modified_dataframe(
                     df=db_model_classifier_dataset,
                     target_description=db_model_classifier_target_description,
-                    qualitative_columns=db_model_classifier_qualitative_columns),
+                    qualitative_columns=db_model_classifier_qualitative_columns,
+                ),
             }
         )
 
@@ -141,7 +166,7 @@ def thread_function(model_id, app):
         #     )
         #     permutation_importance_list.append(permutation_importance)
 
-        # for index, tree in enumerate(db_model_classifier_model.estimators_):            
+        # for index, tree in enumerate(db_model_classifier_model.estimators_):
         #     print("Inner Tree number: ", index)
         #     rules = ExplainSingleTree.get_rules(
         #         model=tree.tree_,
@@ -150,27 +175,27 @@ def thread_function(model_id, app):
         #         features=db_model_classifier_model.feature_names_in_,
         #         class_names=db_model_classifier_target_class_names,
         #         target=db_model_classifier_target_row,
-        #     )            
-                    
+        #     )
+
         #     db_tree = Tree(
         #         **{
-        #             "depth": tree.get_depth(), 
+        #             "depth": tree.get_depth(),
         #             "rules_amount": len(rules),
         #         }
         #     )
-            
+
         #     inexact_rules_amount = 0
         #     for rule in rules:
         #         db_rule = TreeClassifierRule(
         #             **{
         #                 "target_value": rule["target_value"],
         #                 "probability": rule["probability"],
-        #                 "samples_amount": rule["samples_amount"]                            
+        #                 "samples_amount": rule["samples_amount"]
         #             }
         #         )
         #         db_rule.tree_classifier = db_tree
         #         db_rule.add_to_db()
-                
+
         #         for cause in rule["causes"]:
         #             db_cause = TreeClassifierRuleCause(
         #                 **{
@@ -181,14 +206,13 @@ def thread_function(model_id, app):
         #             )
         #             db_cause.tree_classifier_rule = db_rule
         #             db_cause.add_to_db()
-                
+
         #         if rule["probability"] < 100:
         #             inexact_rules_amount += 1
-                
-            
+
         #     db_tree.inexact_rules_amount = inexact_rules_amount
         #     db_tree.add_to_db()
-            
+
         #     inner_tree_data = InnerTreeClassifierData(
         #         **{
         #             "tree_number": index
@@ -198,18 +222,33 @@ def thread_function(model_id, app):
         #     inner_tree_data.explained_classifier_model = classifier_model_data
         #     inner_tree_data.add_to_db()
         
+        if db_model.should_stop:
+            db_model.percent_processed = 0
+            print("db_model.should_stop: ", db_model.should_stop)
+            return db_model.should_stop
+        db_model.percent_processed = 40
+        db_model.process_message = "Creando modelo subrogado datos..."
+        db_model.db_commit()
+
         tree_depth = 3
         surrogate_inexact_rules_amount = -1
         while surrogate_inexact_rules_amount != 0:
-            print("Surrogate Tree depth: ", tree_depth)
+            if db_model.should_stop:
+                db_model.percent_processed = 0
+                print("db_model.should_stop: ", db_model.should_stop)
+                return db_model.should_stop
+            db_model.process_message = (
+                f"Creando modelo subrogado datos (de rofundidad {tree_depth})..."
+            )
+            db_model.db_commit()
             surrogate_tree = ExplainSingleTree.createSurrogateTree(
                 model=db_model_classifier_model,
                 x_train=db_model_classifier_dataset.drop(
                     columns=db_model_classifier_target_row
                 ),
-                max_depth=tree_depth
+                max_depth=tree_depth,
             )
-            tree_depth+=1
+            tree_depth += 1
             rules = ExplainSingleTree.get_rules(
                 model=surrogate_tree.tree_,
                 q_variables=db_model_classifier_qualitative_column_names,
@@ -217,27 +256,27 @@ def thread_function(model_id, app):
                 features=surrogate_tree.feature_names_in_,
                 class_names=db_model_classifier_target_class_names,
                 target=db_model_classifier_target_row,
-            )            
-                    
+            )
+
             db_tree = Tree(
                 **{
-                    "depth": surrogate_tree.get_depth(), 
+                    "depth": surrogate_tree.get_depth(),
                     "rules_amount": len(rules),
                 }
             )
-            
+
             surrogate_inexact_rules_amount = 0
             for rule in rules:
                 db_rule = TreeClassifierRule(
                     **{
                         "target_value": rule["target_value"],
                         "probability": rule["probability"],
-                        "samples_amount": rule["samples_amount"]                            
+                        "samples_amount": rule["samples_amount"],
                     }
                 )
                 db_rule.tree_classifier = db_tree
                 db_rule.add_to_db()
-                
+
                 for cause in rule["causes"]:
                     db_cause = TreeClassifierRuleCause(
                         **{
@@ -248,29 +287,37 @@ def thread_function(model_id, app):
                     )
                     db_cause.tree_classifier_rule = db_rule
                     db_cause.add_to_db()
-                
+
                 if rule["probability"] < 100:
                     surrogate_inexact_rules_amount += 1
-                
-            
+
             db_tree.inexact_rules_amount = surrogate_inexact_rules_amount
             db_tree.add_to_db()
-            
+
             surrogate_tree_data = SurrogateTreeClassifierData(
-                **{
-                    "tree_model": surrogate_tree
-                }
+                **{"tree_model": surrogate_tree}
             )
             surrogate_tree_data.tree = db_tree
             surrogate_tree_data.explained_classifier_model = classifier_model_data
             surrogate_tree_data.add_to_db()
-                    
+            
+        if db_model.should_stop:
+            db_model.percent_processed = 0
+            print("db_model.should_stop: ", db_model.should_stop)
+            return db_model.should_stop
+        db_model.percent_processed = 80
+        db_model.process_message = "Guardando la base de datos del modelo..."
+        db_model.db_commit()
 
         classifier_model_data.data_set_data = dataset_data
         # classifier_model_data.importances_data = importances_data
         # classifier_model_data.permutation_importances_data = (
         #     permutation_importances_data
         # )
+        if db_model.should_stop:
+            db_model.percent_processed = 0
+            print("db_model.should_stop: ", db_model.should_stop)
+            return db_model.should_stop
         dataset_data_distribution_numeric.add_to_db()
         dataset_data_distribution_qualitative.add_to_db()
         dataset_data.add_to_db()
@@ -279,58 +326,67 @@ def thread_function(model_id, app):
         # importances_data.add_to_db()
         # permutation_importances_data.add_to_db()
         classifier_model_data.add_to_db()
-
-        # db_model.percent_processed = 10
-        # db_model.db_commit()
-        # time.sleep(5)
-        # db_model.percent_processed = 26
-        # db_model.db_commit()
-        # time.sleep(5)
-        # db_model.percent_processed = 36
-        # db_model.db_commit()
-        # time.sleep(5)
-        # db_model.percent_processed = 58
-        # db_model.db_commit()
-        # time.sleep(5)
-        # db_model.percent_processed = 89
-        # db_model.db_commit()
-        # time.sleep(5)
-        # db_model.percent_processed = 99
-        # db_model.db_commit()
-        # time.sleep(5)
-        # db_model.percent_processed = 100
-        # db_model.db_commit()
-        # time.sleep(5)
+        
+        if db_model.should_stop:
+            db_model.percent_processed = 0
+            print("db_model.should_stop: ", db_model.should_stop)
+            return db_model.should_stop
+        db_model.percent_processed = 100
+        db_model.process_message = "Completado !!!"
+        db_model.db_commit()
 
 
 @blueprint.route("/classifier", methods=["GET", "POST"])
 @login_required
 def save_classifier():
     form = add_classifier(request.form)
+    cancel = None
+    try:
+        cancel = request.form["cancel"]
+    except:  # noqa: E722
+        pass
 
-    if "Initial" in request.form:
+    print(cancel)
+    print(request.form)
+
+    if cancel == "Second":
+        print(cancel)
+        db_model: ModelForProccess = ModelForProccess.query.filter(
+            ModelForProccess.id == request.form["model_id"]
+        ).first()
+        db_model.delete_from_db()
+        return render_template("add_models.html", form=form, status="Initial")
+
+    if "Initial" in request.form or cancel == "Add":
+        print(cancel)
         try:
-            name = request.form["name"]
-            description = request.form["description"]
-            model = joblib.load(request.files["model"])
-            training_df: pd.DataFrame
-            try:
-                training_df = pd.read_csv(request.files["dataset"])
-            except:   # noqa: E722
-                training_df = pd.read_excel(request.files["dataset"])
-            db_model = ModelForProccess(
-                **{
-                    "name": name,
-                    "description": description,
-                    "model": model,
-                    "dataset": training_df,
-                }
-            )
+            if cancel == "Add":
+                db_model: ModelForProccess = ModelForProccess.query.filter(
+                    ModelForProccess.id == request.form["model_id"]
+                ).first()
+            else:
+                name = request.form["name"]
+                description = request.form["description"]
+                model = joblib.load(request.files["model"])
+                training_df: pd.DataFrame
+                try:
+                    training_df = pd.read_csv(request.files["dataset"])
+                except:  # noqa: E722
+                    training_df = pd.read_excel(request.files["dataset"])
+                db_model = ModelForProccess(
+                    **{
+                        "name": name,
+                        "description": description,
+                        "model": model,
+                        "dataset": training_df,
+                    }
+                )
+                
+                db_model.add_to_db()
             status = "Second"
-            db_model.add_to_db()
             possible_targets = list(
                 set(db_model.getElement("dataset").columns)
-                - set(model.feature_names_in_)
+                - set(db_model.getElement("model").feature_names_in_)
             )
             return render_template(
                 "add_models.html",
@@ -342,17 +398,27 @@ def save_classifier():
             print(e)
             status = "Wrong Data"
             return render_template("add_models.html", form=form, status=status)
-    elif "Second" in request.form:
+    elif "Second" in request.form or cancel == "Create":
+       
         try:
             db_model: ModelForProccess = ModelForProccess.query.filter(
                 ModelForProccess.id == request.form["model_id"]
             ).first()
-            db_model.target_row = request.form["target"]
-            db_model.db_commit()
+
+            if cancel != "Create":
+                db_model.target_row = request.form["target"]
+                db_model.db_commit()
+            else:
+                print(cancel)
+                explainer: ExplainedClassifierModel = ExplainedClassifierModel.query.all()[-1]
+                print(explainer.name)
+                db_model.should_stop = True
+                explainer.delete_from_db()
+                
             qualitative_variables_form = []
             df = db_model.getElement("dataset")
             for column in df:
-                if len(set(df[column])) < 5 or column == request.form["target"]:
+                if len(set(df[column])) < 5 or column == db_model.target_row:
                     qualitative_variables_form.append(
                         {
                             "name": column,
@@ -364,7 +430,7 @@ def save_classifier():
             return render_template(
                 "add_models.html",
                 form=qualitative_variables_form,
-                variables = list(df.columns),
+                variables=list(df.columns),
                 status=status,
                 model_id=db_model.id,
             )
@@ -372,7 +438,9 @@ def save_classifier():
             print(e)
             status = "Wrong Data"
             return render_template("add_models.html", form=form, status=status)
+
     elif "Add" in request.form:
+
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == request.form["model_id"]
         ).first()
@@ -382,9 +450,16 @@ def save_classifier():
         value_number: int = 0
 
         q_dict = {}
+        features_description = {}
         for element in request.form:
             if element != "model_id":
-                if "Q-Variable" in element or element == "Add":
+                if element in df.columns:
+                    features_description[element] = (
+                        request.form[element]
+                        if request.form[element] != ""
+                        else "Sin descripción"
+                    )
+                elif "Q-Variable" in element or element == "Add":
                     value_number = 0
                     if q_dict != {}:
                         if q_dict["column_name"] == db_model.target_row:
@@ -398,14 +473,16 @@ def save_classifier():
                         }
                 else:
                     old_value = element.replace(f"{q_dict['column_name']}-", "")
-                    new_value = request.form[element] if request.form[element] != "" else old_value
+                    new_value = (
+                        request.form[element]
+                        if request.form[element] != ""
+                        else old_value
+                    )
                     try:
                         old_value = int(old_value)
                     except:  # noqa: E722
                         pass
-                        # if isinstance(old_value, str):
-                        #     old_value = value_number
-                    
+
                     q_dict["variables"].append(
                         {
                             "old_value": old_value,
@@ -414,26 +491,25 @@ def save_classifier():
                     )
                     value_number += 1
 
-        test_size = 0.2
-        random_state = 123
-
         db_model.setElements(
             **{
                 "qualitative_variables_saved": qualitative_variables_saved,
                 "target_description": target_description,
+                "features_description": features_description,
             }
         )
         db_model.db_commit()
 
-        thread_function(db_model.id, current_app.app_context())
-        # features_description = "features_description"
-        # full_model = ClassificationTrainedModel(name=db_model.name, df=db_model.to_dict()["dataset"], predictors_description=features_description,
-        #                                         target=db_model.target_row, test_size=test_size, random_state=random_state,
-        #                                         model=db_model.to_dict()["model"], model_description=db_model.description,
-        #                                         target_description=target_description,
-        #                                         q_variables_values_list=qualitative_variables_saved)
-        # x = threading.Thread(target=thread_function, args=(db_model.id, current_app.app_context()))
-        # x.start()
-        # Function to add, the model
+        x = threading.Thread(
+            target=thread_function, args=(db_model.id, current_app.app_context())
+        )
+        x.start()
+        x.daemon
+        # Function to add, the models
         return render_template("add_models.html", model_id=db_model.id, status="Create")
+    elif "Create" in request.form:
+        db_model: ModelForProccess = ModelForProccess.query.filter(
+            ModelForProccess.id == request.form["model_id"]
+        ).first()
+        db_model.delete_from_db()
     return render_template("add_models.html", form=form, status="Initial")
