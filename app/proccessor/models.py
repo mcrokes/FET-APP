@@ -21,7 +21,7 @@ ENCODED_FIELDS = [
     "target_description",
     "target_names_dict",
     "value",
-    "tree_model"
+    "tree_model",
 ]
 
 
@@ -99,6 +99,7 @@ class ModelForProccess(db.Model, dbInteractionMethods):
             "process_message",
             "features_description",
             "q_variables_dict",
+            "should_stop",
         ],
     ):
         return super().getElement(name)
@@ -141,25 +142,10 @@ class ExplainedClassifierModel(ExplainedModel):
 
     target_names_dict = Column(String)  # Encoded
     data_set_data = relationship(
-        "DataSetData", uselist=False, back_populates="explained_classifier_model"
-    )
-    confusion_matrixes_data = relationship(
-        "ConfusionMatrixesData", back_populates="explained_classifier_model"
-    )
-    roc_data = relationship("ROCData", back_populates="explained_classifier_model")
-    importances_data = relationship(
-        "ImportancesData", uselist=False, back_populates="explained_classifier_model"
-    )
-    permutation_importances_data = relationship(
-        "PermutationImportancesData",
-        uselist=False,
-        back_populates="explained_classifier_model",
+        "DataSetData", uselist=False, back_populates="explained_classifier_model", cascade="all, delete-orphan"
     )
     surrogate_trees_data = relationship(
-        "SurrogateTreeClassifierData", back_populates="explained_classifier_model"
-    )
-    inner_trees_data = relationship(
-        "InnerTreeClassifierData", back_populates="explained_classifier_model"
+        "SurrogateTreeClassifierData", back_populates="explained_classifier_model", cascade="all, delete-orphan"
     )
 
     def getElement(
@@ -193,14 +179,14 @@ class DataSetData(db.Model, dbInteractionMethods):
         _initDB_model(self, kwargs)
 
     explained_classifier_model_id = Column(
-        Integer, ForeignKey("explained_classifier_model.id"), primary_key=True
+        Integer, ForeignKey("explained_classifier_model.id"), primary_key=True,
     )
     explained_classifier_model = relationship(
         "ExplainedClassifierModel", uselist=False, back_populates="data_set_data"
     )
 
     data_set_data_distributions = relationship(
-        "DataSetDataDistribution", back_populates="data_set_data"
+        "DataSetDataDistribution", back_populates="data_set_data", cascade="all, delete-orphan"
     )
 
     def getElement(
@@ -247,91 +233,6 @@ class DataSetDataDistribution(db.Model, dbInteractionMethods):
     ):
         return super().getElement(name)
 
-
-class ImportancesData(db.Model, dbInteractionMethods):
-
-    __tablename__ = "importances_data"
-
-    explanation = Column(String)  # Encoded
-
-    def __init__(self, **kwargs):
-        _initDB_model(self, kwargs)
-
-    explained_classifier_model_id = Column(
-        Integer, ForeignKey("explained_classifier_model.id"), primary_key=True
-    )
-    explained_classifier_model = relationship(
-        "ExplainedClassifierModel", uselist=False, back_populates="importances_data"
-    )
-
-    def getElement(
-        self,
-        name: Literal["explanation"],
-    ):
-        return super().getElement(name)
-
-
-class PermutationImportancesData(db.Model, dbInteractionMethods):
-
-    __tablename__ = "permutation_importances_data"
-
-    explanation = Column(String)  # Encoded
-
-    def __init__(self, **kwargs):
-        _initDB_model(self, kwargs)
-
-    explained_classifier_model_id = Column(
-        Integer, ForeignKey("explained_classifier_model.id"), primary_key=True
-    )
-    explained_classifier_model = relationship(
-        "ExplainedClassifierModel",
-        uselist=False,
-        back_populates="permutation_importances_data",
-    )
-
-    permutation_importances = relationship(
-        "PermutationImportance", back_populates="permutation_importances_data"
-    )
-
-    def getElement(
-        self,
-        name: Literal["explanation"],
-    ):
-        return super().getElement(name)
-
-
-class PermutationImportance(db.Model, dbInteractionMethods):
-
-    __tablename__ = "permutation_importance"
-
-    id = Column(Integer, primary_key=True)
-    importance_mean = Column(Float)
-    importance_std = Column(Float)
-    predictor = Column(String)
-
-    def __init__(self, **kwargs):
-        _initDB_model(self, kwargs)
-
-    permutation_importances_data_id = Column(
-        Integer,
-        ForeignKey("permutation_importances_data.explained_classifier_model_id"),
-    )
-    permutation_importances_data = relationship(
-        "PermutationImportancesData", back_populates="permutation_importances"
-    )
-
-    def getElement(
-        self,
-        name: Literal[
-            "id",
-            "importance_mean",
-            "importance_std",
-            "predictor",
-        ],
-    ):
-        return super().getElement(name)
-
-
 class Tree(db.Model, dbInteractionMethods):
 
     __tablename__ = "tree"
@@ -340,7 +241,7 @@ class Tree(db.Model, dbInteractionMethods):
     depth = Column(Integer)
     rules_amount = Column(Integer)
     inexact_rules_amount = Column(Integer)
-    
+
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
@@ -349,15 +250,11 @@ class Tree(db.Model, dbInteractionMethods):
     }
 
     surrogate_tree = relationship(
-        "SurrogateTreeClassifierData", uselist=False, back_populates="tree"
+        "SurrogateTreeClassifierData", uselist=False, back_populates="tree", single_parent=True, cascade="all, delete-orphan"
     )
 
-    inner_tree = relationship(
-        "InnerTreeClassifierData", uselist=False, back_populates="tree"
-    )
+    rules = relationship("TreeClassifierRule", back_populates="tree_classifier", cascade="all, delete-orphan")
 
-    rules = relationship("TreeClassifierRule", back_populates="tree_classifier")
-    
     def getElement(
         self,
         name: Literal[
@@ -378,12 +275,12 @@ class SurrogateTreeClassifierData(db.Model, dbInteractionMethods):
     }
 
     tree_model = Column(String)  # Encoded
-    
+
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
     tree_id = Column(Integer, ForeignKey("tree.id"), primary_key=True)
-    tree = relationship("Tree", uselist=False, back_populates="surrogate_tree")
+    tree = relationship("Tree", uselist=False, back_populates="surrogate_tree", single_parent=True, cascade="all, delete-orphan")
 
     explained_classifier_model_id = Column(
         Integer, ForeignKey("explained_classifier_model.id")
@@ -391,48 +288,12 @@ class SurrogateTreeClassifierData(db.Model, dbInteractionMethods):
     explained_classifier_model = relationship(
         "ExplainedClassifierModel",
         uselist=False,
-        back_populates="surrogate_trees_data",
+        back_populates="surrogate_trees_data"
     )
-    
+
     def getElement(
         self,
-        name: Literal[
-            "tree_model",
-        ],
-    ):
-        return super().getElement(name)
-
-
-class InnerTreeClassifierData(db.Model, dbInteractionMethods):
-
-    __tablename__ = "inner_tree_classifier_data"
-
-    __mapper_args__ = {
-        "polymorphic_identity": "inner_tree_classifier_data",
-    }
-
-    tree_number = Column(Integer)
-    
-    def __init__(self, **kwargs):
-        _initDB_model(self, kwargs)
-
-    tree_id = Column(Integer, ForeignKey("tree.id"), primary_key=True)
-    tree = relationship("Tree", uselist=False, back_populates="inner_tree")
-
-    explained_classifier_model_id = Column(
-        Integer, ForeignKey("explained_classifier_model.id")
-    )
-    explained_classifier_model = relationship(
-        "ExplainedClassifierModel",
-        uselist=False,
-        back_populates="inner_trees_data",
-    )
-    
-    def getElement(
-        self,
-        name: Literal[
-            "tree_number",
-        ],
+        name: Literal["tree_model",],
     ):
         return super().getElement(name)
 
@@ -444,7 +305,7 @@ class TreeClassifierRule(db.Model, dbInteractionMethods):
     target_value = Column(String)
     probability = Column(Float)
     samples_amount = Column(Float)
-    
+
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
@@ -455,17 +316,12 @@ class TreeClassifierRule(db.Model, dbInteractionMethods):
     tree_classifier = relationship("Tree", back_populates="rules")
 
     causes = relationship(
-        "TreeClassifierRuleCause", back_populates="tree_classifier_rule"
+        "TreeClassifierRuleCause", back_populates="tree_classifier_rule", cascade="all, delete-orphan"
     )
-    
+
     def getElement(
         self,
-        name: Literal[
-            "id",
-            "target_value",
-            "probability",
-            "samples_amount"
-        ],
+        name: Literal["id", "target_value", "probability", "samples_amount"],
     ):
         return super().getElement(name)
 
@@ -476,8 +332,8 @@ class TreeClassifierRuleCause(db.Model, dbInteractionMethods):
     id = Column(Integer, primary_key=True)
     predictor = Column(String)
     relation_sign = Column(String)
-    value = Column(String) # encoded
-    
+    value = Column(String)  # encoded
+
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
@@ -486,7 +342,7 @@ class TreeClassifierRuleCause(db.Model, dbInteractionMethods):
         ForeignKey("tree_classifier_rule.id"),
     )
     tree_classifier_rule = relationship("TreeClassifierRule", back_populates="causes")
-    
+
     def getElement(
         self,
         name: Literal[
@@ -498,72 +354,3 @@ class TreeClassifierRuleCause(db.Model, dbInteractionMethods):
     ):
         return super().getElement(name)
 
-class ConfusionMatrixesData(db.Model):
-
-    __tablename__ = "confusion_matrixes_data"
-
-    id = Column(Integer, primary_key=True)
-    class_name = Column(String)
-
-    explained_classifier_model_id = Column(
-        Integer, ForeignKey("explained_classifier_model.id")
-    )
-    explained_classifier_model = relationship(
-        "ExplainedClassifierModel", back_populates="confusion_matrixes_data"
-    )
-
-    confusion_matrixes = relationship(
-        "ConfusionMatrix", back_populates="confusion_matrixes_data"
-    )
-
-
-class ConfusionMatrix(db.Model):
-
-    __tablename__ = "confusion_matrix"
-
-    id = Column(Integer, primary_key=True)
-    matrix = Column(String)  # Encoded
-    cut_off = Column(Integer)
-
-    confusion_matrixes_data_id = Column(
-        Integer, ForeignKey("confusion_matrixes_data.id")
-    )
-    confusion_matrixes_data = relationship(
-        "ConfusionMatrixesData", back_populates="confusion_matrixes"
-    )
-
-    explanation = relationship(
-        "ConfusionMatrixExplanation", uselist=False, back_populates="confusion_matrix"
-    )
-
-
-class ConfusionMatrixExplanation(db.Model):
-
-    __tablename__ = "confusion_matrix_explanation"
-
-    explanation_for_test = Column(String)  # Encoded
-
-    confusion_matrix_id = Column(
-        Integer, ForeignKey("confusion_matrix.id"), primary_key=True
-    )
-    confusion_matrix = relationship(
-        "ConfusionMatrix", uselist=False, back_populates="explanation"
-    )
-
-
-class ROCData(db.Model):
-
-    __tablename__ = "roc_data"
-
-    id = Column(Integer, primary_key=True)
-    class_name = Column(String)
-    fpr = Column(String)  # Encoded
-    tpr = Column(String)  # Encoded
-    auc_score = Column(String)  # Encoded
-
-    explained_classifier_model_id = Column(
-        Integer, ForeignKey("explained_classifier_model.id")
-    )
-    explained_classifier_model = relationship(
-        "ExplainedClassifierModel", back_populates="roc_data"
-    )

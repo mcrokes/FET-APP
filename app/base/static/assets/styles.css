@@ -171,12 +171,13 @@ div.section-card {
 }
 
 .info-icon {
-  color: coral;
+  color: #213584;
   margin-right: 2rem;
+  font-size: 25px;
 }
 
 .info-icon:hover {
-  color: rgb(230, 146, 115);
+  color: rgb(89, 161, 189);
   cursor: pointer;
 }
 

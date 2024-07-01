@@ -7,7 +7,7 @@
       <img src="/static/images/img.jpg" alt="..." class="img-circle profile_img" />
     </div>
     <div class="profile_info">
-      <span>Welcome,</span>
+      <span>Bienvenido,</span>
       <h2>{{ current_user.username }}</h2>
     </div>
   </div>
@@ -21,47 +21,39 @@
       <h3>General</h3>
       <ul class="nav side-menu">
         <li>
-          <a href="/home"><i class="fa fa-home"></i> Home <span></span></a>
+          <a href="/home"><i class="fa fa-home"></i> Inicio <span></span></a>
         </li>
         <li>
-          <a href="/add_model/classifier"><i class="fa fa-home"></i> Add Model <span></span></a>
+          <a href="/add_model/classifier"><i class="fa fa-home"></i> Cargar Modelo <span></span></a>
         </li>
 
         <li>
-          <a><i class="fa fa-bar-chart-o"></i> Pizarra <span class="fa fa-chevron-down"></span></a>
+          <a style="overflow: hidden; text-overflow: ellipsis;"><i class="fa fa-bar-chart-o"></i> Clasificación <span class="fa fa-chevron-down"></span></a>
+          <ul id="classification-models" class="nav child_menu"> </ul>
+        </li>
+
+        <li>
+          <a><i class="fa fa-bar-chart-o"></i> Regresión <span class="fa fa-chevron-down"></span></a>
           <ul class="nav child_menu">
             <li>
               <a href="/DashExample/app1">dash app1</a>
-            </li>
-            <li>
-              <a><i class="fa fa-bar-chart-o"></i> Clasificación <span class="fa fa-chevron-down"></span></a>
-              <ul id="classification-models" class="nav child_menu">
-              </ul>
-            </li>
-            <li>
-              <a><i class="fa fa-bar-chart-o"></i> Regresión <span class="fa fa-chevron-down"></span></a>
-              <ul class="nav child_menu">
-                <li>
-                  <a href="/DashExample/app1">dash app1</a>
-                </li>
-              </ul>
             </li>
           </ul>
         </li>
 
         <li>
-          <a><i class="fa fa-cog"></i> Setting <span class="fa fa-chevron-down"></span></a>
+          <a style="overflow: hidden; text-overflow: ellipsis;"><i class="fa fa-cog"></i> Configuración <span class="fa fa-chevron-down"></span></a>
           <ul class="nav child_menu">
             {% if Is_admin %}
               <li>
-                <a href="/setting/manage_users">Manage Users</a>
+                <a href="/setting/manage_users">Configurar Usuarios</a>
               </li>
               <li>
-                <a href="/setting/add_user">Add User</a>
+                <a href="/setting/add_user">Añadir Usuario</a>
               </li>
             {% endif %}
             <li>
-              <a href="/setting/change_password">Change Password</a>
+              <a href="/setting/change_password">Cambiar Contraseña</a>
             </li>
           </ul>
         </li>
@@ -102,7 +94,7 @@
       const classifiers = document.getElementById("classification-models")
       let classifiersList = ""
       models_data.forEach((model) => {
-        classifiersList += "<li><a href='/DashExample/app2?model_id=" + model.id + "'>Explainer: " + model.name + "</a></li>"
+        classifiersList += `<li><a href='/DashExample/app2?model_id=${model.id}'>Explainer: ${model.name}</a></li>`
       })
       classifiers.innerHTML = classifiersList
     }    

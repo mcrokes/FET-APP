@@ -182,6 +182,7 @@ class_selector = dcc.Dropdown(
     id="prediction-positive-class-selector",
     placeholder="Seleccione como positiva la clase que desea analizar",
     clearable=False,
+    style={"cursor": "pointer"},
 )
 
 marks = {}
@@ -194,6 +195,7 @@ slider = dcc.Slider(
     min=1, max=100, step=1, marks=marks, value=50, id="trees-cutoff-slider"
 )
 
+id_sufix = ["contributions", "trees-graph"]
 predictionsLayout = html.Div(
     [
         dcc.Store(id="current-class-data"),
@@ -287,8 +289,67 @@ predictionsLayout = html.Div(
             ],
             style={"padding-top": "20px"},
         ),
+        html.Div(
+            [
+                html.I(
+                    id=f"{id_sufix[0]}-info",
+                    className="fa fa-info-circle info-icon",
+                ),
+                dbc.Tooltip(
+                    [
+                        html.Plaintext(
+                            [
+                                "Se examina la ",
+                                html.Strong("contribución individual"),
+                                " de cada característica a la predicción, lo que permite identificar qué características son más relevantes para el modelo.",
+                            ]
+                        ),
+                    ],
+                    className="personalized-tooltip",
+                    target=f"{id_sufix[0]}-info",
+                ),
+            ],
+            id=f"{id_sufix[0]}-container",
+            style={"display": "flex", "justify-content": "end"},
+        ),
         html.Div(id="contributions-output-upload"),
         html.Div(id="test"),
+        html.Div(
+            [
+                html.I(
+                    id=f"{id_sufix[1]}-info",
+                    className="fa fa-info-circle info-icon",
+                ),
+                dbc.Tooltip(
+                    [
+                        html.Plaintext(
+                            [
+                                html.Strong("Cada árbol"),
+                                " del modelo hace una predicción. La predicción final se basa en la ",
+                                html.Strong("combinación de las predicciones"),
+                                " de todos los árboles.",
+                            ]
+                        ),
+                        html.Plaintext(
+                            [
+                                html.Strong("* El azul"),
+                                " representa los arboles que predicen la clase seleccionada como positiva.",
+                            ]
+                        ),
+                        html.Plaintext(
+                            [
+                                html.Strong("* El rojo"),
+                                " representa los arboles que predicen la(s) clases restantes.",
+                            ]
+                        ),
+                    ],
+                    className="personalized-tooltip",
+                    target=f"{id_sufix[1]}-info",
+                ),
+            ],
+            id=f"{id_sufix[1]}-container",
+            style={"display": "flex", "justify-content": "end"},
+        ),
         html.Div(id="trees-output-upload"),
         html.Div(slider, id="trees-slider-container", hidden=True),
     ],
@@ -365,7 +426,7 @@ def predictionsCallbacks(app, furl: Function):
             )
             class_names = [var["new_value"] for var in target_description["variables"]]
             slider_initial_value = 100 / len(class_names) + 1
-            
+
             target_dropdown = get_target_dropdown(target_description["variables"])
             return (
                 drop_down,
@@ -441,6 +502,8 @@ def predictionsCallbacks(app, furl: Function):
         Output("trees-slider-container", "hidden"),
         Output("predictions-class_selector-container", "hidden"),
         Output("predictions-class_selector-title", "hidden"),
+        Output(f"{id_sufix[0]}-container", "hidden"),
+        Output(f"{id_sufix[1]}-container", "hidden"),
         Output("current-class-data", "data"),
         State("path", "href"),
         Input("select", "value"),
@@ -566,6 +629,8 @@ def predictionsCallbacks(app, furl: Function):
                     False,
                     False,
                     False,
+                    False,
+                    False,
                     json.dumps(
                         {"prediction": predictions_graph_data["values"][positive_class]}
                     ),
@@ -575,4 +640,4 @@ def predictionsCallbacks(app, furl: Function):
                 raise PreventUpdate
 
         else:
-            return [], [], [], [], True, True, True, None
+            return [], [], [], [], True, True, True, True, True, None

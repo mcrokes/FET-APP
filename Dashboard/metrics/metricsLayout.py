@@ -9,7 +9,10 @@ import pandas as pd
 from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 
-from app.proccessor.model.dataset_interaction_methods import get_y_transformed, update_y_pred
+from app.proccessor.model.dataset_interaction_methods import (
+    get_y_transformed,
+    update_y_pred,
+)
 from app.proccessor.models import ExplainedClassifierModel
 
 from sklearn import metrics
@@ -192,7 +195,7 @@ def get_matrix_explanation(cm, class_names):
 
 
 def __create_matrix(cm, class_names):
-    
+
     fig = px.imshow(
         img=cm,
         title="MATRIZ DE CONFUSION",
@@ -302,9 +305,10 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
 
 
 cutoff = dbc.Switch(
-    label="USAR COTOFF",
+    label="Punto de Corte",
     value=False,
     id="check-cutoff",
+    style={"display": "flex", "gap": "1rem"},
 )
 
 class_selector = dcc.Dropdown(
@@ -317,9 +321,10 @@ class_selector = dcc.Dropdown(
 slider = dcc.Slider(0.01, 0.99, 0.1, value=0.5, id="cutoff-slider", disabled=True)
 
 ROCcutoff = dbc.Switch(
-    label="USAR COTOFF",
+    label="Punto de Corte",
     value=False,
     id="ROC-check-cutoff",
+    style={"display": "flex", "gap": "1rem"},
 )
 
 ROCclass_selector = dcc.Dropdown(
@@ -331,6 +336,8 @@ ROCclass_selector = dcc.Dropdown(
 
 ROCslider = dcc.Slider(0.01, 0.99, value=0.5, id="ROC-cutoff-slider", disabled=True)
 
+id_sufix = ["confusion-matrix", "roc-curve"]
+
 metricsLayout = html.Div(
     [
         html.Div(
@@ -340,6 +347,17 @@ metricsLayout = html.Div(
                         dbc.Col(
                             [
                                 dbc.Row([html.Div(id="matrix-output-upload")]),
+                                dbc.Tooltip(
+                                    [
+                                        html.Plaintext(
+                                            [
+                                                "Punto porcentual en el que el modelo decide clasificar una clase como verdadera.",
+                                            ]
+                                        ),
+                                    ],
+                                    className="personalized-tooltip",
+                                    target="check-cutoff",
+                                ),
                                 dbc.Row(
                                     [html.Div([cutoff], style={"padding-left": "20px"})]
                                 ),
@@ -355,6 +373,50 @@ metricsLayout = html.Div(
                         ),
                         dbc.Col(
                             [
+                                html.Div(
+                                    [
+                                        html.I(
+                                            id=f"{id_sufix[0]}-info",
+                                            className="fa fa-info-circle info-icon",
+                                        ),
+                                        dbc.Tooltip(
+                                            [
+                                                html.Plaintext(
+                                                    [
+                                                        "Matriz de Confusión: Evalúa la precisión del modelo en la clasificación de ejemplos.",
+                                                    ]
+                                                ),
+                                                html.Plaintext(
+                                                    [
+                                                        html.Strong("VP: "),
+                                                        "ejemplos positivos correctamente clasificados.",
+                                                    ]
+                                                ),
+                                                html.Plaintext(
+                                                    [
+                                                        html.Strong("VN: "),
+                                                        "ejemplos negativos correctamente clasificados.",
+                                                    ]
+                                                ),
+                                                html.Plaintext(
+                                                    [
+                                                        html.Strong("FP: "),
+                                                        "ejemplos negativos incorrectamente clasificados como positivos.",
+                                                    ]
+                                                ),
+                                                html.Plaintext(
+                                                    [
+                                                        html.Strong("FN: "),
+                                                        "ejemplos positivos incorrectamente clasificados como negativos.",
+                                                    ]
+                                                ),
+                                            ],
+                                            className="personalized-tooltip",
+                                            target=f"{id_sufix[0]}-info",
+                                        ),
+                                    ],
+                                    style={"display": "flex", "justify-content": "end"},
+                                ),
                                 html.Plaintext(
                                     "Parámetros Obtenidos", style={"color": "black"}
                                 ),
@@ -370,11 +432,55 @@ metricsLayout = html.Div(
                             xxl=5,
                         ),
                     ],
-                    style={"padding-top": "20px"},
+                ),
+                html.Div(
+                    [
+                        html.I(
+                            id=f"{id_sufix[1]}-info",
+                            className="fa fa-info-circle info-icon",
+                        ),
+                        dbc.Tooltip(
+                            [
+                                html.Plaintext(
+                                    [
+                                        "Curva ROC: Muestra la relación entre la tasa de Verdaderos Positivos (",
+                                        html.Strong("Sensibilidad"),
+                                        ") y la tasa de Falsos Positivos (",
+                                        html.Strong("1-Especificidad"),
+                                        ") a diferentes umbrales de clasificación.",
+                                    ]
+                                ),
+                                html.Plaintext(
+                                    [
+                                        """
+                                        * El área bajo la curva (AUC) es una métrica que resume 
+                                        la performance del modelo. Un AUC cercano a 1 indica un modelo 
+                                        que puede distinguir perfectamente entre positivos y negativos, mientras que un 
+                                        AUC cercano a 0.5 indica un modelo que no es mejor que una elección aleatoria.
+                                        """,
+                                    ]
+                                ),
+                            ],
+                            className="personalized-tooltip",
+                            target=f"{id_sufix[1]}-info",
+                        ),
+                    ],
+                    style={"display": "flex", "justify-content": "end"},
                 ),
                 dbc.Row(
                     [
                         dbc.Row(id="roc-output-upload"),
+                        dbc.Tooltip(
+                            [
+                                html.Plaintext(
+                                    [
+                                        "Punto porcentual en el que el modelo decide clasificar una clase como verdadera.",
+                                    ]
+                                ),
+                            ],
+                            className="personalized-tooltip",
+                            target="ROC-check-cutoff",
+                        ),
                         dbc.Row(
                             [html.Div([ROCcutoff], style={"padding-left": "20px"})]
                         ),

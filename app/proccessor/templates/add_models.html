@@ -10,6 +10,14 @@
   {{ super() }}
 
   <style>
+    .common_header {
+      font-family: monospace;
+      font-weight: 900;
+      margin: auto !important;
+      white-space: wrap;
+      text-align: center;
+    }
+    
     .form-fields {
       width: max-content;
       margin: auto !important;
@@ -54,6 +62,10 @@
       transition: background 0.2s ease-in-out;
     }
     
+    .custom-file-input::file-selector-text {
+      color: red;
+    }
+    
     .custom-file-input:focus::file-selector-button,
     .custom-file-input::file-selector-button:hover {
       background: limegreen;
@@ -74,13 +86,8 @@
       <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
           <div class="x_panel">
-            <div class="x_title">
-              <h2>Add Classifier Model</h2>
-              <ul class="nav navbar-right" style="cursor: pointer;">
-                <li>
-                  <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                </li>
-              </ul>
+            <div class="x_title" style="display: flex;">
+              <h2 class="common_header">Cargar Modelo de Clasificación</h2>
               <div class="clearfix"></div>
             </div>
             <div class="x_content">
@@ -99,8 +106,14 @@
                       {% if status == 'Initial' %}
                         {% for field in form if field.widget.input_type != 'hidden' %}
                           <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                            {% if field.id != 'model-description' %}
+                              <span style="color: red;">*Requerido</span>
+                            {% else %}
+                              <span style="color: green;">*Opcional</span>
+                            {% endif %}
                             {% if field.widget.input_type == 'file' %}
-                              {{ field(class='form-control custom-file-input', placeholder=field.label.text, accept=field.render_kw.accept) }}
+                              {{ field(class='form-control custom-file-input', style='display: none', placeholder=field.label.text, accept=field.render_kw.accept) }}
+                              <label class="form-control custom-file-input" for="{{ field.id }}" style="align-items: center; display: flex;"><p id="{{ field.id }}-holder" style="font-weight: 100; color: darkgray; margin: 0; width: 500px;">{{ field.label.text }}</p></label>
                             {% else %}
                               {{ field(class='form-control custom-input', placeholder=field.label.text) }}
                             {% endif %}
@@ -116,22 +129,20 @@
                           </select>
                         </div>
                       {% elif status == 'Add' %}
-                        <h2>Establezca descripciones a las vatiables.</h2>
+                        <h5 style="padding-left: 5rem;">Descripción de variables.</h5>
                         {% for var in variables %}
-                          <div class="" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                          <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
                             <label for="">{{ var }}</label>
-                            <div class="col custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
-                              <input class="form-control custom-input" placeholder="Descripción..." type="text" name="{{ var }}" />
-                            </div>
+                            <textarea class="form-control custom-input" placeholder="Descripción..." type="text" name="{{ var }}"></textarea>
                           </div>
                         {% endfor %}
-                        <h2>Establezca valores a las posibles variables cualitativas.</h2>
+                        <h5 style="padding-left: 5rem;">Valores de las posibles variables cualitativas.</h5>
                         {% for col in form %}
                           <input type="text" name="Q-Variable-{{ col.name }}" value="{{ col.name }}" hidden />
                           <div class="col col-lg-6 custom-col custom-qualitative-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
                             <label for="">{{ col.name }}</label>
                             {% for var in col.variables %}
-                              <div class="col custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                              <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
                                 <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
                               </div>
                             {% endfor %}
@@ -142,7 +153,7 @@
                   </section>
 
                   <div class="navbar-right" style="padding-right: 5rem; justify-content: center; display: flex; padding-left: 5rem;">
-                    <button type="submit" id="cancel" class="btn btn-warning submit" name="cancel" value="{{ status }}">
+                    <button type="submit" id="cancel" hidden class="btn btn-warning submit" name="cancel" value="{{ status }}">
                       {% if status == 'Create' %}
                         Cancelar
                       {% else %}
@@ -197,8 +208,10 @@
       if (res >= 100) {
         clearInterval(interval)
         add_button.disabled = false
+        cancel_button.disabled = false
       } else {
         add_button.disabled = true
+        cancel_button.disabled = true
       }
     }
     
@@ -214,15 +227,30 @@
     const model_description_field = document.getElementById('model-description')
     const model_data_set_field = document.getElementById('model-data-set')
     
+    const model_field_holder = document.getElementById('model-holder')
+    const model_data_set_field_holder = document.getElementById('model-data-set-holder')
+    
     const verify_imputs = () => {
-      if (model_name_field == null || (model_name_field.value && model_field.value && model_description_field.value && model_data_set_field.value)) {
-        add_button.disabled = false
+      if (model_name_field == null || (model_name_field.value && model_field.value && model_data_set_field.value)) {
+        add_button.disabled = false        
+        add_button.classList.remove("btn-danger")
+        add_button.classList.add("btn-success")
         if (model_name_field == null) cancel_button.style.display = ''
         console.log('ACTIVATED')
       } else {
         add_button.disabled = true
+        add_button.classList.remove("btn-success")
+        add_button.classList.add("btn-danger")
         cancel_button.style.display = 'none'
         console.log('DEACTIVATED')
+      }
+      if (model_data_set_field && model_data_set_field.value) {
+        model_data_set_field_holder.innerHTML = model_data_set_field.value
+        model_data_set_field_holder.style.color = 'black'
+      }
+      if (model_field && model_field.value) {
+        model_field_holder.innerHTML = model_field.value
+        model_field_holder.style.color = 'black'
       }
     }
     

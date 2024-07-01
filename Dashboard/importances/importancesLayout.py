@@ -26,11 +26,57 @@ class_selector = dcc.Dropdown(
     placeholder="Seleccione como positiva la clase que desea analizar",
 )
 
+id_sufix = ["importances", "permutation-importances"]
+
 importancesLayout = html.Div(
     [
+        html.Div(
+            [
+                html.I(
+                    id=f"{id_sufix[0]}-info",
+                    className="fa fa-info-circle info-icon",
+                ),
+                dbc.Tooltip(
+                    [
+                        html.Plaintext(
+                            [
+                                "Importancia GINI: Indica la capacidad de cada característica para reducir la impureza en la clase objetivo. ",
+                                html.Strong("Valores altos"),
+                                " significan que la característica es más importante para la predicción.",
+                            ]
+                        ),
+                    ],
+                    className="personalized-tooltip",
+                    target=f"{id_sufix[0]}-info",
+                ),
+            ],
+            style={"display": "flex", "justify-content": "end"},
+        ),
         dbc.Row(
             html.Div(id="importance-output-upload"),
             style={"padding-top": "20px"},
+        ),
+        html.Div(
+            [
+                html.I(
+                    id=f"{id_sufix[1]}-info",
+                    className="fa fa-info-circle info-icon",
+                ),
+                dbc.Tooltip(
+                    [
+                        html.Plaintext(
+                            [
+                                "Importancia por Permutación: Evalúa la importancia de cada característica al medir la pérdida de precisión del modelo al aleatorizar sus valores. ",
+                                html.Strong("Valores altos"),
+                                " indican características clave.",
+                            ]
+                        ),
+                    ],
+                    className="personalized-tooltip",
+                    target=f"{id_sufix[1]}-info",
+                ),
+            ],
+            style={"display": "flex", "justify-content": "end"},
         ),
         dbc.Row(
             html.Div(id="permutation-importance-output-upload"),
@@ -66,7 +112,7 @@ def importancesCallbacks(app, furl: Function):
             old_class_names = [
                 element["old_value"] for element in target_description["variables"]
             ]
-            
+
             df_feature_importance: pd.DataFrame = pd.DataFrame(
                 {
                     "Predictor": classifier_model.feature_names_in_,
@@ -81,7 +127,7 @@ def importancesCallbacks(app, furl: Function):
                 y="Predictor",
                 title="Importance GINI",
             )
-            
+
             try:
                 positive_class = old_class_names[int(positive_class)]
             except:  # noqa: E722

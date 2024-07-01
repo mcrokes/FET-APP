@@ -1,32 +1,21 @@
-from ctypes import Array
 import threading
-import time
-from tokenize import String
 
-from sklearn.calibration import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier
-
 from app.proccessor.forms import add_classifier
 from app.proccessor.model.dataset_interaction_methods import get_modified_dataframe
 from app.proccessor.model.explainers.decision_tree_surrogate import ExplainSingleTree
-from app.proccessor.model.explainers.importance import Importance
 from app.proccessor.models import (
     DataSetData,
     DataSetDataDistribution,
     ExplainedClassifierModel,
-    ImportancesData,
-    InnerTreeClassifierData,
     ModelForProccess,
-    PermutationImportance,
-    PermutationImportancesData,
     SurrogateTreeClassifierData,
     Tree,
     TreeClassifierRule,
     TreeClassifierRuleCause,
 )
 from . import blueprint
-from flask import current_app, make_response, render_template, request
+from flask import current_app, render_template, request
 from flask_login import login_required
 import pandas as pd
 
@@ -39,10 +28,6 @@ def thread_function(model_id, app):
             ModelForProccess.id == model_id
         ).first()
         
-        if db_model.should_stop:
-            db_model.percent_processed = 0
-            print("db_model.should_stop: ", db_model.should_stop)
-            return db_model.should_stop
         db_model.percent_processed = 10
         db_model.process_message = "Sincronizando datos..."
         db_model.db_commit()
@@ -65,11 +50,6 @@ def thread_function(model_id, app):
         for column in db_model_classifier_qualitative_columns:
             db_model_classifier_qualitative_column_names.append(column["column_name"])
             
-            
-        if db_model.should_stop:
-            db_model.percent_processed = 0
-            print("db_model.should_stop: ", db_model.should_stop)
-            return db_model.should_stop
         db_model.percent_processed = 20
         db_model.process_message = "Generando modelo base..."
         db_model.db_commit()
@@ -92,10 +72,6 @@ def thread_function(model_id, app):
             }
         )
         
-        if db_model.should_stop:
-            db_model.percent_processed = 0
-            print("db_model.should_stop: ", db_model.should_stop)
-            return db_model.should_stop
         db_model.percent_processed = 30
         db_model.process_message = "Cargando metricas del conjunto de datos..."
         db_model.db_commit()
@@ -132,100 +108,7 @@ def thread_function(model_id, app):
             }
         )
         dataset_data_distribution_numeric.data_set_data = dataset_data
-
-        #### IMPORTANCES DATA ####
-
-        # importances_data = ImportancesData(**{"explanation": "Importace Explanation"})
-
-        # permutation_importances_data = PermutationImportancesData(
-        #     **{"explanation": "Permutation Importace Explanation"}
-        # )
-
-        # permutation_importances: pd.DataFrame = (
-        #     Importance.create_permutation_importance(
-        #         model=db_model_classifier_model,
-        #         features=db_model_classifier_model.feature_names_in_,
-        #         x_train=db_model_classifier_dataset.drop(
-        #             columns=db_model_classifier_target_row
-        #         ),
-        #         y_train=db_model_classifier_dataset[db_model_classifier_target_row],
-        #     )
-        # )
-
-        # permutation_importance_list = []
-        # for _, row in permutation_importances.iterrows():
-        #     permutation_importance = PermutationImportance(
-        #         **{
-        #             "importance_mean": row["importances_mean"],
-        #             "importance_std": row["importances_std"],
-        #             "predictor": row["Predictor"],
-        #         }
-        #     )
-        #     permutation_importance.permutation_importances_data = (
-        #         permutation_importances_data
-        #     )
-        #     permutation_importance_list.append(permutation_importance)
-
-        # for index, tree in enumerate(db_model_classifier_model.estimators_):
-        #     print("Inner Tree number: ", index)
-        #     rules = ExplainSingleTree.get_rules(
-        #         model=tree.tree_,
-        #         q_variables=db_model_classifier_qualitative_column_names,
-        #         q_variables_values=db_model_classifier_qualitative_columns,
-        #         features=db_model_classifier_model.feature_names_in_,
-        #         class_names=db_model_classifier_target_class_names,
-        #         target=db_model_classifier_target_row,
-        #     )
-
-        #     db_tree = Tree(
-        #         **{
-        #             "depth": tree.get_depth(),
-        #             "rules_amount": len(rules),
-        #         }
-        #     )
-
-        #     inexact_rules_amount = 0
-        #     for rule in rules:
-        #         db_rule = TreeClassifierRule(
-        #             **{
-        #                 "target_value": rule["target_value"],
-        #                 "probability": rule["probability"],
-        #                 "samples_amount": rule["samples_amount"]
-        #             }
-        #         )
-        #         db_rule.tree_classifier = db_tree
-        #         db_rule.add_to_db()
-
-        #         for cause in rule["causes"]:
-        #             db_cause = TreeClassifierRuleCause(
-        #                 **{
-        #                     "predictor": cause["item"],
-        #                     "relation_sign": cause["sign"],
-        #                     "value": cause["value"],
-        #                 }
-        #             )
-        #             db_cause.tree_classifier_rule = db_rule
-        #             db_cause.add_to_db()
-
-        #         if rule["probability"] < 100:
-        #             inexact_rules_amount += 1
-
-        #     db_tree.inexact_rules_amount = inexact_rules_amount
-        #     db_tree.add_to_db()
-
-        #     inner_tree_data = InnerTreeClassifierData(
-        #         **{
-        #             "tree_number": index
-        #         }
-        #     )
-        #     inner_tree_data.tree = db_tree
-        #     inner_tree_data.explained_classifier_model = classifier_model_data
-        #     inner_tree_data.add_to_db()
         
-        if db_model.should_stop:
-            db_model.percent_processed = 0
-            print("db_model.should_stop: ", db_model.should_stop)
-            return db_model.should_stop
         db_model.percent_processed = 40
         db_model.process_message = "Creando modelo subrogado datos..."
         db_model.db_commit()
@@ -233,10 +116,7 @@ def thread_function(model_id, app):
         tree_depth = 3
         surrogate_inexact_rules_amount = -1
         while surrogate_inexact_rules_amount != 0:
-            if db_model.should_stop:
-                db_model.percent_processed = 0
-                print("db_model.should_stop: ", db_model.should_stop)
-                return db_model.should_stop
+            
             db_model.process_message = (
                 f"Creando modelo subrogado datos (de rofundidad {tree_depth})..."
             )
@@ -300,37 +180,18 @@ def thread_function(model_id, app):
             surrogate_tree_data.tree = db_tree
             surrogate_tree_data.explained_classifier_model = classifier_model_data
             surrogate_tree_data.add_to_db()
-            
-        if db_model.should_stop:
-            db_model.percent_processed = 0
-            print("db_model.should_stop: ", db_model.should_stop)
-            return db_model.should_stop
+        
         db_model.percent_processed = 80
         db_model.process_message = "Guardando la base de datos del modelo..."
         db_model.db_commit()
 
         classifier_model_data.data_set_data = dataset_data
-        # classifier_model_data.importances_data = importances_data
-        # classifier_model_data.permutation_importances_data = (
-        #     permutation_importances_data
-        # )
-        if db_model.should_stop:
-            db_model.percent_processed = 0
-            print("db_model.should_stop: ", db_model.should_stop)
-            return db_model.should_stop
+        
         dataset_data_distribution_numeric.add_to_db()
         dataset_data_distribution_qualitative.add_to_db()
         dataset_data.add_to_db()
-        # for pi in permutation_importance_list:
-        #     pi.add_to_db()
-        # importances_data.add_to_db()
-        # permutation_importances_data.add_to_db()
         classifier_model_data.add_to_db()
         
-        if db_model.should_stop:
-            db_model.percent_processed = 0
-            print("db_model.should_stop: ", db_model.should_stop)
-            return db_model.should_stop
         db_model.percent_processed = 100
         db_model.process_message = "Completado !!!"
         db_model.db_commit()
@@ -412,8 +273,11 @@ def save_classifier():
                 print(cancel)
                 explainer: ExplainedClassifierModel = ExplainedClassifierModel.query.all()[-1]
                 print(explainer.name)
-                db_model.should_stop = True
-                explainer.delete_from_db()
+                if db_model.name == explainer.name:
+                    explainer.delete_from_db()
+                db_model.percent_processed = 0
+                db_model.db_commit()
+                
                 
             qualitative_variables_form = []
             df = db_model.getElement("dataset")
