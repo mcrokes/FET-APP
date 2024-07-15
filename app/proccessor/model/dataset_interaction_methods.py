@@ -56,12 +56,13 @@ def creating_qualitative_dict(variables):
 
 def get_modified_dataframe(df, target_description, qualitative_columns):
     new_df = df.copy()
-    target = target_description['column_name']
-    for value in target_description['variables']:
-        # noinspection PyTypeChecker
-        new_df.replace({f'{target}': value['old_value']},
-                   {f'{target}': value['new_value']},
-                   inplace=True)
+    if target_description:
+        target = target_description['column_name']
+        for value in target_description['variables']:
+            # noinspection PyTypeChecker
+            new_df.replace({f'{target}': value['old_value']},
+                    {f'{target}': value['new_value']},
+                    inplace=True)
 
     for q_variables_modified in qualitative_columns:
         print(q_variables_modified)

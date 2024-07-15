@@ -5,8 +5,6 @@
 {% endblock %}
 
 {% block stylesheets %}
-  <!-- Bulma -->
-  <!-- <link href="{{ url_for('static', filename='vendors/bulma/css/bulma.min.css') }}" rel="stylesheet" /> -->
   {{ super() }}
 
   <style>
@@ -118,7 +116,7 @@
                               {{ field(class='form-control custom-input', placeholder=field.label.text) }}
                             {% endif %}
                           </div>
-                        {% endfor %}
+                        {% endfor %}            
                       {% elif status == 'Second' %}
                         <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; width: 100%;">
                           <label for="target-slector">Columna de Clasificación</label>
@@ -153,7 +151,7 @@
                   </section>
 
                   <div class="navbar-right" style="padding-right: 5rem; justify-content: center; display: flex; padding-left: 5rem;">
-                    <button type="submit" id="cancel" hidden class="btn btn-warning submit" name="cancel" value="{{ status }}">
+                    <button type="submit" id="cancel" style="display: none;" class="btn btn-warning submit" name="cancel" value="{{ status }}">
                       {% if status == 'Create' %}
                         Cancelar
                       {% else %}
@@ -190,7 +188,7 @@
       const progress_message = document.getElementById('progress-message')
       const model_id = document.getElementById('model_id')
     
-      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/classifier/percent', {
+      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/model/percent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: model_id.value

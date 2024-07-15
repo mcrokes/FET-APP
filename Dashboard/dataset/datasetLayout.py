@@ -189,9 +189,11 @@ def datasetCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
-            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.id == model_id
+            classifier_model: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.explainer_model_id == model_id
             ).first()
+            
+            model_x = classifier_model.explainer_model
 
             original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
             original_df_with_index = original_df.rename_axis("Índice").reset_index()

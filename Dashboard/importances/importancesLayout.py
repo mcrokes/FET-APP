@@ -100,15 +100,17 @@ def importancesCallbacks(app, furl: Function):
         f = furl(cl)
         param1 = f.args["model_id"]
         try:
-            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.id == param1
+            classifer_model: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.explainer_model_id == param1
             ).first()
+            
+            model_x = classifer_model.explainer_model
 
             classifier_model: RandomForestClassifier = model_x.getElement("model")
             classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
                 "dataset"
             )
-            target_description = model_x.getElement("target_names_dict")
+            target_description = classifer_model.getElement("target_names_dict")
             old_class_names = [
                 element["old_value"] for element in target_description["variables"]
             ]

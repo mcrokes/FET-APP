@@ -1,6 +1,7 @@
 from bcrypt import gensalt, hashpw, checkpw
 from flask_login import UserMixin
 from sqlalchemy import BINARY, Column, Integer, String, Boolean
+from sqlalchemy.orm import relationship
 
 from app import db, login_manager
 
@@ -14,6 +15,20 @@ class User(db.Model, UserMixin):
     email = Column(String, unique=True)
     password = Column(BINARY)
     is_admin = Column(Boolean, default=False)
+    
+    model_for_proccess = relationship(
+        "ModelForProccess", back_populates="user", cascade="all, delete-orphan"
+    )
+    
+    classifier_models = relationship(
+        "ExplainedClassifierModel", back_populates="user", cascade="all, delete-orphan"
+    )
+    
+    regressor_models = relationship(
+        "ExplainedRegressorModel", back_populates="user", cascade="all, delete-orphan"
+    )
+    
+    
 
     def to_dict(self):
         return {
@@ -23,7 +38,7 @@ class User(db.Model, UserMixin):
         }
 
     def get_users_list():
-        return User.query.filter(not User.is_admin).all()
+        return User.query.filter(User.is_admin == False).all()  # noqa: E712
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():

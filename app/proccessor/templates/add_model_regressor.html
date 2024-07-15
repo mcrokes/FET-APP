@@ -1,0 +1,281 @@
+{% extends 'base_site.html' %}
+
+{% block title %}
+  Add Models
+{% endblock %}
+
+{% block stylesheets %}
+  {{ super() }}
+
+  <style>
+    .common_header {
+      font-family: monospace;
+      font-weight: 900;
+      margin: auto !important;
+      white-space: wrap;
+      text-align: center;
+    }
+    
+    .form-fields {
+      width: max-content;
+      margin: auto !important;
+      max-width: 100%;
+    }
+    @media (min-width: 800px) {
+      .custom-col {
+        width: 50%;
+      }
+    }
+    
+    @media (max-width: 800px) {
+      .custom-col {
+        float: unset !important;
+      }
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 5rem;
+      max-height: 10rem;
+    }
+    .custom-input,
+    .custom-file-input {
+      min-height: 5rem !important;
+      width: 100%;
+      max-width: 100%;
+      color: #444;
+      padding: 5px;
+      background: #fff;
+      border-radius: 4px !important;
+      height: unset;
+    }
+    .custom-file-input::file-selector-button {
+      margin-right: 20px;
+      border: none;
+      background: springgreen;
+      padding: 10px 20px;
+      border-radius: 4px;
+      color: #444;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+    
+    .custom-file-input::file-selector-text {
+      color: red;
+    }
+    
+    .custom-file-input:focus::file-selector-button,
+    .custom-file-input::file-selector-button:hover {
+      background: limegreen;
+      color: #fff;
+    }
+    
+    @media (min-width: 1200px) {
+      .custom-qualitative-col {
+        width: unset !important;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title" style="display: flex;">
+              <h2 class="common_header">Cargar Modelo de Regresión</h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <div class="container is-widescreen">
+                <form class="container" data-parsley-validate method="post" enctype="multipart/form-data">
+                  <section class="row justify-content-md-center form-fields">
+                    {% if status != 'Initial' %}
+                      <input type="text" id="model_id" name="model_id" value="{{ model_id }}" data-status="{{ status }}" hidden />
+                    {% endif %}
+                    {% if status == 'Create' %}
+                      <div class="progress" style="width: 70vw;">
+                        <div id="progress_bar" class="progress-bar" style="width: 0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                      </div>
+                      <div id="progress-message">Creating Dataset Distributions</div>
+                    {% else %}
+                      {% if status == 'Initial' %}
+                        {% for field in form if field.widget.input_type != 'hidden' %}
+                          <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                            {% if field.id != 'model-description' %}
+                              <span style="color: red;">*Requerido</span>
+                            {% else %}
+                              <span style="color: green;">*Opcional</span>
+                            {% endif %}
+                            {% if field.widget.input_type == 'file' %}
+                              {{ field(class='form-control custom-file-input', style='display: none', placeholder=field.label.text, accept=field.render_kw.accept) }}
+                              <label class="form-control custom-file-input" for="{{ field.id }}" style="align-items: center; display: flex;"><p id="{{ field.id }}-holder" style="font-weight: 100; color: darkgray; margin: 0; width: 500px;">{{ field.label.text }}</p></label>
+                            {% else %}
+                              {{ field(class='form-control custom-input', placeholder=field.label.text) }}
+                            {% endif %}
+                          </div>
+                        {% endfor %}
+                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                          <span style="color: green;">*Opcional</span>
+                          <input class="form-control custom-input" list="datalistOptions" id="exampleDataList" name="unit" placeholder="Elige o escribe la unidad de Medida" />
+                          <datalist id="datalistOptions" style="background-color: white;">
+                            <option value="$" />
+                            <option value="%" />
+                            <option value="Ltr" />
+                            <option value="g" />
+                            <option value="kg" />
+                            <option value="cm" />
+                            <option value="dm" />
+                            <option value="m" />
+                            <option value="km" />
+                          </datalist>
+                        </div>
+                      {% elif status == 'Second' %}
+                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; width: 100%;">
+                          <label for="target-slector">Columna de Clasificación</label>
+                          <select name="target" id="target-slector" class="form-control custom-input form-select form-select-lg mb-3" aria-label="Large select example">
+                            {% for option in form %}
+                              <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      {% elif status == 'Add' %}
+                        <h5 style="padding-left: 5rem;">Descripción de variables.</h5>
+                        {% for var in variables %}
+                          <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                            <label for="">{{ var }}</label>
+                            <textarea class="form-control custom-input" placeholder="Descripción..." type="text" name="{{ var }}"></textarea>
+                          </div>
+                        {% endfor %}
+                        <h5 style="padding-left: 5rem;">Valores de las posibles variables cualitativas.</h5>
+                        {% for col in form %}
+                          <input type="text" name="Q-Variable-{{ col.name }}" value="{{ col.name }}" hidden />
+                          <div class="col col-lg-6 custom-col custom-qualitative-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                            <label for="">{{ col.name }}</label>
+                            {% for var in col.variables %}
+                              <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                                <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
+                              </div>
+                            {% endfor %}
+                          </div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endif %}
+                  </section>
+
+                  <div class="navbar-right" style="padding-right: 5rem; justify-content: center; display: flex; padding-left: 5rem;">
+                    <button type="submit" id="cancel" style="display: none;" class="btn btn-warning submit" name="cancel" value="{{ status }}">
+                      {% if status == 'Create' %}
+                        Cancelar
+                      {% else %}
+                        Atrás
+                      {% endif %}
+                    </button>
+                    <button type="submit" id="submit" disabled class="btn btn-default submit" name="{{ status }}">
+                      {% if status == 'Create' %}
+                        Aceptar
+                      {% elif status != 'Add' %}
+                        Siguiente
+                      {% else %}
+                        Crear
+                      {% endif %}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ super() }}
+  <script>
+    let interval = 0
+    const getProgressPercent = async () => {
+      // get
+      const progress_bar = document.getElementById('progress_bar')
+      const progress_message = document.getElementById('progress-message')
+      const model_id = document.getElementById('model_id')
+    
+      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/model/percent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: model_id.value
+      })
+    
+      res = await response.json().then((value) => {
+        progress_bar.style.width = `${value[0].percent}%`
+        progress_bar.ariaValueNow = value[0].percent
+        progress_bar.innerHTML = `${value[0].percent}%`
+        progress_message.innerHTML = value[0].message
+        console.log(value[0])
+        return value[0].percent
+      })
+    
+      if (res >= 100) {
+        clearInterval(interval)
+        add_button.disabled = false
+        cancel_button.disabled = false
+      } else {
+        add_button.disabled = true
+        cancel_button.disabled = true
+      }
+    }
+    
+    const add_button = document.getElementById('submit')
+    const cancel_button = document.getElementById('cancel')
+    
+    cancel_button.addEventListener('click', () => {
+      //cancel_button.value = 'cancel'
+    })
+    
+    const model_name_field = document.getElementById('model-name')
+    const model_field = document.getElementById('model')
+    const model_description_field = document.getElementById('model-description')
+    const model_data_set_field = document.getElementById('model-data-set')
+    
+    const model_field_holder = document.getElementById('model-holder')
+    const model_data_set_field_holder = document.getElementById('model-data-set-holder')
+    
+    const verify_imputs = () => {
+      if (model_name_field == null || (model_name_field.value && model_field.value && model_data_set_field.value)) {
+        add_button.disabled = false
+        add_button.classList.remove('btn-danger')
+        add_button.classList.add('btn-success')
+        if (model_name_field == null) cancel_button.style.display = ''
+        console.log('ACTIVATED')
+      } else {
+        add_button.disabled = true
+        add_button.classList.remove('btn-success')
+        add_button.classList.add('btn-danger')
+        cancel_button.style.display = 'none'
+        console.log('DEACTIVATED')
+      }
+      if (model_data_set_field && model_data_set_field.value) {
+        model_data_set_field_holder.innerHTML = model_data_set_field.value
+        model_data_set_field_holder.style.color = 'black'
+      }
+      if (model_field && model_field.value) {
+        model_field_holder.innerHTML = model_field.value
+        model_field_holder.style.color = 'black'
+      }
+    }
+    
+    const manage_percent = async () => {
+      const model_id = document.getElementById('model_id')
+      if (model_id && model_id.dataset.status == 'Create') {
+        interval = setInterval(await getProgressPercent, 3000)
+      }
+    }
+    
+    window.addEventListener('DOMContentLoaded', manage_percent)
+    window.addEventListener('DOMContentLoaded', verify_imputs)
+    window.addEventListener('input', verify_imputs)
+  </script>
+{% endblock %}

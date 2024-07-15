@@ -511,16 +511,18 @@ def metricsCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
-            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.id == model_id
+            classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.explainer_model_id == model_id
             ).first()
+            
+            model_x = classifier_dbmodel.explainer_model
 
             classifier_model: RandomForestClassifier = model_x.getElement("model")
             classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
                 "dataset"
             )
 
-            target_description = model_x.getElement("target_names_dict")
+            target_description = classifier_dbmodel.getElement("target_names_dict")
             class_names = [
                 element["new_value"] for element in target_description["variables"]
             ]
@@ -599,16 +601,18 @@ def metricsCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
-            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.id == model_id
+            classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.explainer_model_id == model_id
             ).first()
+            
+            model_x = classifier_dbmodel.explainer_model
 
             classifier_model: RandomForestClassifier = model_x.getElement("model")
             classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
                 "dataset"
             )
 
-            target_description = model_x.getElement("target_names_dict")
+            target_description = classifier_dbmodel.getElement("target_names_dict")
 
             if positive_class or slider or cutoff:
                 if cutoff and positive_class is not None:

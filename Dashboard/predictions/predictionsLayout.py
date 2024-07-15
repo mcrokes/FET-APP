@@ -409,12 +409,15 @@ def predictionsCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
-            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.id == model_id
+            classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.explainer_model_id == model_id
             ).first()
+            
+            model_x = classifier_dbmodel.explainer_model
+            
             ds = model_x.data_set_data.getElement("dataset")
             x_test = ds.drop(columns=model_x.getElement("target_row"))
-            target_description = model_x.getElement("target_names_dict")
+            target_description = classifier_dbmodel.getElement("target_names_dict")
             options = []
             for index, _ in x_test.iterrows():
                 options.append({"label": index, "value": index})
@@ -451,11 +454,13 @@ def predictionsCallbacks(app, furl: Function):
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
-                model_x: ExplainedClassifierModel = (
+                classifier_dbmodel: ExplainedClassifierModel = (
                     ExplainedClassifierModel.query.filter(
-                        ExplainedClassifierModel.id == model_id
+                        ExplainedClassifierModel.explainer_model_id == model_id
                     ).first()
                 )
+                
+                model_x = classifier_dbmodel.explainer_model
 
                 ds = model_x.data_set_data.getElement("dataset")
                 x_test = ds.drop(columns=model_x.getElement("target_row"))
@@ -467,7 +472,7 @@ def predictionsCallbacks(app, furl: Function):
                     current_class=positive_class,
                     class_names=[
                         var["new_value"]
-                        for var in model_x.getElement("target_names_dict")["variables"]
+                        for var in classifier_dbmodel.getElement("target_names_dict")["variables"]
                     ],
                     instance=instance,
                     model=model_x.getElement("model"),
@@ -515,11 +520,13 @@ def predictionsCallbacks(app, furl: Function):
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
-                model_x: ExplainedClassifierModel = (
+                classifier_dbmodel: ExplainedClassifierModel = (
                     ExplainedClassifierModel.query.filter(
-                        ExplainedClassifierModel.id == model_id
+                        ExplainedClassifierModel.explainer_model_id == model_id
                     ).first()
                 )
+                
+                model_x = classifier_dbmodel.explainer_model
                 ds = model_x.data_set_data.getElement("dataset")
                 dsModified = model_x.data_set_data.getElement("dataset_modified")
                 x_test = ds.drop(columns=model_x.getElement("target_row"))
@@ -537,7 +544,7 @@ def predictionsCallbacks(app, furl: Function):
                 )
                 class_names = [
                     var["new_value"]
-                    for var in model_x.getElement("target_names_dict")["variables"]
+                    for var in classifier_dbmodel.getElement("target_names_dict")["variables"]
                 ]
                 contribution_graph_data, general_dict, predictions_graph_data = (
                     getTreeInterpreterParamethers(

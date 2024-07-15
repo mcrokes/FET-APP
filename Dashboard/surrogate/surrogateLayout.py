@@ -10,8 +10,8 @@ from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
 from app.proccessor.models import (
-    ExplainedClassifierModel,
-    SurrogateTreeClassifierData,
+    ExplainedModel,
+    SurrogateTreeData,
     Tree,
 )
 id_sufix = ["surrogate"]
@@ -146,22 +146,22 @@ def surrogateCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
 
-        surrogate_model: SurrogateTreeClassifierData = (
-            SurrogateTreeClassifierData.query.filter(
-                SurrogateTreeClassifierData.explained_classifier_model_id == model_id
+        surrogate_model: SurrogateTreeData = (
+            SurrogateTreeData.query.filter(
+                SurrogateTreeData.explained_model_id == model_id
             )
-            .join(SurrogateTreeClassifierData.tree)
+            .join(SurrogateTreeData.tree)
             .filter(Tree.depth == max_depht)
             .first()
         )
 
         lenght = len(
-            SurrogateTreeClassifierData.query.filter(
-                SurrogateTreeClassifierData.explained_classifier_model_id == model_id
+            SurrogateTreeData.query.filter(
+                SurrogateTreeData.explained_model_id == model_id
             ).all()
         )
 
-        model_x: ExplainedClassifierModel = surrogate_model.explained_classifier_model
+        model_x: ExplainedModel = surrogate_model.explained_model
         rules = ExplainSingleTree.get_rules(
             model=surrogate_model.getElement("tree_model").tree_,
             q_variables=[
@@ -171,9 +171,9 @@ def surrogateCallbacks(app, furl: Function):
             features=surrogate_model.getElement("tree_model").feature_names_in_,
             class_names=[
                 var["new_value"]
-                for var in model_x.getElement("target_names_dict")["variables"]
+                for var in model_x.explainer_classifier.getElement("target_names_dict")["variables"]
             ],
-            target=model_x.getElement("target_row"),
+            type="Classifier"
         )
 
         rules_table = []
@@ -273,28 +273,28 @@ def surrogateCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
 
-        surrogate_model: SurrogateTreeClassifierData = (
-            SurrogateTreeClassifierData.query.filter(
-                SurrogateTreeClassifierData.explained_classifier_model_id == model_id
+        surrogate_model: SurrogateTreeData = (
+            SurrogateTreeData.query.filter(
+                SurrogateTreeData.explained_model_id == model_id
             )
-            .join(SurrogateTreeClassifierData.tree)
+            .join(SurrogateTreeData.tree)
             .filter(Tree.depth == max_depht)
             .first()
         )
 
-        model_x: ExplainedClassifierModel = surrogate_model.explained_classifier_model
+        model_x: ExplainedModel = surrogate_model.explained_model
 
         model: DecisionTreeClassifier = surrogate_model.getElement("tree_model")
 
         dataset: pd.DataFrame = (
-            surrogate_model.explained_classifier_model.data_set_data.getElement(
+            surrogate_model.explained_model.data_set_data.getElement(
                 "dataset"
             )
         )
-        target_row: str = surrogate_model.explained_classifier_model.getElement(
+        target_row: str = surrogate_model.explained_model.getElement(
             "target_row"
         )
-        target_description = model_x.getElement("target_names_dict")
+        target_description = model_x.explainer_classifier.getElement("target_names_dict")
         class_names = [
             element["new_value"] for element in target_description["variables"]
         ]

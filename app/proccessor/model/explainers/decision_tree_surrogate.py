@@ -15,7 +15,7 @@ matplotlib.use('SVG')
 class ExplainSingleTree:
     
     @staticmethod
-    def get_rules(model, q_variables, q_variables_values, features, class_names, target):
+    def get_rules(model, q_variables, q_variables_values, features, class_names, type):
         tree_ = model
         feature_name = [
             features[i] if i != _tree.TREE_UNDEFINED else "undefined!"
@@ -151,7 +151,7 @@ class ExplainSingleTree:
             rule["causes"] = path[:-1]
             classes = path[-1][0][0]
             position = np.argmax(classes)
-            rule["target_value"] = class_names[position]
+            rule["target_value"] = class_names[position] if type == "Classifier" else position
             rule["probability"] = np.round(100.0 * classes[position] / np.sum(classes), 2)
             rule["samples_amount"] = path[-1][1]
             rules.append(rule)
