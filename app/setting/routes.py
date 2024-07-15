@@ -21,20 +21,6 @@ def get_Users():
 @login_required
 def manage_Users():
     if check_admin():
-        # form = add_user_Form(request.form)
-        users = User.get_users_list()
-        print(users)
-        # if "Add" in request.form:
-        #     user = User.query.filter_by(username=request.form["username"]).first()
-        #     email = User.query.filter_by(email=request.form["email"]).first()
-        #     if user:
-        #         status = "Username is existing"
-        #     elif email:
-        #         status = "Email is existing"
-        #     else:
-        #         User(**request.form).add_to_db()
-        #         status = "Add user success !"
-        #     return render_template("add_user.html", form=form, status=status)
         return render_template("manage_users.html")
     return redirect("/page_403")
 

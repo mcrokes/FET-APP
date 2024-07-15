@@ -14,6 +14,7 @@ from app.proccessor.models import (
     ExplainedClassifierModel,
 )
 
+id_sufix = ["trees"]
 specificTreesLayout = html.Div(
     [
         dcc.Loading(
@@ -39,6 +40,32 @@ specificTreesLayout = html.Div(
                         ),
                     ],
                     className="tree-creator",
+                ),
+                html.Div(
+                    [
+                        html.I(
+                            id=f"{id_sufix[0]}-info",
+                            className="fa fa-info-circle info-icon",
+                        ),
+                        dbc.Tooltip(
+                            [
+                                html.Plaintext(
+                                    [
+                                        "Árbol de Decisión: Un ",
+                                        html.Strong("componente independiente"),
+                                        "  del modelo de Random Forest que contribuye a la predicción final mediante la ",
+                                        html.Strong("combinación de sus resultados"),
+                                        " con los de otros árboles. Cada árbol se entrena con una ",
+                                        html.Strong("muestra aleatoria"),
+                                        " de características y ejemplos.",
+                                    ]
+                                ),
+                            ],
+                            className="personalized-tooltip",
+                            target=f"{id_sufix[0]}-info",
+                        ),
+                    ],
+                    style={"display": "flex", "justify-content": "end"},
                 ),
                 dbc.Row(
                     [
@@ -120,9 +147,11 @@ def specificTreesCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
 
-        model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-            ExplainedClassifierModel.id == model_id
+        classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+            ExplainedClassifierModel.explainer_model_id == model_id
         ).first()
+        
+        model_x = classifier_dbmodel.explainer_model
 
         model: RandomForestClassifier = model_x.getElement("model")
 
@@ -137,9 +166,9 @@ def specificTreesCallbacks(app, furl: Function):
             features=model.feature_names_in_,
             class_names=[
                 var["new_value"]
-                for var in model_x.getElement("target_names_dict")["variables"]
+                for var in classifier_dbmodel.getElement("target_names_dict")["variables"]
             ],
-            target=model_x.getElement("target_row"),
+            type="Classifier"
         )
 
         rules_table = []
@@ -239,16 +268,19 @@ def specificTreesCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
 
-        model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-            ExplainedClassifierModel.id == model_id
+        classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+            ExplainedClassifierModel.explainer_model_id == model_id
         ).first()
+        
+        model_x = classifier_dbmodel.explainer_model
+        
 
         model: RandomForestClassifier = model_x.getElement("model")
 
         model: DecisionTreeClassifier = model.estimators_[tree_number]
         dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
         target_row: str = model_x.getElement("target_row")
-        target_description = model_x.getElement("target_names_dict")
+        target_description = classifier_dbmodel.getElement("target_names_dict")
         class_names = [
             element["new_value"] for element in target_description["variables"]
         ]

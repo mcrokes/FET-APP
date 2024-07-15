@@ -16,14 +16,14 @@
                 <div class="animate form login_form">
                   <section class="login_content">
                     <form data-parsley-validate method="post">
-                      <h1>Add User</h1>
+                      <h1>Crear Usuario</h1>
                       {% for field in form if field.widget.input_type != 'hidden'  %}
                         <div>
                           {{ field(class="form-control required", placeholder=field.label.text) }}
                         </div>
                       {% endfor %}
                       <div>
-                      <button type="submit" class="btn btn-default submit" name="Add"> Add </button>
+                      <button type="submit" class="btn btn-default submit" name="Add"> Crear </button>
                       </div>
                       <div class="clearfix"></div>
                     </form>

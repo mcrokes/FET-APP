@@ -2,17 +2,17 @@ from ctypes import Array
 import threading
 import time
 
-from app.proccessor.forms import add_classifier
-from app.proccessor.models import ExplainedClassifierModel
+from app.proccessor.models import ExplainedClassifierModel, ExplainedRegressorModel, ExplainedModel
 from app.proccessor.models import ModelForProccess
 from . import blueprint
 from flask import current_app, make_response, render_template, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 import pandas as pd
 
 import joblib
 
-@blueprint.route("/classifier/percent", methods=["GET", "POST"])
+
+@blueprint.route("/model/percent", methods=["GET", "POST"])
 @login_required
 def get_percent():
     db_model: ModelForProccess = ModelForProccess.query.filter(
@@ -25,10 +25,21 @@ def get_percent():
 
 @blueprint.route("/classifier/list", methods=["GET", "POST"])
 @login_required
-def get_list():
-    db_model: ExplainedClassifierModel = ExplainedClassifierModel.query.all()
-    # db_model: ModelForProccess = ModelForProccess.query.all()
+def get_classifier_list():
+    print("current_user: ", current_user.id)
+    classifiers: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(ExplainedClassifierModel.user_id == current_user.id).all()
     response = []
-    for model in db_model:
+    for classifier in classifiers:
+        model: ExplainedModel = classifier.explainer_model
+        response.append({"id": model.id, "name": model.name})
+    return make_response(response)
+
+@blueprint.route("/regressor/list", methods=["GET", "POST"])
+@login_required
+def get_regressor_list():
+    regressors: ExplainedRegressorModel = ExplainedRegressorModel.query.filter(ExplainedRegressorModel.user_id == current_user.id).all()
+    response = []
+    for regressor in regressors:
+        model: ExplainedModel = regressor.explainer_model
         response.append({"id": model.id, "name": model.name})
     return make_response(response)

@@ -134,9 +134,35 @@ datasetLayout = html.Div(
                             className="rules-title",
                         ),
                         dbc.Row(id="object-plot"),
-                        html.Plaintext(
-                            "Correlación de Variables",
-                            className="rules-title",
+                        html.Div(
+                            [
+                                html.Plaintext(
+                                    "Correlación de Variables",
+                                    className="rules-title",
+                                ),
+                                html.I(
+                                    id="correlation-info",
+                                    className="fa fa-info-circle info-icon",
+                                ),
+                                dbc.Tooltip(
+                                    [
+                                        html.Plaintext(
+                                            [
+                                                "Correlación: Medida de la relación entre dos variables, que varía de -1 (correlación negativa) a 1 (correlación positiva). ",
+                                                html.Strong("Valores positivos"),
+                                                " indican que las variables aumentan o disminuyen juntas, mientras que ",
+                                                html.Strong("valores negativos"),
+                                                " indican que una variable aumenta cuando la otra disminuye. Valores ",
+                                                html.Strong("cercanos a 0"),
+                                                " indican poca o ninguna correlación.",
+                                            ]
+                                        ),
+                                    ],
+                                    className="personalized-tooltip",
+                                    target="correlation-info",
+                                ),
+                            ],
+                            className="title-hint-container",
                         ),
                         html.Div(id="correlation-plot"),
                     ],
@@ -163,9 +189,11 @@ def datasetCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
-            model_x: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.id == model_id
+            classifier_model: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                ExplainedClassifierModel.explainer_model_id == model_id
             ).first()
+            
+            model_x = classifier_model.explainer_model
 
             original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
             original_df_with_index = original_df.rename_axis("Índice").reset_index()
