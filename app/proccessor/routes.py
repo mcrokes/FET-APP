@@ -514,7 +514,7 @@ def save_regressor():
             qualitative_variables_form = []
             df = db_model.getElement("dataset")
             for column in df:
-                if len(set(df[column])) < 5 or column == db_model.target_row:
+                if len(set(df[column])) < 5 and column != db_model.target_row:
                     qualitative_variables_form.append(
                         {
                             "name": column,
