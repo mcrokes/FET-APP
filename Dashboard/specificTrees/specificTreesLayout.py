@@ -104,7 +104,8 @@ specificTreesLayout = html.Div(
                                 html.Plaintext(
                                     [
                                         "* Para visualizar el árbol deberá instalar el software ",
-                                        html.Strong("Graphviz"),
+                                        html.Strong(
+                                            html.A("Graphviz", href="https://graphviz.org/download/", target='_blank')),
                                         " en su ordenador.",
                                     ]
                                 ),
@@ -116,6 +117,7 @@ specificTreesLayout = html.Div(
                                     ]
                                 ),
                             ],
+                            autohide=False,
                             className="personalized-tooltip",
                             target="s-build-tree-btn",
                         ),
@@ -150,7 +152,7 @@ def specificTreesCallbacks(app, furl: Function):
         classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
             ExplainedClassifierModel.explainer_model_id == model_id
         ).first()
-        
+
         model_x = classifier_dbmodel.explainer_model
 
         model: RandomForestClassifier = model_x.getElement("model")
@@ -271,9 +273,8 @@ def specificTreesCallbacks(app, furl: Function):
         classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
             ExplainedClassifierModel.explainer_model_id == model_id
         ).first()
-        
+
         model_x = classifier_dbmodel.explainer_model
-        
 
         model: RandomForestClassifier = model_x.getElement("model")
 

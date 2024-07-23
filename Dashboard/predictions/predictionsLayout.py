@@ -390,7 +390,7 @@ def predictionsCallbacks(app, furl: Function):
                 x=["Acumulado", "Predicción Final"],
                 y=[point, point],
                 mode="lines",
-                name=f"Actual ({round(point, 3)}) {round(point/(data["prediction"] if data["prediction"] > 0 else 1) * 100, 2)}%",
+                name=f"Actual ({round(point, 3)}) {round(point/(data['prediction'] if data['prediction'] > 0 else 1) * 100, 2)}%",
                 line=dict(dash="dash"),
             )
             figure["data"].append(trace)
@@ -481,7 +481,7 @@ def predictionsCallbacks(app, furl: Function):
 
                 return [
                     html.Div(
-                        id=f"contribution_graph_{data["class_name"]}",
+                        id=f"contribution_graph_{data['class_name']}",
                         children=dcc.Graph(
                             figure=setBottomLegend(
                                 go.Figure(
@@ -619,7 +619,7 @@ def predictionsCallbacks(app, furl: Function):
                     ),
                     [
                         html.Div(
-                            id=f"contribution_graph_{data["class_name"]}",
+                            id=f"contribution_graph_{data['class_name']}",
                             children=dcc.Graph(
                                 id="test_graph",
                                 figure=getFigure(

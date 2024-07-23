@@ -6,7 +6,7 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objects as go
-from app.proccessor.models import ExplainedClassifierModel
+from app.proccessor.models import ExplainedClassifierModel, ExplainedModel
 
 
 def generateDataSetDistributions(df: pd.DataFrame):
@@ -148,7 +148,8 @@ datasetLayout = html.Div(
                                     [
                                         html.Plaintext(
                                             [
-                                                "Correlación: Medida de la relación entre dos variables, que varía de -1 (correlación negativa) a 1 (correlación positiva). ",
+                                                "Correlación: Medida de la relación entre dos variables, que varía de "
+                                                "-1 (correlación negativa) a 1 (correlación positiva). ",
                                                 html.Strong("Valores positivos"),
                                                 " indican que las variables aumentan o disminuyen juntas, mientras que ",
                                                 html.Strong("valores negativos"),
@@ -183,17 +184,16 @@ def datasetCallbacks(app, furl: Function):
         Output("numeric-plot", "children"),
         Output("object-plot", "children"),
         Output("correlation-plot", "children"),
+        State("path", "pathname"),
         Input("path", "href"),
     )
-    def graph_explainers(cl):
+    def graph_explainers(name, cl):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
-            classifier_model: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.explainer_model_id == model_id
+            model_x: ExplainedModel = ExplainedModel.query.filter(
+                ExplainedModel.id == model_id
             ).first()
-            
-            model_x = classifier_model.explainer_model
 
             original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
             original_df_with_index = original_df.rename_axis("Índice").reset_index()
@@ -254,7 +254,7 @@ def datasetCallbacks(app, furl: Function):
                 ),
                 [
                     dbc.Col(
-                        id=f"contribution_graph_{data["predictor"]}",
+                        id=f"contribution_graph_{data['predictor']}",
                         children=dcc.Graph(
                             figure=setBottomLegend(
                                 go.Figure(
@@ -274,7 +274,7 @@ def datasetCallbacks(app, furl: Function):
                 ],
                 [
                     dbc.Col(
-                        id=f"contribution_graph_{data["predictor"]}",
+                        id=f"contribution_graph_{data['predictor']}",
                         children=dcc.Graph(
                             figure=setBottomLegend(
                                 go.Figure(

@@ -4,8 +4,8 @@ import pickle
 import matplotlib
 
 from dtreeviz import model
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier, _tree
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.tree import DecisionTreeClassifier, _tree, DecisionTreeRegressor
 import numpy as np
 
 from app.proccessor.model.dataset_interaction_methods import get_y_transformed
@@ -179,13 +179,16 @@ class ExplainSingleTree:
             return ""
     
     @staticmethod
-    def createSurrogateTree(x_train, model: RandomForestClassifier, max_depth: int):
-        surrogate: DecisionTreeClassifier = DecisionTreeClassifier(max_depth=max_depth, random_state=123)
-        surrogate.fit(X=x_train, y=get_y_transformed(model.predict(x_train)))
+    def createSurrogateTree(x_train, trainedModel: RandomForestClassifier | RandomForestRegressor, max_depth: int):
+        if isinstance(trainedModel, RandomForestClassifier):
+            surrogate: DecisionTreeClassifier = DecisionTreeClassifier(max_depth=max_depth, random_state=123)
+            surrogate.fit(X=x_train, y=get_y_transformed(trainedModel.predict(x_train)))
+        else:
+            surrogate: DecisionTreeRegressor = DecisionTreeRegressor(max_depth=max_depth, random_state=123)
+            surrogate.fit(X=x_train, y=trainedModel.predict(x_train))
         return surrogate
      
-class SurrogateTree:  
-    
+class SurrogateTree:
     
     def __init__(self, x_train, model: RandomForestClassifier, df, class_names, target, max_depth: int):
         self.__surrogate_t = DecisionTreeClassifier(max_depth=max_depth)

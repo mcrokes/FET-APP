@@ -134,7 +134,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
             )
             db_model.db_commit()
             surrogate_tree = ExplainSingleTree.createSurrogateTree(
-                model=db_model_model,
+                trainedModel=db_model_model,
                 x_train=db_model_dataset.drop(columns=db_model_target_row),
                 max_depth=tree_depth,
             )
@@ -301,7 +301,13 @@ def save_classifier():
             ).first()
 
             if cancel != "Create":
+                possible_not_needed_variables = list(
+                    set(db_model.getElement("dataset").columns)
+                    - set(db_model.getElement("model").feature_names_in_)
+                )
                 db_model.target_row = request.form["target"]
+                db_model.dataset = db_model.getElement("dataset").drop(
+                    columns=possible_not_needed_variables.remove(request.form["target"]))
                 db_model.db_commit()
             else:
                 print(cancel)
@@ -496,7 +502,18 @@ def save_regressor():
             ).first()
 
             if cancel != "Create":
+                possible_not_needed_variables = list(
+                    set(db_model.getElement("dataset").columns)
+                    - set(db_model.getElement("model").feature_names_in_)
+                )
+                possible_not_needed_variables.remove(request.form["target"])
+                print("Possible Not Needeed: ", possible_not_needed_variables)
                 db_model.target_row = request.form["target"]
+                db_model.setElements(
+                    **{
+                        "dataset": db_model.getElement("dataset").drop(
+                            columns=possible_not_needed_variables)
+                    })
                 db_model.db_commit()
             else:
                 print(cancel)
@@ -558,10 +575,9 @@ def save_regressor():
                 elif "Q-Variable" in element or element == "Add":
                     value_number = 0
                     if q_dict != {}:
-                        if q_dict["column_name"] == db_model.target_row:
-                            target_description = q_dict
-                        else:
+                        if q_dict["column_name"] != db_model.target_row:
                             qualitative_variables_saved.append(q_dict)
+
                     if element != "Add":
                         q_dict = {
                             "column_name": request.form[element],
@@ -590,7 +606,6 @@ def save_regressor():
         db_model.setElements(
             **{
                 "qualitative_variables_saved": qualitative_variables_saved,
-                "target_description": target_description,
                 "features_description": features_description,
             }
         )
@@ -601,7 +616,6 @@ def save_regressor():
             args=(db_model.id, current_app.app_context(), user_id, "Regressor"),
         )
         x.start()
-        x.daemon
         # Function to add, the models
         return render_template(
             "add_model_regressor.html", model_id=db_model.id, status="Create"

@@ -64,7 +64,6 @@ class dbInteractionMethods:
 
 
 class ModelForProccess(db.Model, dbInteractionMethods):
-
     __tablename__ = "model_for_proccess"
 
     id = Column(Integer, primary_key=True)
@@ -80,7 +79,7 @@ class ModelForProccess(db.Model, dbInteractionMethods):
     target_description = Column(String)  # Encoded
     features_description = Column(String)  # Encoded
     should_stop = Column(Boolean, default=False)
-    
+
     user_id = Column(
         Integer, ForeignKey("User.id")
     )
@@ -95,27 +94,28 @@ class ModelForProccess(db.Model, dbInteractionMethods):
         return str(self.name)
 
     def getElement(
-        self,
-        name: Literal[
-            "id",
-            "name",
-            "model",
-            "dataset",
-            "description",
-            "target_row",
-            "percent_processed",
-            "process_message",
-            "features_description",
-            "q_variables_dict",
-            "should_stop",
-            "unit",
-        ],
+            self,
+            name: Literal[
+                "id",
+                "name",
+                "model",
+                "dataset",
+                "description",
+                "target_row",
+                "percent_processed",
+                "process_message",
+                "target_description",
+                "qualitative_variables_saved",
+                "features_description",
+                "q_variables_dict",
+                "should_stop",
+                "unit",
+            ],
     ):
         return super().getElement(name)
 
 
 class ExplainedModel(db.Model, dbInteractionMethods):
-
     __tablename__ = "explained_model"
 
     id = Column(Integer, primary_key=True)
@@ -134,15 +134,17 @@ class ExplainedModel(db.Model, dbInteractionMethods):
     __mapper_args__ = {
         "polymorphic_identity": "explained_model",
     }
-    
+
     explainer_classifier = relationship(
-        "ExplainedClassifierModel", uselist=False, back_populates="explainer_model", single_parent=True, cascade="all, delete-orphan"
+        "ExplainedClassifierModel", uselist=False, back_populates="explainer_model", single_parent=True,
+        cascade="all, delete-orphan"
     )
-    
+
     explainer_regressor = relationship(
-        "ExplainedRegressorModel", uselist=False, back_populates="explainer_model", single_parent=True, cascade="all, delete-orphan"
+        "ExplainedRegressorModel", uselist=False, back_populates="explainer_model", single_parent=True,
+        cascade="all, delete-orphan"
     )
-    
+
     data_set_data = relationship(
         "DataSetData", uselist=False, back_populates="explained_model", cascade="all, delete-orphan"
     )
@@ -152,28 +154,28 @@ class ExplainedModel(db.Model, dbInteractionMethods):
 
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
-    
+
     def getElement(
-        self,
-        name: Literal[
-            "id",
-            "name",
-            "model",
-            "indexesDict",
-            "indexColumnName",
-            "model_description",
-            "features_description",
-            "target_row",
-            "q_variables_dict",
-            "test_size",
-            "random_state",
-            "type",
-        ],
+            self,
+            name: Literal[
+                "id",
+                "name",
+                "model",
+                "indexesDict",
+                "indexColumnName",
+                "model_description",
+                "features_description",
+                "target_row",
+                "q_variables_dict",
+                "test_size",
+                "random_state",
+                "type",
+            ],
     ):
         return super().getElement(name)
 
-class ExplainedRegressorModel(db.Model, dbInteractionMethods):
 
+class ExplainedRegressorModel(db.Model, dbInteractionMethods):
     __tablename__ = "explained_regressor_model"
 
     __mapper_args__ = {
@@ -182,26 +184,27 @@ class ExplainedRegressorModel(db.Model, dbInteractionMethods):
 
     unit = Column(String)
     explainer_model_id = Column(Integer, ForeignKey("explained_model.id"), primary_key=True)
-    explainer_model = relationship("ExplainedModel", uselist=False, back_populates="explainer_regressor", single_parent=True, cascade="all, delete-orphan")
+    explainer_model = relationship("ExplainedModel", uselist=False, back_populates="explainer_regressor",
+                                   single_parent=True, cascade="all, delete-orphan")
     user_id = Column(
         Integer, ForeignKey("User.id")
     )
-   
+
     user = relationship(
         "User", uselist=False, back_populates="regressor_models"
     )
-    
+
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
     def getElement(
-        self,
-        name: Literal["unit",],
+            self,
+            name: Literal["unit",],
     ):
         return super().getElement(name)
 
-class ExplainedClassifierModel(db.Model, dbInteractionMethods):
 
+class ExplainedClassifierModel(db.Model, dbInteractionMethods):
     __tablename__ = "explained_classifier_model"
 
     __mapper_args__ = {
@@ -210,26 +213,26 @@ class ExplainedClassifierModel(db.Model, dbInteractionMethods):
 
     target_names_dict = Column(String)  # Encoded
     explainer_model_id = Column(Integer, ForeignKey("explained_model.id"), primary_key=True)
-    explainer_model = relationship("ExplainedModel", uselist=False, back_populates="explainer_classifier", single_parent=True, cascade="all, delete-orphan")
+    explainer_model = relationship("ExplainedModel", uselist=False, back_populates="explainer_classifier",
+                                   single_parent=True, cascade="all, delete-orphan")
     user_id = Column(
         Integer, ForeignKey("User.id")
     )
     user = relationship(
         "User", uselist=False, back_populates="classifier_models"
     )
-    
+
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
     def getElement(
-        self,
-        name: Literal["target_names_dict",],
+            self,
+            name: Literal["target_names_dict",],
     ):
         return super().getElement(name)
 
 
 class DataSetData(db.Model, dbInteractionMethods):
-
     __tablename__ = "data_set_data"
 
     dataset = Column(String)  # Encoded
@@ -250,17 +253,16 @@ class DataSetData(db.Model, dbInteractionMethods):
     )
 
     def getElement(
-        self,
-        name: Literal[
-            "dataset",
-            "dataset_modified",
-        ],
+            self,
+            name: Literal[
+                "dataset",
+                "dataset_modified",
+            ],
     ):
         return super().getElement(name)
 
 
 class DataSetDataDistribution(db.Model, dbInteractionMethods):
-
     __tablename__ = "data_set_data_distribution"
 
     id = Column(Integer, primary_key=True)
@@ -281,20 +283,20 @@ class DataSetDataDistribution(db.Model, dbInteractionMethods):
     )
 
     def getElement(
-        self,
-        name: Literal[
-            "id",
-            "isNumeric",
-            "rows_amount",
-            "columns_amount",
-            "isPrime",
-            "distribution_dataset",
-        ],
+            self,
+            name: Literal[
+                "id",
+                "isNumeric",
+                "rows_amount",
+                "columns_amount",
+                "isPrime",
+                "distribution_dataset",
+            ],
     ):
         return super().getElement(name)
 
-class Tree(db.Model, dbInteractionMethods):
 
+class Tree(db.Model, dbInteractionMethods):
     __tablename__ = "tree"
 
     id = Column(Integer, primary_key=True)
@@ -316,19 +318,18 @@ class Tree(db.Model, dbInteractionMethods):
     rules = relationship("TreeRule", back_populates="tree", cascade="all, delete-orphan")
 
     def getElement(
-        self,
-        name: Literal[
-            "id",
-            "depth",
-            "rules_amount",
-            "inexact_rules_amount",
-        ],
+            self,
+            name: Literal[
+                "id",
+                "depth",
+                "rules_amount",
+                "inexact_rules_amount",
+            ],
     ):
         return super().getElement(name)
 
 
 class SurrogateTreeData(db.Model, dbInteractionMethods):
-
     __tablename__ = "surrogate_tree_data"
     __mapper_args__ = {
         "polymorphic_identity": "surrogate_tree_data",
@@ -340,7 +341,8 @@ class SurrogateTreeData(db.Model, dbInteractionMethods):
         _initDB_model(self, kwargs)
 
     tree_id = Column(Integer, ForeignKey("tree.id"), primary_key=True)
-    tree = relationship("Tree", uselist=False, back_populates="surrogate_tree", single_parent=True, cascade="all, delete-orphan")
+    tree = relationship("Tree", uselist=False, back_populates="surrogate_tree", single_parent=True,
+                        cascade="all, delete-orphan")
 
     explained_model_id = Column(
         Integer, ForeignKey("explained_model.id")
@@ -352,8 +354,8 @@ class SurrogateTreeData(db.Model, dbInteractionMethods):
     )
 
     def getElement(
-        self,
-        name: Literal["tree_model",],
+            self,
+            name: Literal["tree_model",],
     ):
         return super().getElement(name)
 
@@ -380,8 +382,8 @@ class TreeRule(db.Model, dbInteractionMethods):
     )
 
     def getElement(
-        self,
-        name: Literal["id", "target_value", "probability", "samples_amount"],
+            self,
+            name: Literal["id", "target_value", "probability", "samples_amount"],
     ):
         return super().getElement(name)
 
@@ -404,13 +406,12 @@ class TreeRuleCause(db.Model, dbInteractionMethods):
     tree_rule = relationship("TreeRule", back_populates="causes")
 
     def getElement(
-        self,
-        name: Literal[
-            "id",
-            "predictor",
-            "relation_sign",
-            "value",
-        ],
+            self,
+            name: Literal[
+                "id",
+                "predictor",
+                "relation_sign",
+                "value",
+            ],
     ):
         return super().getElement(name)
-

@@ -37,11 +37,7 @@
 
         <li>
           <a><i class="fa fa-line-chart"></i> Regresión <span class="fa fa-chevron-down"></span></a>
-          <ul class="nav child_menu">
-            <li>
-              <a href="/DashExample/app1">dash app1</a>
-            </li>
-          </ul>
+          <ul id="regression-models" class="nav child_menu"> </ul>
         </li>
 
         <li>
@@ -80,24 +76,37 @@
 
   <script>
     const getModelsList = async () => {
-      // get
-      const user_id = 3
-    
-      const response = await fetch('http://127.0.0.1:5000/INTERNAL_API/classifier/list', {
+      // Classifier Models
+      const classifiers_response = await fetch('http://127.0.0.1:5000/INTERNAL_API/classifier/list', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: user_id
       })
-      const models_data = await response.json().then((value) => {
+      const classifiers_models_data = await classifiers_response.json().then((value) => {
         console.log(value)
         return value
       })
       const classifiers = document.getElementById("classification-models")
       let classifiersList = ""
-      models_data.forEach((model) => {
+      classifiers_models_data.forEach((model) => {
         classifiersList += `<li><a href='/DashExample/app2?model_id=${model.id}'>Explainer: ${model.name}</a></li>`
       })
       classifiers.innerHTML = classifiersList
+
+      // Regression Models
+      const regressions_response = await fetch('http://127.0.0.1:5000/INTERNAL_API/regression/list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const regressions_models_data = await regressions_response.json().then((value) => {
+        console.log(value)
+        return value
+      })
+      const regressions = document.getElementById("regression-models")
+      let regressionsList = ""
+      regressions_models_data.forEach((model) => {
+        regressionsList += `<li><a href='/DashExample/app1?model_id=${model.id}'>Explainer: ${model.name}</a></li>`
+      })
+      regressions.innerHTML = regressionsList
     }    
   
     window.addEventListener('DOMContentLoaded', getModelsList)
