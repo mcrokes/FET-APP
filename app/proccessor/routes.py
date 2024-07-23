@@ -140,7 +140,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
             )
             tree_depth += 1
             rules = ExplainSingleTree.get_rules(
-                model=surrogate_tree.tree_,
+                tree_model=surrogate_tree.tree_,
                 q_variables=db_model_qualitative_column_names,
                 q_variables_values=db_model_qualitative_columns,
                 features=surrogate_tree.feature_names_in_,
@@ -149,7 +149,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
                     if type == "Classifier"
                     else None
                 ),
-                type=type,
+                model_type=type,
             )
 
             db_tree = Tree(

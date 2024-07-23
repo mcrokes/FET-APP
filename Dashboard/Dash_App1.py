@@ -159,7 +159,7 @@ def Add_Dash(server):
     # importancesCallbacks(app, furl)
     # metricsCallbacks(app, furl)
     surrogateCallbacks(app, furl, True)
-    # specificTreesCallbacks(app, furl)
+    specificTreesCallbacks(app, furl, True)
     # predictionsCallbacks(app, furl)
 
     return app.server

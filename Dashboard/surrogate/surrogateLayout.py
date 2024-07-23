@@ -171,25 +171,25 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
                 for var in model_x.explainer_classifier.getElement("target_names_dict")["variables"]
             ]
             rules = ExplainSingleTree.get_rules(
-                model=surrogate_model.getElement("tree_model").tree_,
+                tree_model=surrogate_model.getElement("tree_model").tree_,
                 q_variables=[
                     var["column_name"] for var in model_x.getElement("q_variables_dict")
                 ],
                 q_variables_values=model_x.getElement("q_variables_dict"),
                 features=surrogate_model.getElement("tree_model").feature_names_in_,
                 class_names=class_names,
-                type="Classifier"
+                model_type="Classifier"
             )
         else:
             rules = ExplainSingleTree.get_rules(
-                model=surrogate_model.getElement("tree_model").tree_,
+                tree_model=surrogate_model.getElement("tree_model").tree_,
                 q_variables=[
                     var["column_name"] for var in model_x.getElement("q_variables_dict")
                 ],
                 q_variables_values=model_x.getElement("q_variables_dict"),
                 features=surrogate_model.getElement("tree_model").feature_names_in_,
                 class_names=None,
-                type="Regressor"
+                model_type="Regressor"
             )
 
         rules_table = []
