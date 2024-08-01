@@ -22,7 +22,6 @@ from Dashboard.specificTrees.specificTreesLayout import (
     specificTreesLayout,
 )
 
-
 from .Dash_fun import apply_layout_with_auth, load_object, save_object
 import dash_bootstrap_components as dbc
 from furl import furl
@@ -33,7 +32,6 @@ holder = html.Plaintext("No se ha insertado ninugún modelo")
 
 
 def setTooltip(innerText, id):
-
     tooltip = dbc.Tooltip(
         html.Plaintext(innerText),
         target=id,
@@ -81,6 +79,15 @@ tabs = dbc.Tabs(
     [
         dbc.Tab(
             [
+                tab5_content,
+                setTooltip("interpretación de predicciones", "predictions-tooltip-id"),
+            ],
+            id="predictions-tooltip-id",
+            label="Predicciones",
+            className="classifier-tab",
+        ),
+        dbc.Tab(
+            [
                 tab0_content,
                 setTooltip("Estudio del Conjunto de Datos", "data-tooltip-id"),
             ],
@@ -124,15 +131,6 @@ tabs = dbc.Tabs(
             label="árboles",
             className="classifier-tab",
         ),
-        dbc.Tab(
-            [
-                tab5_content,
-                setTooltip("interpretación de predicciones", "predictions-tooltip-id"),
-            ],
-            id="predictions-tooltip-id",
-            label="Predicciones",
-            className="classifier-tab",
-        ),
     ],
     id="classifier-tabs",
 )
@@ -155,11 +153,11 @@ def Add_Dash(server):
         ],
     )
     apply_layout_with_auth(app, layout)
-    datasetCallbacks(app, furl)
+    # datasetCallbacks(app, furl)
     # importancesCallbacks(app, furl)
     # metricsCallbacks(app, furl)
-    surrogateCallbacks(app, furl, True)
-    specificTreesCallbacks(app, furl, True)
-    # predictionsCallbacks(app, furl)
+    # surrogateCallbacks(app, furl, True)
+    # specificTreesCallbacks(app, furl, True)
+    predictionsCallbacks(app, furl, True)
 
     return app.server
