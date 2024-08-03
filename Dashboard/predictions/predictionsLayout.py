@@ -1,7 +1,5 @@
 import json
-import pickle
 from pyclbr import Function
-from re import M
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -14,7 +12,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from Dashboard.metrics.metricsLayout import get_target_dropdown
-from app.proccessor.models import ExplainedClassifierModel, ExplainedModel
+from app.proccessor.models import ExplainedModel
 
 from treeinterpreter import treeinterpreter as ti
 
@@ -29,7 +27,7 @@ def setBottomLegend(fig):
 def getTreeInterpreterParamethersRegressor(
         instance,
         instanceModified,
-        model: RandomForestClassifier | DecisionTreeClassifier,
+        model: RandomForestRegressor | DecisionTreeRegressor,
 ):
     general_dict = {
         ("Instance", "Predictor"): [],
@@ -735,7 +733,8 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                                 ]
                             ],
                             columns=[
-                                {"name": [i, j], "id": f"{i}_{j}"} if not isRegressor or i != 'Contribution' else {"name": [i], "id": f"{i}_{j}", "rowspan": 2}
+                                {"name": [i, j], "id": f"{i}_{j}"} if not isRegressor or i != 'Contribution' else {
+                                    "name": [i], "id": f"{i}_{j}", "rowspan": 2}
                                 for i, j in df.columns
                             ],
                             page_size=10,

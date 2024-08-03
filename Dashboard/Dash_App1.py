@@ -79,11 +79,11 @@ tabs = dbc.Tabs(
     [
         dbc.Tab(
             [
-                tab5_content,
-                setTooltip("interpretación de predicciones", "predictions-tooltip-id"),
+                tab1_content,
+                setTooltip("IMportancias de los predictores", "importance-tooltip-id"),
             ],
-            id="predictions-tooltip-id",
-            label="Predicciones",
+            id="importance-tooltip-id",
+            label="Importancias",
             className="classifier-tab",
         ),
         dbc.Tab(
@@ -93,15 +93,6 @@ tabs = dbc.Tabs(
             ],
             id="data-tooltip-id",
             label="Datos",
-            className="classifier-tab",
-        ),
-        dbc.Tab(
-            [
-                tab1_content,
-                setTooltip("IMportancias de los predictores", "importance-tooltip-id"),
-            ],
-            id="importance-tooltip-id",
-            label="Importancias",
             className="classifier-tab",
         ),
         dbc.Tab(
@@ -131,6 +122,15 @@ tabs = dbc.Tabs(
             label="árboles",
             className="classifier-tab",
         ),
+        dbc.Tab(
+            [
+                tab5_content,
+                setTooltip("interpretación de predicciones", "predictions-tooltip-id"),
+            ],
+            id="predictions-tooltip-id",
+            label="Predicciones",
+            className="classifier-tab",
+        ),
     ],
     id="classifier-tabs",
 )
@@ -154,10 +154,10 @@ def Add_Dash(server):
     )
     apply_layout_with_auth(app, layout)
     # datasetCallbacks(app, furl)
-    # importancesCallbacks(app, furl)
+    importancesCallbacks(app, furl, True)
     # metricsCallbacks(app, furl)
     # surrogateCallbacks(app, furl, True)
     # specificTreesCallbacks(app, furl, True)
-    predictionsCallbacks(app, furl, True)
+    # predictionsCallbacks(app, furl, True)
 
     return app.server
