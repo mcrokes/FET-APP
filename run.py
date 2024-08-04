@@ -1,11 +1,9 @@
 from dotenv import load_dotenv
 from flask_migrate import Migrate
-from app.proccessor.models import ModelForProccess
 from configs.config import config_dict
 from app import create_app, db
 import os
 import sys
-from flask.ctx import AppContext
 
 load_dotenv()
 

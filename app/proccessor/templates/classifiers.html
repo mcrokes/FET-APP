@@ -1,7 +1,7 @@
 {% extends 'base_site.html' %}
 
 {% block title %}
-  Manage Users
+  Manage Classifiers
 {% endblock %}
 
 {% block stylesheets %}
@@ -12,13 +12,13 @@
       width: unset !important;
     }
     
-    #user_data {
+    #classifier_data {
       width: 100% !important;
       /*text-align: center !important;*/
       align-items: center;
     }
     
-    #user_data th {
+    #classifier_data th {
       background-color: #04aa6d;
       color: white;
       padding: 0.5rem;
@@ -38,13 +38,14 @@
       <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="dashboard_graph">
           <div style="width: 100%; min-height:800px;">
-            <h2 style="font-weight: bold; margin-bottom: 1.5rem; text-align: center;">USUARIOS</h2>
-            <table id="user_data">
+            <h2 style="font-weight: bold; margin-bottom: 1.5rem; text-align: center;">MODELOS DE CLASIFICACIÓN</h2>
+            <table id="classifier_data">
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>Nombre</th>
-                  <th>Email</th>
+                  <th>Descripción</th>
+                  <th>Valor Estudiado</th>
                   <th>Opciones</th>
                 </tr>
               </thead>
@@ -65,17 +66,18 @@
   <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
 
   <script>
-    let table = $('#user_data').DataTable({
-      ajax: '/INTERNAL_API/users/list',
-      columns: [{ data: 'id' }, { data: 'name' }, { data: 'email' }, { data: 'id' }],
+    let table = $('#classifier_data').DataTable({
+      ajax: '/INTERNAL_API/classifier/list',
+      columns: [{ data: 'id' }, { data: 'name' }, { data: 'model_description' }, { data: 'target_row' }, { data: 'name' }],
       columnDefs: [
         {
           targets: [-1],
           class: 'text-center',
           orderable: false,
           render: function (data, type, row) {
-            var buttons = '<a href="/setting/setting_password/' + row.id + '" class="btn btn-warning btn-xs btn-flat"><i class="fa fa-edit"></i></a> '
-            buttons += '<a href="/setting/delete_user/' + row.id + '" type="button" class="btn btn-danger btn-xs btn-flat"><i class="fa fa-trash"></i></a>'
+            var buttons = '<a href="/DashExample/app2?model_id=' + row.id + '" class="btn btn-success btn-xs btn-flat"><i class="fa fa-check"></i></a> '
+            buttons += '<a href="' + row.id + '" class="btn btn-warning btn-xs btn-flat"><i class="fa fa-edit"></i></a> '
+            buttons += '<a href="' + row.id + '" type="button" class="btn btn-danger btn-xs btn-flat"><i class="fa fa-trash"></i></a>'
             return buttons
           }
         }

@@ -134,13 +134,13 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
             )
             db_model.db_commit()
             surrogate_tree = ExplainSingleTree.createSurrogateTree(
-                model=db_model_model,
+                trainedModel=db_model_model,
                 x_train=db_model_dataset.drop(columns=db_model_target_row),
                 max_depth=tree_depth,
             )
             tree_depth += 1
             rules = ExplainSingleTree.get_rules(
-                model=surrogate_tree.tree_,
+                tree_model=surrogate_tree.tree_,
                 q_variables=db_model_qualitative_column_names,
                 q_variables_values=db_model_qualitative_columns,
                 features=surrogate_tree.feature_names_in_,
@@ -149,7 +149,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
                     if type == "Classifier"
                     else None
                 ),
-                type=type,
+                model_type=type,
             )
 
             db_tree = Tree(
@@ -228,7 +228,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
         db_model.db_commit()
 
 
-@blueprint.route("/classifier", methods=["GET", "POST"])
+@blueprint.route("/add_classifier", methods=["GET", "POST"])
 @login_required
 def save_classifier():
     form = add_model(request.form)
@@ -301,7 +301,13 @@ def save_classifier():
             ).first()
 
             if cancel != "Create":
+                possible_not_needed_variables = list(
+                    set(db_model.getElement("dataset").columns)
+                    - set(db_model.getElement("model").feature_names_in_)
+                )
                 db_model.target_row = request.form["target"]
+                db_model.dataset = db_model.getElement("dataset").drop(
+                    columns=possible_not_needed_variables.remove(request.form["target"]))
                 db_model.db_commit()
             else:
                 print(cancel)
@@ -424,7 +430,7 @@ def save_classifier():
     return render_template("add_model_classifier.html", form=form, status="Initial")
 
 
-@blueprint.route("/regressor", methods=["GET", "POST"])
+@blueprint.route("/add_regressor", methods=["GET", "POST"])
 @login_required
 def save_regressor():
     form = add_model(request.form)
@@ -496,7 +502,18 @@ def save_regressor():
             ).first()
 
             if cancel != "Create":
+                possible_not_needed_variables = list(
+                    set(db_model.getElement("dataset").columns)
+                    - set(db_model.getElement("model").feature_names_in_)
+                )
+                possible_not_needed_variables.remove(request.form["target"])
+                print("Possible Not Needeed: ", possible_not_needed_variables)
                 db_model.target_row = request.form["target"]
+                db_model.setElements(
+                    **{
+                        "dataset": db_model.getElement("dataset").drop(
+                            columns=possible_not_needed_variables)
+                    })
                 db_model.db_commit()
             else:
                 print(cancel)
@@ -514,7 +531,7 @@ def save_regressor():
             qualitative_variables_form = []
             df = db_model.getElement("dataset")
             for column in df:
-                if len(set(df[column])) < 5 or column == db_model.target_row:
+                if len(set(df[column])) < 5 and column != db_model.target_row:
                     qualitative_variables_form.append(
                         {
                             "name": column,
@@ -558,10 +575,9 @@ def save_regressor():
                 elif "Q-Variable" in element or element == "Add":
                     value_number = 0
                     if q_dict != {}:
-                        if q_dict["column_name"] == db_model.target_row:
-                            target_description = q_dict
-                        else:
+                        if q_dict["column_name"] != db_model.target_row:
                             qualitative_variables_saved.append(q_dict)
+
                     if element != "Add":
                         q_dict = {
                             "column_name": request.form[element],
@@ -590,7 +606,6 @@ def save_regressor():
         db_model.setElements(
             **{
                 "qualitative_variables_saved": qualitative_variables_saved,
-                "target_description": target_description,
                 "features_description": features_description,
             }
         )
@@ -601,7 +616,6 @@ def save_regressor():
             args=(db_model.id, current_app.app_context(), user_id, "Regressor"),
         )
         x.start()
-        x.daemon
         # Function to add, the models
         return render_template(
             "add_model_regressor.html", model_id=db_model.id, status="Create"
@@ -612,3 +626,15 @@ def save_regressor():
         ).first()
         db_model.delete_from_db()
     return render_template("add_model_regressor.html", form=form, status="Initial")
+
+
+@blueprint.route("/manage_classifiers", methods=["GET", "POST"])
+@login_required
+def manage_classifiers():
+    return render_template("classifiers.html")
+
+
+@blueprint.route("/manage_regressors", methods=["GET", "POST"])
+@login_required
+def manage_regressors():
+    return render_template("regressors.html")

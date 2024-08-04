@@ -11,7 +11,7 @@ from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
 from app.proccessor.models import (
-    ExplainedClassifierModel,
+    ExplainedClassifierModel, ExplainedModel,
 )
 
 id_sufix = ["trees"]
@@ -52,8 +52,8 @@ specificTreesLayout = html.Div(
                                 html.Plaintext(
                                     [
                                         "Árbol de Decisión: Un ",
-                                        html.Strong("componente independiente"),
-                                        "  del modelo de Random Forest que contribuye a la predicción final mediante la ",
+                                        html.Strong("componente independiente "),
+                                        "del modelo de Random Forest que contribuye a la predicción final mediante la ",
                                         html.Strong("combinación de sus resultados"),
                                         " con los de otros árboles. Cada árbol se entrena con una ",
                                         html.Strong("muestra aleatoria"),
@@ -104,7 +104,8 @@ specificTreesLayout = html.Div(
                                 html.Plaintext(
                                     [
                                         "* Para visualizar el árbol deberá instalar el software ",
-                                        html.Strong("Graphviz"),
+                                        html.Strong(
+                                            html.A("Graphviz", href="https://graphviz.org/download/", target='_blank')),
                                         " en su ordenador.",
                                     ]
                                 ),
@@ -116,6 +117,7 @@ specificTreesLayout = html.Div(
                                     ]
                                 ),
                             ],
+                            autohide=False,
                             className="personalized-tooltip",
                             target="s-build-tree-btn",
                         ),
@@ -134,7 +136,7 @@ specificTreesLayout = html.Div(
 )
 
 
-def specificTreesCallbacks(app, furl: Function):
+def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
     @app.callback(
         Output("s-rules-output-upload", "children"),
         Output("s-max-depth-input-row", "max"),
@@ -147,18 +149,16 @@ def specificTreesCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
 
-        classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-            ExplainedClassifierModel.explainer_model_id == model_id
+        model_x: ExplainedModel = ExplainedModel.query.filter(
+            ExplainedModel.id == model_id
         ).first()
-        
-        model_x = classifier_dbmodel.explainer_model
 
         model: RandomForestClassifier = model_x.getElement("model")
 
         lenght = len(model.estimators_)
 
         rules = ExplainSingleTree.get_rules(
-            model=model.estimators_[tree_number].tree_,
+            tree_model=model.estimators_[tree_number].tree_,
             q_variables=[
                 var["column_name"] for var in model_x.getElement("q_variables_dict")
             ],
@@ -166,9 +166,9 @@ def specificTreesCallbacks(app, furl: Function):
             features=model.feature_names_in_,
             class_names=[
                 var["new_value"]
-                for var in classifier_dbmodel.getElement("target_names_dict")["variables"]
-            ],
-            type="Classifier"
+                for var in model_x.explainer_classifier.getElement("target_names_dict")["variables"]
+            ] if not isRegressor else None,
+            model_type="Classifier" if not isRegressor else "Regressor"
         )
 
         rules_table = []
@@ -268,22 +268,22 @@ def specificTreesCallbacks(app, furl: Function):
         f = furl(cl)
         model_id = f.args["model_id"]
 
-        classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-            ExplainedClassifierModel.explainer_model_id == model_id
+        model_x: ExplainedModel = ExplainedModel.query.filter(
+            ExplainedModel.id == model_id
         ).first()
-        
-        model_x = classifier_dbmodel.explainer_model
-        
 
         model: RandomForestClassifier = model_x.getElement("model")
 
         model: DecisionTreeClassifier = model.estimators_[tree_number]
         dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
         target_row: str = model_x.getElement("target_row")
-        target_description = classifier_dbmodel.getElement("target_names_dict")
-        class_names = [
-            element["new_value"] for element in target_description["variables"]
-        ]
+        if not isRegressor:
+            target_description = model_x.explainer_classifier.getElement("target_names_dict")
+            class_names = [
+                element["new_value"] for element in target_description["variables"]
+            ]
+        else:
+            class_names = None
         x_train = dataset.drop(columns=target_row)
         tg = ExplainSingleTree.graph_tree(
             x_train=x_train,

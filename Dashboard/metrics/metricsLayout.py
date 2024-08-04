@@ -148,7 +148,7 @@ def get_matrix_explanation(cm, class_names):
             false_values = sum(false_positives) + sum(false_negatives)
 
         explanation = {
-            f"{keys["precision"]}": (
+            f"{keys['precision']}": (
                 (true_positive / (true_positive + sum(false_positives)))
                 if true_positive > 0
                 else 0
@@ -187,9 +187,9 @@ def get_matrix_explanation(cm, class_names):
 
     return {
         "dtype": "object",
-        f"{keys["tv"]}": true_values,
-        f"{keys["fv"]}": false_values,
-        f"{keys["accuracy"]}": f"{round((true_values / (true_values + false_values)) *100, 2)} %",
+        f"{keys['tv']}": true_values,
+        f"{keys['fv']}": false_values,
+        f"{keys['accuracy']}": f"{round((true_values / (true_values + false_values)) *100, 2)} %",
         "matrix_explanation": matrix_explanation,
     }
 
@@ -495,7 +495,7 @@ metricsLayout = html.Div(
 )
 
 
-def metricsCallbacks(app, furl: Function):
+def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
     @app.callback(
         Output("matrix-output-upload", "children"),
         Output("matrix-explanation", "children"),

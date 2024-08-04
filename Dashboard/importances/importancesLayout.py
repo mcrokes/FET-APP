@@ -1,5 +1,4 @@
 from logging import exception
-import math
 import multiprocessing
 from pyclbr import Function
 from dash import dcc, html
@@ -8,18 +7,13 @@ from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 
-import copy
-import numpy as np
 import pandas as pd
 import plotly.express as px
-from sklearn.metrics import accuracy_score
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import permutation_importance
 
-from app.proccessor.model.dataset_interaction_methods import get_y_transformed
 from app.proccessor.model.values import get_target_dropdown
-from app.proccessor.models import ExplainedClassifierModel, ModelForProccess
-
+from app.proccessor.models import ExplainedModel
 
 class_selector = dcc.Dropdown(
     id="importances-permut-positive-class-selector",
@@ -29,96 +23,94 @@ class_selector = dcc.Dropdown(
 id_sufix = ["importances", "permutation-importances"]
 
 importancesLayout = html.Div(
-    [
-        html.Div(
-            [
-                html.I(
-                    id=f"{id_sufix[0]}-info",
-                    className="fa fa-info-circle info-icon",
-                ),
-                dbc.Tooltip(
-                    [
-                        html.Plaintext(
-                            [
-                                "Importancia GINI: Indica la capacidad de cada característica para reducir la impureza en la clase objetivo. ",
-                                html.Strong("Valores altos"),
-                                " significan que la característica es más importante para la predicción.",
-                            ]
-                        ),
-                    ],
-                    className="personalized-tooltip",
-                    target=f"{id_sufix[0]}-info",
-                ),
-            ],
-            style={"display": "flex", "justify-content": "end"},
-        ),
-        dbc.Row(
-            html.Div(id="importance-output-upload"),
-            style={"padding-top": "20px"},
-        ),
-        html.Div(
-            [
-                html.I(
-                    id=f"{id_sufix[1]}-info",
-                    className="fa fa-info-circle info-icon",
-                ),
-                dbc.Tooltip(
-                    [
-                        html.Plaintext(
-                            [
-                                "Importancia por Permutación: Evalúa la importancia de cada característica al medir la pérdida de precisión del modelo al aleatorizar sus valores. ",
-                                html.Strong("Valores altos"),
-                                " indican características clave.",
-                            ]
-                        ),
-                    ],
-                    className="personalized-tooltip",
-                    target=f"{id_sufix[1]}-info",
-                ),
-            ],
-            style={"display": "flex", "justify-content": "end"},
-        ),
-        dbc.Row(
-            html.Div(id="permutation-importance-output-upload"),
-            style={"padding-top": "20px"},
-        ),
-        dbc.Row([class_selector]),
-    ],
+    dcc.Loading(
+        [
+            html.Div(
+                [
+                    html.I(
+                        id=f"{id_sufix[0]}-info",
+                        className="fa fa-info-circle info-icon",
+                    ),
+                    dbc.Tooltip(
+                        [
+                            html.Plaintext(
+                                [
+                                    "Importancia GINI: Indica la capacidad de cada característica para reducir la impureza en la clase objetivo. ",
+                                    html.Strong("Valores altos"),
+                                    " significan que la característica es más importante para la predicción.",
+                                ]
+                            ),
+                        ],
+                        className="personalized-tooltip",
+                        target=f"{id_sufix[0]}-info",
+                    ),
+                ],
+                style={"display": "flex", "justify-content": "end"},
+            ),
+            dbc.Row(
+                html.Div(id="importance-output-upload"),
+                style={"padding-top": "20px"},
+            ),
+            html.Div(
+                [
+                    html.I(
+                        id=f"{id_sufix[1]}-info",
+                        className="fa fa-info-circle info-icon",
+                    ),
+                    dbc.Tooltip(
+                        [
+                            html.Plaintext(
+                                [
+                                    "Importancia por Permutación: Evalúa la importancia de cada característica al medir"
+                                    " la pérdida de precisión del modelo al aleatorizar sus valores. ",
+                                    html.Strong("Valores altos"),
+                                    " indican características clave.",
+                                ]
+                            ),
+                        ],
+                        className="personalized-tooltip",
+                        target=f"{id_sufix[1]}-info",
+                    ),
+                ],
+                style={"display": "flex", "justify-content": "end"},
+            ),
+            dbc.Row(
+                html.Div(id="permutation-importance-output-upload"),
+                style={"padding-top": "20px"},
+            ),
+            dbc.Row(html.Div([class_selector], id='selector-container', hidden=True)),
+        ],
+    ),
     style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
 )
 
 
-def importancesCallbacks(app, furl: Function):
+def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
     @app.callback(
         Output("importance-output-upload", "children"),
         Output("permutation-importance-output-upload", "children"),
         Output("importances-permut-positive-class-selector", "options"),
+        Output("selector-container", "hidden"),
         Input("path", "href"),
         Input("importances-permut-positive-class-selector", "value"),
     )
     def graph_explainers(cl, positive_class):
         f = furl(cl)
-        param1 = f.args["model_id"]
+        model_id = f.args["model_id"]
         try:
-            classifer_model: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.explainer_model_id == param1
+            model_x: ExplainedModel = ExplainedModel.query.filter(
+                ExplainedModel.id == model_id
             ).first()
-            
-            model_x = classifer_model.explainer_model
 
-            classifier_model: RandomForestClassifier = model_x.getElement("model")
-            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
+            model: RandomForestClassifier | RandomForestRegressor = model_x.getElement("model")
+            dataset: pd.DataFrame = model_x.data_set_data.getElement(
                 "dataset"
             )
-            target_description = classifer_model.getElement("target_names_dict")
-            old_class_names = [
-                element["old_value"] for element in target_description["variables"]
-            ]
 
             df_feature_importance: pd.DataFrame = pd.DataFrame(
                 {
-                    "Predictor": classifier_model.feature_names_in_,
-                    "Importancia": classifier_model.feature_importances_,
+                    "Predictor": model.feature_names_in_,
+                    "Importancia": model.feature_importances_,
                 }
             )
             importances_fig = px.bar(
@@ -130,25 +122,32 @@ def importancesCallbacks(app, furl: Function):
                 title="Importance GINI",
             )
 
-            try:
-                positive_class = old_class_names[int(positive_class)]
-            except:  # noqa: E722
-                if positive_class is None:
-                    positive_class = classifier_dataset[model_x.target_row]
+            if not isRegressor:
+                classifer_model = model_x.explainer_classifier
+                target_description = classifer_model.getElement("target_names_dict")
+                old_class_names = [
+                    element["old_value"] for element in target_description["variables"]
+                ]
+                try:
+                    positive_class = old_class_names[int(positive_class)]
+                except:  # noqa: E722
+                    if positive_class is None:
+                        positive_class = dataset[model_x.target_row]
 
-            y = classifier_dataset[
-                classifier_dataset[model_x.target_row] == positive_class
-            ][model_x.target_row]
+                y = dataset[
+                    dataset[model_x.target_row] == positive_class
+                    ][model_x.target_row]
+            else:
+                y = dataset[model_x.target_row]
 
             permutation_importance_model = permutation_importance(
-                estimator=classifier_model,
-                X=classifier_dataset.drop(columns=model_x.target_row)[
-                    classifier_dataset[model_x.target_row] == positive_class
-                ],
+                estimator=model,
+                X=dataset.drop(columns=model_x.target_row)[
+                    dataset[model_x.target_row] == positive_class
+                    ] if not isRegressor else dataset.drop(columns=model_x.target_row),
                 y=y,
                 n_repeats=5,
-                # scoring="neg_root_mean_squared_error",
-                scoring="accuracy",
+                scoring="accuracy" if not isRegressor else "neg_root_mean_squared_error",
                 n_jobs=multiprocessing.cpu_count() - 1,
                 random_state=123,
             )
@@ -158,7 +157,7 @@ def importancesCallbacks(app, furl: Function):
                     for k in ["importances_mean", "importances_std"]
                 }
             )
-            df_permutation_importance["Predictor"] = classifier_model.feature_names_in_
+            df_permutation_importance["Predictor"] = model.feature_names_in_
             df_ordered_importance = df_permutation_importance.sort_values(
                 "importances_mean", ascending=True
             )
@@ -173,7 +172,8 @@ def importancesCallbacks(app, furl: Function):
             return (
                 dcc.Graph(figure=importances_fig),
                 dcc.Graph(figure=permutation_fig),
-                get_target_dropdown(target_description["variables"]),
+                get_target_dropdown(target_description["variables"]) if not isRegressor else [],
+                True if isRegressor else False,
             )
         except Exception as e:
             print(e)

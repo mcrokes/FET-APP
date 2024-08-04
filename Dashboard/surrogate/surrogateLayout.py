@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 
 import dash_bootstrap_components as dbc
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
@@ -14,6 +14,7 @@ from app.proccessor.models import (
     SurrogateTreeData,
     Tree,
 )
+
 id_sufix = ["surrogate"]
 surrogateLayout = html.Div(
     [
@@ -103,7 +104,8 @@ surrogateLayout = html.Div(
                                 html.Plaintext(
                                     [
                                         "* Para visualizar el árbol deberá instalar el software ",
-                                        html.Strong("Graphviz"),
+                                        html.Strong(
+                                            html.A("Graphviz", href="https://graphviz.org/download/", target='_blank')),
                                         " en su ordenador.",
                                     ]
                                 ),
@@ -115,6 +117,7 @@ surrogateLayout = html.Div(
                                     ]
                                 ),
                             ],
+                            autohide=False,
                             className="personalized-tooltip",
                             target="build-tree-btn",
                         ),
@@ -133,7 +136,7 @@ surrogateLayout = html.Div(
 )
 
 
-def surrogateCallbacks(app, furl: Function):
+def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
     @app.callback(
         Output("rules-output-upload", "children"),
         Output("max-depth-input-row", "max"),
@@ -162,19 +165,32 @@ def surrogateCallbacks(app, furl: Function):
         )
 
         model_x: ExplainedModel = surrogate_model.explained_model
-        rules = ExplainSingleTree.get_rules(
-            model=surrogate_model.getElement("tree_model").tree_,
-            q_variables=[
-                var["column_name"] for var in model_x.getElement("q_variables_dict")
-            ],
-            q_variables_values=model_x.getElement("q_variables_dict"),
-            features=surrogate_model.getElement("tree_model").feature_names_in_,
-            class_names=[
+        if not isRegressor:
+            class_names = [
                 var["new_value"]
                 for var in model_x.explainer_classifier.getElement("target_names_dict")["variables"]
-            ],
-            type="Classifier"
-        )
+            ]
+            rules = ExplainSingleTree.get_rules(
+                tree_model=surrogate_model.getElement("tree_model").tree_,
+                q_variables=[
+                    var["column_name"] for var in model_x.getElement("q_variables_dict")
+                ],
+                q_variables_values=model_x.getElement("q_variables_dict"),
+                features=surrogate_model.getElement("tree_model").feature_names_in_,
+                class_names=class_names,
+                model_type="Classifier"
+            )
+        else:
+            rules = ExplainSingleTree.get_rules(
+                tree_model=surrogate_model.getElement("tree_model").tree_,
+                q_variables=[
+                    var["column_name"] for var in model_x.getElement("q_variables_dict")
+                ],
+                q_variables_values=model_x.getElement("q_variables_dict"),
+                features=surrogate_model.getElement("tree_model").feature_names_in_,
+                class_names=None,
+                model_type="Regressor"
+            )
 
         rules_table = []
         for index, rule in enumerate(rules):
@@ -284,7 +300,7 @@ def surrogateCallbacks(app, furl: Function):
 
         model_x: ExplainedModel = surrogate_model.explained_model
 
-        model: DecisionTreeClassifier = surrogate_model.getElement("tree_model")
+        model: DecisionTreeClassifier | DecisionTreeRegressor = surrogate_model.getElement("tree_model")
 
         dataset: pd.DataFrame = (
             surrogate_model.explained_model.data_set_data.getElement(
@@ -294,10 +310,13 @@ def surrogateCallbacks(app, furl: Function):
         target_row: str = surrogate_model.explained_model.getElement(
             "target_row"
         )
-        target_description = model_x.explainer_classifier.getElement("target_names_dict")
-        class_names = [
-            element["new_value"] for element in target_description["variables"]
-        ]
+        try:
+            target_description = model_x.explainer_classifier.getElement("target_names_dict")
+            class_names = [
+                element["new_value"] for element in target_description["variables"]
+            ]
+        except:
+            class_names = None
         tg = ExplainSingleTree.graph_tree(
             x_train=dataset.drop(columns=target_row),
             y_train=model_x.getElement("model").predict(dataset.drop(columns=target_row)),

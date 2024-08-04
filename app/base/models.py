@@ -7,7 +7,6 @@ from app import db, login_manager
 
 
 class User(db.Model, UserMixin):
-
     __tablename__ = "User"
 
     id = Column(Integer, primary_key=True)
@@ -15,20 +14,18 @@ class User(db.Model, UserMixin):
     email = Column(String, unique=True)
     password = Column(BINARY)
     is_admin = Column(Boolean, default=False)
-    
+
     model_for_proccess = relationship(
         "ModelForProccess", back_populates="user", cascade="all, delete-orphan"
     )
-    
+
     classifier_models = relationship(
         "ExplainedClassifierModel", back_populates="user", cascade="all, delete-orphan"
     )
-    
+
     regressor_models = relationship(
         "ExplainedRegressorModel", back_populates="user", cascade="all, delete-orphan"
     )
-    
-    
 
     def to_dict(self):
         return {

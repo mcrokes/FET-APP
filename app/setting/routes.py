@@ -11,12 +11,6 @@ from ..base.models import User
 from .common.useful_functions import check_admin
 
 
-@blueprint.route("/api/users", methods=["GET"])
-@login_required
-def get_Users():
-    return {"data": [user.to_dict() for user in User.get_users_list()]}
-
-
 @blueprint.route("/manage_users", methods=["GET", "POST"])
 @login_required
 def manage_Users():

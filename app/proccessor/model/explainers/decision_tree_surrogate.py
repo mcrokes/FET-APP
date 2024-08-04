@@ -1,24 +1,24 @@
 import base64
-import json
-import pickle
 import matplotlib
 
 from dtreeviz import model
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier, _tree
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 import numpy as np
+from sklearn.tree._tree import Tree, TREE_UNDEFINED
 
 from app.proccessor.model.dataset_interaction_methods import get_y_transformed
 
 matplotlib.use('SVG')
 
+
 class ExplainSingleTree:
-    
+
     @staticmethod
-    def get_rules(model, q_variables, q_variables_values, features, class_names, type):
-        tree_ = model
+    def get_rules(tree_model: Tree, q_variables, q_variables_values, features, class_names, model_type):
+        tree_: Tree = tree_model
         feature_name = [
-            features[i] if i != _tree.TREE_UNDEFINED else "undefined!"
+            features[i] if i != TREE_UNDEFINED else "undefined!"
             for i in tree_.feature
         ]
 
@@ -31,7 +31,7 @@ class ExplainSingleTree:
             watched_classes_less = []
             done = False
             iteration = 0
-            while (not done):
+            while not done:
                 analyzed_rule = {}
                 analyzed_item = ""
                 analyzed_sign = ""
@@ -96,34 +96,33 @@ class ExplainSingleTree:
             return simplified_route
 
         def get_rule(name, threshold, bigger):
-            rule = [{
+            tree_rule = [{
                 "item": name,
                 "sign": "",
                 "value": []
             }]
             if name in q_variables:
                 new_args = []
-                # condition = "es : "
-                rule[0]["sign"] = "es: "
+                tree_rule[0]["sign"] = "es: "
                 for variables in q_variables_values:
                     if variables["column_name"] == name:
                         for values in variables["variables"]:
                             if (not bigger and float(values["old_value"]) <= threshold) or (
                                     bigger and float(values["old_value"]) > threshold):
                                 new_args.append(values["new_value"])
-                rule[0]["value"] = new_args
+                tree_rule[0]["value"] = new_args
             else:
                 if not bigger:
-                    rule[0]["sign"] = " <= "
+                    tree_rule[0]["sign"] = " <= "
                 else:
-                    rule[0]["sign"] = " > "
-                rule[0]["value"] = [f"{np.round(threshold, 3)}"]
+                    tree_rule[0]["sign"] = " > "
+                tree_rule[0]["value"] = [f"{np.round(threshold, 3)}"]
 
-            return rule
+            return tree_rule
 
         def recurse(node, route, routes):
 
-            if tree_.feature[node] != _tree.TREE_UNDEFINED:
+            if tree_.feature[node] != TREE_UNDEFINED:
                 name = feature_name[node]
                 threshold = tree_.threshold[node]
                 left_path_rules, right_path_rules = list(route), list(route)
@@ -145,22 +144,19 @@ class ExplainSingleTree:
 
         rules = []
         for path in paths:
-            # rule = "Si "
-            rule = {}
-            
-            rule["causes"] = path[:-1]
+            rule = {"causes": path[:-1]}
             classes = path[-1][0][0]
             position = np.argmax(classes)
-            rule["target_value"] = class_names[position] if type == "Classifier" else position
+            rule["target_value"] = class_names[position] if model_type == "Classifier" else round(classes[position], 4)
             rule["probability"] = np.round(100.0 * classes[position] / np.sum(classes), 2)
             rule["samples_amount"] = path[-1][1]
             rules.append(rule)
 
         return rules
-    
+
     @staticmethod
     def graph_tree(tree, x_train, y_train, feature_names, class_names):
-        
+
         viz = model(
             model=tree,
             X_train=x_train,
@@ -177,20 +173,22 @@ class ExplainSingleTree:
         except Exception as e:
             print(e)
             return ""
-    
+
     @staticmethod
-    def createSurrogateTree(x_train, model: RandomForestClassifier, max_depth: int):
-        surrogate: DecisionTreeClassifier = DecisionTreeClassifier(max_depth=max_depth, random_state=123)
-        surrogate.fit(X=x_train, y=get_y_transformed(model.predict(x_train)))
+    def createSurrogateTree(x_train, trainedModel: RandomForestClassifier | RandomForestRegressor, max_depth: int):
+        if isinstance(trainedModel, RandomForestClassifier):
+            surrogate: DecisionTreeClassifier = DecisionTreeClassifier(max_depth=max_depth, random_state=123)
+            surrogate.fit(X=x_train, y=get_y_transformed(trainedModel.predict(x_train)))
+        else:
+            surrogate: DecisionTreeRegressor = DecisionTreeRegressor(max_depth=max_depth, random_state=123)
+            surrogate.fit(X=x_train, y=trainedModel.predict(x_train))
         return surrogate
-     
-class SurrogateTree:  
-    
-    
+
+
+class SurrogateTree:
+
     def __init__(self, x_train, model: RandomForestClassifier, df, class_names, target, max_depth: int):
         self.__surrogate_t = DecisionTreeClassifier(max_depth=max_depth)
         self.__x_train = x_train
         self.__y_train = model.predict(x_train)
         self.__surrogate_t.fit(self.__x_train, self.__y_train)
-
-    
