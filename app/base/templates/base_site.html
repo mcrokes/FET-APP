@@ -15,7 +15,8 @@
 
       {% block stylesheets %}
         <!-- Bootstrap -->
-        <link href="{{ url_for('static', filename='vendors/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
+<!--        <link href="{{ url_for('static', filename='vendors/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">-->
+        <link href="{{ url_for('static', filename='vendors/bootstrap-5.3.3/css/bootstrap.min.css') }}" rel="stylesheet">
         <!-- Font Awesome -->
         <link href="{{ url_for('static', filename='vendors/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
         <!-- NProgress -->
@@ -34,8 +35,8 @@
 
   <body class="{% block body_class %} nav-md {% endblock body_class %}">
     {% block body %}
-      <div class="container body">
-        <div class="main_container">
+      <div class="container body" style="margin: 0;">
+        <div class="main_container" style="width: 100vw; height: 100vh; margin-left: 0;">
 
           {% block sidebar %}
             <div class="col-md-3 left_col {% block sidebar_class %} {% endblock sidebar_class %}">
@@ -49,9 +50,11 @@
             </div>
           {% endblock top_navigation %}
 
-          {% block content %}
-            <!-- {{ content }} -->
-          {% endblock content %}
+          <div class="right_col" role="main" style="height: 100%;">
+            {% block content %}
+              <!-- {{ content }} -->
+            {% endblock content %}
+          </div>
 
           {% block footer %}
             <footer>
@@ -65,7 +68,8 @@
         <!-- jQuery -->
         <script src="{{ url_for('static', filename='vendors/jquery/dist/jquery.min.js') }}"></script>
         <!-- Bootstrap -->
-        <script src="{{ url_for('static', filename='vendors/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+<!--        <script src="{{ url_for('static', filename='vendors/bootstrap/dist/js/bootstrap.min.js') }}"></script>-->
+        <script src="{{ url_for('static', filename='vendors/bootstrap-5.3.3/js/bootstrap.min.js') }}"></script>
         <!-- FastClick -->
         <script src="{{ url_for('static', filename='vendors/fastclick/lib/fastclick.js') }}"></script>
         <!-- NProgress -->
