@@ -79,11 +79,11 @@ tabs = dbc.Tabs(
     [
         dbc.Tab(
             [
-                tab1_content,
-                setTooltip("IMportancias de los predictores", "importance-tooltip-id"),
+                tab2_content,
+                setTooltip("Métricas del Modelo", "metrics-tooltip-id"),
             ],
-            id="importance-tooltip-id",
-            label="Importancias",
+            id="metrics-tooltip-id",
+            label="Métricas",
             className="classifier-tab",
         ),
         dbc.Tab(
@@ -97,11 +97,11 @@ tabs = dbc.Tabs(
         ),
         dbc.Tab(
             [
-                tab2_content,
-                setTooltip("Métricas del Modelo", "metrics-tooltip-id"),
+                tab1_content,
+                setTooltip("IMportancias de los predictores", "importance-tooltip-id"),
             ],
-            id="metrics-tooltip-id",
-            label="Métricas",
+            id="importance-tooltip-id",
+            label="Importancias",
             className="classifier-tab",
         ),
         dbc.Tab(
@@ -154,8 +154,8 @@ def Add_Dash(server):
     )
     apply_layout_with_auth(app, layout)
     # datasetCallbacks(app, furl)
-    importancesCallbacks(app, furl, True)
-    # metricsCallbacks(app, furl)
+    # importancesCallbacks(app, furl, True)
+    metricsCallbacks(app, furl, True)
     # surrogateCallbacks(app, furl, True)
     # specificTreesCallbacks(app, furl, True)
     # predictionsCallbacks(app, furl, True)

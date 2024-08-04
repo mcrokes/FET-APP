@@ -495,7 +495,7 @@ metricsLayout = html.Div(
 )
 
 
-def metricsCallbacks(app, furl: Function):
+def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
     @app.callback(
         Output("matrix-output-upload", "children"),
         Output("matrix-explanation", "children"),

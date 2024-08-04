@@ -24,20 +24,18 @@
           <a href="/home"><i class="fa fa-home"></i> Inicio <span></span></a>
         </li>
         <li>
-          <a href="/add_model/classifier"><i class="fa fa-cubes"></i> Cargar Clasificador <span></span></a>
+          <a href="/processor/add_classifier"><i class="fa fa-cubes"></i> Cargar Clasificador <span></span></a>
         </li>
         <li>
-          <a href="/add_model/regressor"><i class="fa fa-sitemap"></i> Cargar Regresor <span></span></a>
-        </li>
-
-        <li>
-          <a style="overflow: hidden; text-overflow: ellipsis;"><i class="fa fa-pie-chart"></i> Clasificación <span class="fa fa-chevron-down"></span></a>
-          <ul id="classification-models" class="nav child_menu"> </ul>
+          <a href="/processor/add_regressor"><i class="fa fa-sitemap"></i> Cargar Regresor <span></span></a>
         </li>
 
         <li>
-          <a><i class="fa fa-line-chart"></i> Regresión <span class="fa fa-chevron-down"></span></a>
-          <ul id="regression-models" class="nav child_menu"> </ul>
+          <a style="overflow: hidden; text-overflow: ellipsis;" href="/processor/manage_classifiers"><i class="fa fa-pie-chart"></i> Clasificación </a>
+        </li>
+
+        <li>
+          <a href="/processor/manage_regressors"><i class="fa fa-line-chart"></i> Regresión </a>
         </li>
 
         <li>
@@ -73,42 +71,4 @@
     <a data-toggle="tooltip" data-placement="top" title="Logout" href="/logout"><span class="glyphicon glyphicon-off" aria-hidden="true"></span></a>
   </div>
   <!-- /menu footer buttons -->
-
-  <script>
-    const getModelsList = async () => {
-      // Classifier Models
-      const classifiers_response = await fetch('http://127.0.0.1:5000/INTERNAL_API/classifier/list', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      const classifiers_models_data = await classifiers_response.json().then((value) => {
-        console.log(value)
-        return value
-      })
-      const classifiers = document.getElementById("classification-models")
-      let classifiersList = ""
-      classifiers_models_data.forEach((model) => {
-        classifiersList += `<li><a href='/DashExample/app2?model_id=${model.id}'>Explainer: ${model.name}</a></li>`
-      })
-      classifiers.innerHTML = classifiersList
-
-      // Regression Models
-      const regressions_response = await fetch('http://127.0.0.1:5000/INTERNAL_API/regression/list', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      const regressions_models_data = await regressions_response.json().then((value) => {
-        console.log(value)
-        return value
-      })
-      const regressions = document.getElementById("regression-models")
-      let regressionsList = ""
-      regressions_models_data.forEach((model) => {
-        regressionsList += `<li><a href='/DashExample/app1?model_id=${model.id}'>Explainer: ${model.name}</a></li>`
-      })
-      regressions.innerHTML = regressionsList
-    }    
-  
-    window.addEventListener('DOMContentLoaded', getModelsList)
-  </script>
 </div>

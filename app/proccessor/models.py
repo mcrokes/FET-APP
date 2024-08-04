@@ -155,6 +155,14 @@ class ExplainedModel(db.Model, dbInteractionMethods):
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "model_description": self.model_description,
+            "target_row": self.target_row,
+        }
+
     def getElement(
             self,
             name: Literal[
@@ -197,6 +205,9 @@ class ExplainedRegressorModel(db.Model, dbInteractionMethods):
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
+    def to_dict(self):
+        return self.explainer_model.to_dict()
+
     def getElement(
             self,
             name: Literal["unit",],
@@ -221,6 +232,9 @@ class ExplainedClassifierModel(db.Model, dbInteractionMethods):
     user = relationship(
         "User", uselist=False, back_populates="classifier_models"
     )
+
+    def to_dict(self):
+        return self.explainer_model.to_dict()
 
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)

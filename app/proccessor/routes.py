@@ -228,7 +228,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
         db_model.db_commit()
 
 
-@blueprint.route("/classifier", methods=["GET", "POST"])
+@blueprint.route("/add_classifier", methods=["GET", "POST"])
 @login_required
 def save_classifier():
     form = add_model(request.form)
@@ -430,7 +430,7 @@ def save_classifier():
     return render_template("add_model_classifier.html", form=form, status="Initial")
 
 
-@blueprint.route("/regressor", methods=["GET", "POST"])
+@blueprint.route("/add_regressor", methods=["GET", "POST"])
 @login_required
 def save_regressor():
     form = add_model(request.form)
@@ -626,3 +626,15 @@ def save_regressor():
         ).first()
         db_model.delete_from_db()
     return render_template("add_model_regressor.html", form=form, status="Initial")
+
+
+@blueprint.route("/manage_classifiers", methods=["GET", "POST"])
+@login_required
+def manage_classifiers():
+    return render_template("classifiers.html")
+
+
+@blueprint.route("/manage_regressors", methods=["GET", "POST"])
+@login_required
+def manage_regressors():
+    return render_template("regressors.html")
