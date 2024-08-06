@@ -331,7 +331,7 @@ html , body{
     border-bottom: 1px solid #D9DEE4;
     margin-bottom: 10px;
     width: 100%;
-    position: relative
+    position: relative;
 }
 @media (min-width: 480px) {
     .nav_menu {
@@ -356,7 +356,6 @@ body .container.body .right_col {
 }
 .nav-md .container.body .right_col {
     padding: 10px 20px 0;
-    margin-left: 230px
 }
 .nav_title {
     width: 230px;
@@ -787,6 +786,11 @@ a:focus {
     position: relative;
     display: block;
     padding: 13px 15px 12px
+}
+.nav>li>div>div>a {
+    position: relative;
+    display: block;
+    padding: 13px 15px 12px;
 }
 .nav.side-menu>li.current-page,
 .nav.side-menu>li.active {

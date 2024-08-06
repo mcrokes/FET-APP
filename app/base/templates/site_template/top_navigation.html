@@ -1,24 +1,44 @@
 <div class="nav_menu">
   <nav>
-    <div class="nav toggle">
-      <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+    <div class="nav toggle" style="padding-top: 0;">
+      <a id="menu_toggle" onclick="show_sidebar()"><i class="fa fa-bars"></i></a>
     </div>
-
-    <ul class="nav navbar-nav navbar-right">
-      <li class="">
-        <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-          <img src="/static/images/img.jpg" alt="">{{ current_user.username }}
-          <span class=" fa fa-angle-down"></span>
-        </a>
-        <ul class="dropdown-menu dropdown-usermenu pull-right"  style="width: auto;">
-          {% if Is_admin %}
-          <li><a href="/setting/add_user"> Configuración de Administrador </a></li>
-          {% else %}
-          <li><a href="/setting/change_password"> Configuración </a></li>
-          {% endif %}
-          <li><a href="/logout"><i class="fa fa-sign-out pull-right"></i> Salir</a></li>
-        </ul>
+    <ul class="nav navbar-nav navbar-right" style="width: min-content;">
+      <li class="my-3" style="text-align: end; margin-right: 2rem;">
+          <div class="dropdown" id="configuration">
+            <a href="#" class="user-profile dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false" onclick="show_toggle()">
+              <img src="/static/images/img.jpg" alt="">{{ current_user.username }}
+            </a>
+            <ul class="dropdown-menu dropdown-usermenu pull-right" style="width: auto; position: absolute; line-height: 24px; margin-top: 15px; right: 0;" id="dropdown-content-on-top-bar">
+              {% if Is_admin %}
+              <li><a href="/setting/add_user"> Configuración </a></li>
+              {% else %}
+              <li><a href="/setting/change_password"> Configuración </a></li>
+              {% endif %}
+              <li><a href="/logout"><i class="fa fa-sign-out pull-right"></i> Salir</a></li>
+            </ul>
+          </div>
       </li>
     </ul>
   </nav>
+  <script>
+    let opened = false;
+    window.addEventListener('click', () => {
+      if (content.style.display === 'unset' && !opened) {
+        content.style.display = 'none';
+      }
+      opened = false;
+    })
+    const content = document.getElementById('dropdown-content-on-top-bar')
+    const show_toggle = () => {
+      if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'unset';
+        opened = true;
+      } else {
+        content.style.display = 'none';
+        opened = false;
+      }
+    }
+
+  </script>
 </div>
