@@ -55,6 +55,26 @@
         </div>
       </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content .bg-danger">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel"><i class="fa fa-trash"></i> Eliminar Modelo</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" style="background-color: #dc3535; color: white;">
+            ¿Está seguro que desea eliminar el modelo? <br>
+            Esta acción es irreversible
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 {% endblock %}
 
 {% block javascripts %}
@@ -75,7 +95,7 @@
           render: function (data, type, row) {
             var buttons = '<a href="/DashExample/app2?model_id=' + row.id + '" class="btn btn-success btn-xs btn-flat"><i class="fa fa-check"></i></a> '
             buttons += '<a href="' + row.id + '" class="btn btn-warning btn-xs btn-flat"><i class="fa fa-edit"></i></a> '
-            buttons += '<a href="' + row.id + '" type="button" class="btn btn-danger btn-xs btn-flat"><i class="fa fa-trash"></i></a>'
+            buttons += '<a href="' + row.id + '" type="button" class="btn btn-danger btn-xs btn-flat" data-bs-toggle="modal" data-bs-target="#staticBackdrop"><i class="fa fa-trash"></i></a>'
             return buttons
           }
         }
