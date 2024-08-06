@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <style>
+      .remove-icon {
+        display: flex;
+        justify-content: space-between;
+      }
+      .remove-icon::after{
+        display: none;
+      }
+      .sidebar-link {
+        white-space: nowrap;
+        padding-right: 3rem;
+        padding-left: 20px;
+        padding-right: 10px;
+      }
+    </style>
     {% block head %}
       {% block meta %}
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -38,32 +53,116 @@
       <div class="container body" style="margin: 0;">
         <div class="main_container" style="width: 100vw; height: 100vh; margin-left: 0;">
 
-          {% block sidebar %}
-            <div class="col-md-3 left_col {% block sidebar_class %} {% endblock sidebar_class %}">
-              {% include "site_template/sidebar.html" %}
-            </div>
-          {% endblock sidebar %}
+          <div style="display: grid; grid-template-columns: min-content auto; gap: 0; height: 100%;">
+            {% block sidebar %}
+              <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}" style="width: min-content; top: 0; left: 0; height: 100%;">
+                {% include "site_template/sidebar.html" %}
+              </div>
+            {% endblock sidebar %}
 
-          {% block top_navigation %}
-            <div class="top_nav">
-              {% include "site_template/top_navigation.html" %}
-            </div>
-          {% endblock top_navigation %}
+            <div id="body-container" style="height: 100%; position: absolute; right: 0;">
+              {% block top_navigation %}
+                <div class="top_nav" style="margin-left: 0;">
+                  {% include "site_template/top_navigation.html" %}
+                </div>
+              {% endblock top_navigation %}
 
-          <div class="right_col" role="main" style="height: 100%;">
-            {% block content %}
-              <!-- {{ content }} -->
-            {% endblock content %}
+              <div class="right_col" role="main" style="height: 100%; margin-left: 0;">
+                {% block content %}
+                  <!-- {{ content }} -->
+                {% endblock content %}
+              </div>
+              {% block footer %}
+                <footer style="margin-left:0 !important;">
+                  {% include "site_template/footer.html" %}
+                </footer>
+              {% endblock footer %}
+            </div>
           </div>
-
-          {% block footer %}
-            <footer>
-              {% include "site_template/footer.html" %}
-            </footer>
-          {% endblock footer %}
         </div>
       </div>
 
+      <script>
+        const sidebar = document.getElementById('sidebar-container');
+        const sidebarImage = document.getElementById('sidebar-img');
+        const sidebarChevronIcon = document.getElementById('chevron-icon-sidebar');
+        const sidebarItems = document.getElementsByClassName('sidebar-item');
+        const sidebarIcons = document.getElementsByClassName('sidebar-icon');
+        const body = document.getElementById('body-container');
+
+        const setSmallSideBar = () => {
+          body.style.width = '100%';
+          sidebarImage.style.display = 'none'
+          sidebarChevronIcon.style.display = 'none'
+          for (const item of sidebarItems) {
+            item.style.display = 'none';
+          }
+          for (const icon of sidebarIcons) {
+            icon.style.fontSize = '25px';
+            icon.style.marginLeft = '0.5rem';
+          }
+          body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+          window.localStorage.setItem('sidebar-expanded', 'false');
+        }
+
+        const setNormalSideBar = () => {
+          body.style.width = '100%';
+          sidebarImage.style.display = 'unset'
+          sidebarChevronIcon.style.display = 'unset'
+          for (const item of sidebarItems) {
+            item.style.display = 'unset';
+          }
+          for (const icon of sidebarIcons) {
+            icon.style.fontSize = '18px';
+            icon.style.marginLeft = '0';
+          }
+          body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+          window.localStorage.removeItem('sidebar-expanded');
+        }
+
+        const show_sidebar = (onClick = true) => {
+          if (window.innerWidth <= 800) {
+            if ((sidebar.style.display === 'none' && onClick) || window.localStorage.getItem('sidebar-mobile-expanded') === 'true' && !onClick) {
+              sidebar.style.display = 'unset';
+              setSmallSideBar();
+              window.localStorage.setItem('sidebar-mobile-expanded', 'true');
+            } else {
+              sidebar.style.display = 'none';
+              body.style.width = '100%';
+              window.localStorage.setItem('sidebar-mobile-expanded', 'false');
+            }
+          } else if (sidebarImage.style.display !== 'none') {
+            setSmallSideBar();
+            window.localStorage.setItem('sidebar-mobile-expanded', 'false');
+          } else {
+            setNormalSideBar()
+            window.localStorage.setItem('sidebar-mobile-expanded', 'false');
+          }
+        }
+
+        if (window.localStorage.getItem('sidebar-expanded') === 'false') {
+          show_sidebar(false);
+        } else {
+          body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+        }
+
+        window.addEventListener('resize', ()=> {
+          console.log('resize: ', window.innerWidth);
+          if (window.innerWidth <= 800 && window.localStorage.getItem('sidebar-mobile-expanded') !== 'true') {
+            console.log('sidebar: ', window.localStorage.getItem('sidebar-mobile-expanded'));
+            sidebar.style.display = 'none';
+            body.style.width = '100%';
+            window.localStorage.setItem('sidebar-mobile-expanded', 'false');
+          } else {
+            sidebar.style.display = 'unset';
+            if (window.localStorage.getItem('sidebar-mobile-expanded') === 'true' && window.innerWidth <= 800 || window.localStorage.getItem('sidebar-expanded') === 'false') {
+              setSmallSideBar();
+            } else if(window.innerWidth > 800 && window.localStorage.getItem('sidebar-expanded') !== 'false'){
+              setNormalSideBar()
+            }
+          }
+        })
+      </script>
       {% block javascripts %}
         <!-- jQuery -->
         <script src="{{ url_for('static', filename='vendors/jquery/dist/jquery.min.js') }}"></script>
