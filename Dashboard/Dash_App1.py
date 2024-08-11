@@ -11,7 +11,7 @@ from Dashboard.importances.importancesLayout import (
     importancesCallbacks,
     importancesLayout,
 )
-from Dashboard.metrics.metricsLayout import metricsCallbacks, metricsLayout
+from Dashboard.metrics.metricsLayout import metricsCallbacks, metricsRegressorLayout
 from Dashboard.predictions.predictionsLayout import (
     predictionsCallbacks,
     predictionsLayout,
@@ -52,7 +52,7 @@ tab1_content = dbc.Card(
 )
 
 tab2_content = dbc.Card(
-    dbc.CardBody([html.Div([metricsLayout], id="graph-metrics-layout-output-upload")]),
+    dbc.CardBody([html.Div([metricsRegressorLayout], id="graph-metrics-layout-output-upload")]),
     className="mt-3 section-card",
 )
 
@@ -79,15 +79,6 @@ tabs = dbc.Tabs(
     [
         dbc.Tab(
             [
-                tab2_content,
-                setTooltip("Métricas del Modelo", "metrics-tooltip-id"),
-            ],
-            id="metrics-tooltip-id",
-            label="Métricas",
-            className="classifier-tab",
-        ),
-        dbc.Tab(
-            [
                 tab0_content,
                 setTooltip("Estudio del Conjunto de Datos", "data-tooltip-id"),
             ],
@@ -102,6 +93,15 @@ tabs = dbc.Tabs(
             ],
             id="importance-tooltip-id",
             label="Importancias",
+            className="classifier-tab",
+        ),
+        dbc.Tab(
+            [
+                tab2_content,
+                setTooltip("Métricas del Modelo", "metrics-tooltip-id"),
+            ],
+            id="metrics-tooltip-id",
+            label="Métricas",
             className="classifier-tab",
         ),
         dbc.Tab(
@@ -153,11 +153,11 @@ def Add_Dash(server):
         ],
     )
     apply_layout_with_auth(app, layout)
-    # datasetCallbacks(app, furl)
-    # importancesCallbacks(app, furl, True)
+    datasetCallbacks(app, furl)
+    importancesCallbacks(app, furl, True)
     metricsCallbacks(app, furl, True)
-    # surrogateCallbacks(app, furl, True)
-    # specificTreesCallbacks(app, furl, True)
-    # predictionsCallbacks(app, furl, True)
+    surrogateCallbacks(app, furl, True)
+    specificTreesCallbacks(app, furl, True)
+    predictionsCallbacks(app, furl, True)
 
     return app.server
