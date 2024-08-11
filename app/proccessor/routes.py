@@ -266,6 +266,7 @@ def save_classifier():
                     training_df = pd.read_csv(request.files["dataset"])
                 except:  # noqa: E722
                     training_df = pd.read_excel(request.files["dataset"])
+
                 db_model = ModelForProccess(
                     **{
                         "name": name,
@@ -301,13 +302,20 @@ def save_classifier():
             ).first()
 
             if cancel != "Create":
+                print('Entering on Crete...')
                 possible_not_needed_variables = list(
                     set(db_model.getElement("dataset").columns)
                     - set(db_model.getElement("model").feature_names_in_)
                 )
+                possible_not_needed_variables.remove(request.form["target"])
+                print('possible_not_needed_variables:', possible_not_needed_variables)
                 db_model.target_row = request.form["target"]
-                db_model.dataset = db_model.getElement("dataset").drop(
-                    columns=possible_not_needed_variables.remove(request.form["target"]))
+                db_model.setElements(
+                    **{
+                        'dataset': db_model.getElement("dataset").drop(
+                            columns=possible_not_needed_variables)
+                    }
+                )
                 db_model.db_commit()
             else:
                 print(cancel)
@@ -324,6 +332,8 @@ def save_classifier():
 
             qualitative_variables_form = []
             df = db_model.getElement("dataset")
+            print('df: ', df)
+
             for column in df:
                 if len(set(df[column])) < 5 or column == db_model.target_row:
                     qualitative_variables_form.append(

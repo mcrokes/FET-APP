@@ -69,7 +69,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-danger">Eliminar</button>
+            <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="deleteModel()">Eliminar</button>
           </div>
         </div>
       </div>
@@ -84,6 +84,12 @@
   <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
 
   <script>
+    let modelForDelete = null;
+    const saveModelId = (id) => {
+      modelForDelete = id;
+      console.log(modelForDelete);
+    }
+
     let table = $('#classifier_data').DataTable({
       ajax: '/INTERNAL_API/classifier/list',
       columns: [{ data: 'id' }, { data: 'name' }, { data: 'model_description' }, { data: 'target_row' }, { data: 'name' }],
@@ -95,11 +101,27 @@
           render: function (data, type, row) {
             var buttons = '<a href="/DashExample/app2?model_id=' + row.id + '" class="btn btn-success btn-xs btn-flat"><i class="fa fa-check"></i></a> '
             buttons += '<a href="' + row.id + '" class="btn btn-warning btn-xs btn-flat"><i class="fa fa-edit"></i></a> '
-            buttons += '<a href="' + row.id + '" type="button" class="btn btn-danger btn-xs btn-flat" data-bs-toggle="modal" data-bs-target="#staticBackdrop"><i class="fa fa-trash"></i></a>'
+            buttons += '<a href="' + row.id + '" type="button" class="btn btn-danger btn-xs btn-flat" data-bs-toggle="modal" onclick="saveModelId(' + row.id + ')" data-bs-target="#staticBackdrop"><i class="fa fa-trash"></i></a>'
             return buttons
           }
         }
       ]
     })
+    const deleteModel = async () => {
+      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/classifier/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: modelForDelete,
+      })
+
+      res = await response.json().then((value) => {
+        console.log(value)
+        if (value.status == 200) {
+          table.ajax.reload()
+        }
+        modelForDelete = null;
+      })
+
+    }
   </script>
 {% endblock %}

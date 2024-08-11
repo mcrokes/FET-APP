@@ -49,3 +49,32 @@ def get_regressor_list():
     for regressor in regressors:
         response.append(regressor.to_dict())
     return {"data": response}
+
+
+@blueprint.route("/classifier/delete", methods=["POST"])
+@login_required
+def delete_classifier():
+    modelId = request.data.decode()
+    print('modelId: ', modelId)
+    classifier: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+        ExplainedClassifierModel.explainer_model_id == modelId
+    ).first()
+    print(classifier.explainer_model.name)
+    try:
+        classifier.delete_from_db()
+        return {'status': 200, 'statusText': 'OK'}
+    except:
+        return {'status': 500, 'statusText': 'error on deletion'}
+
+
+@blueprint.route("/regressor/delete", methods=["POST"])
+@login_required
+def delete_regressor():
+    modelId = request.data.decode()
+    regressor: ExplainedRegressorModel = ExplainedRegressorModel.query.filter(
+        ExplainedRegressorModel.explainer_model_id == modelId).first()
+    try:
+        regressor.delete_from_db()
+        return {'status': 200, 'statusText': 'OK'}
+    except:
+        return {'status': 500, 'statusText': 'error on deletion'}
