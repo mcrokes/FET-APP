@@ -1,5 +1,7 @@
 import math
 from pyclbr import Function
+
+import numpy as np
 from dash import dcc, html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
@@ -7,13 +9,14 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
 from sklearn.calibration import LabelEncoder
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 from app.proccessor.model.dataset_interaction_methods import (
     get_y_transformed,
     update_y_pred,
 )
-from app.proccessor.models import ExplainedClassifierModel
+from app.proccessor.models import ExplainedClassifierModel, ExplainedModel
 
 from sklearn import metrics
 import plotly.express as px
@@ -27,7 +30,87 @@ keys = {
     "tv": "Predicciones Correctas",
     "fv": "Predicciones Fallidas",
     "accuracy": "Precisión Global",
+    "mse": "Error Cuadrático Medio",
+    "rmse": "Raíz del Error Cuadrático Medio",
+    "mae": "Error Absoluto Medio",
+    "mape": "Error Absoluto Porcentual Medio",
+    "r2": "Coeficiente de Determinación R²",
 }
+
+
+def generate_regression_metrics(y, y_pred):
+    mse = mean_squared_error(y, y_pred)
+    regression_metrics = {
+        f"{keys['mse']}": round(mse, 4),
+        f"{keys['rmse']}": round(np.sqrt(mse), 4),
+        f"{keys['mae']}": round(mean_absolute_error(y, y_pred), 4),
+        f"{keys['mape']}": round(np.mean(np.abs((y - y_pred) / y)) * 100, 4),
+        f"{keys['r2']}": round(r2_score(y, y_pred), 4),
+    }
+
+    descriptions = {
+        f"{keys['mse']}": "El MSE mide la media de los errores cuadrados entre los valores reales y los valores "
+                          "predichos. Un MSE bajo indica que el modelo se ajusta bien a los datos.",
+        f"{keys['rmse']}": "El RMSE es la raíz cuadrada del MSE. Es una métrica más fácil de interpretar que el MSE, "
+                           "ya que tiene la misma unidad que los valores reales.",
+        f"{keys['mae']}": "El MAE mide la media de los errores absolutos entre los valores reales y los valores "
+                          "predichos. Un MAE bajo indica que el modelo se ajusta bien a los datos.",
+        f"{keys['mape']}": "El MAPE mide la media de los errores absolutos porcentuales entre los valores reales y "
+                           "los valores predichos. Un MAPE bajo indica que el modelo se ajusta bien a los datos.",
+        f"{keys['r2']}": "El R² mide la proporción de la varianza en los valores reales que es explicada por el "
+                         "modelo. Un R² alto indica que el modelo se ajusta bien a los datos.",
+    }
+
+    regression_metrics_df = (
+        pd.DataFrame(regression_metrics, index=["Valor"])
+        .transpose()[0:]
+        .rename_axis("Métricas")
+        .reset_index()
+    )
+
+    regression_metrics_table = dbc.Table(
+        [
+            html.Thead(
+                html.Tr([html.Th(col) for col in regression_metrics_df.columns])
+            ),
+            html.Tbody(
+                [
+                    html.Tr(
+                        [
+                            html.Td(
+                                [
+                                    html.Span(cell, id=f"{cell}-{row}-{index}"),
+                                    dbc.Tooltip(
+                                        f"{descriptions[cell]}",
+                                        target=f"{cell}-{row}-{index}",
+                                    ),
+                                ]
+                                if index == 0
+                                else cell,
+                                style={'white-space': 'nowrap', 'padding': '0.5rem'}
+                            )
+                            for index, (col, cell) in enumerate(zip(regression_metrics_df.columns, row))
+                        ]
+                    )
+                    for row in regression_metrics_df.values.tolist()
+                ]
+            ),
+        ],
+        className="rules-table",
+        bordered=True,
+        hover=True,
+    )
+
+    print(regression_metrics_df)
+
+    print("Error Cuadrático Medio (mean-squared-error):", round(regression_metrics[keys['mse']], 4))
+    print("Raíz del Error Cuadrático Medio (root-mean-squared-error):", round(regression_metrics[keys['rmse']], 4))
+    print("Error Absoluto Medio (mean-absolute-error):", round(regression_metrics[keys['mae']], 4))
+    print("Error Absoluto Porcentual Medio (mean-absolute-percentage-error):",
+          round(regression_metrics[keys['mape']], 4))
+    print("Coeficiente de Determinación (R-squared):", round(regression_metrics[keys['r2']], 4))
+
+    return regression_metrics_table
 
 
 def setBottomLegend(fig):
@@ -79,12 +162,14 @@ def generateMatrixExplanationLayout(matrix_explanation):
         )
 
     if matrix_explanation != {}:
-
         descriptions = {
-            f"{keys['tpr']}": "Proporción de predicciones correctas entre todos los valores reales de la clase. (Mayor es Mejor)",
-            f"{keys['fpr']}": "Proporción de predicciones erroneas entre todos los valores reales de otras clases clase. (Menor es Mejor)",
+            f"{keys['tpr']}": "Proporción de predicciones correctas entre todos los valores reales de la clase. ("
+                              "Mayor es Mejor)",
+            f"{keys['fpr']}": "Proporción de predicciones erroneas entre todos los valores reales de otras clases "
+                              "clase. (Menor es Mejor)",
             f"{keys['f1']}": "Media armónica de la precisión y la sensibilidad. (Mayor es Mejor)",
-            f"{keys['precision']}": "Proporción de verdaderos positivos entre todos los positivos predichos. (Mayor es Mejor)",
+            f"{keys['precision']}": "Proporción de verdaderos positivos entre todos los positivos predichos. (Mayor "
+                                    "es Mejor)",
         }
 
         explanation_df = pd.concat(
@@ -112,8 +197,8 @@ def generateMatrixExplanationLayout(matrix_explanation):
                                         else cell
                                     )
                                     for index, (col, cell) in enumerate(
-                                        zip(explanation_df.columns, row)
-                                    )
+                                    zip(explanation_df.columns, row)
+                                )
                                 ]
                             )
                             for row in explanation_df.values.tolist()
@@ -159,15 +244,15 @@ def get_matrix_explanation(cm, class_names):
                 else 0
             ),
             f"{keys['fpr']}": sum(false_positives)
-            / (sum(false_positives) + sum(true_negatives)),
+                              / (sum(false_positives) + sum(true_negatives)),
         }
 
         explanation[keys["f1"]] = (
             (
-                2
-                * explanation[keys["precision"]]
-                * explanation[keys["tpr"]]
-                / (explanation[keys["precision"]] + explanation[keys["tpr"]])
+                    2
+                    * explanation[keys["precision"]]
+                    * explanation[keys["tpr"]]
+                    / (explanation[keys["precision"]] + explanation[keys["tpr"]])
             )
             if (explanation[keys["precision"]] + explanation[keys["tpr"]]) > 0
             else 0
@@ -189,13 +274,12 @@ def get_matrix_explanation(cm, class_names):
         "dtype": "object",
         f"{keys['tv']}": true_values,
         f"{keys['fv']}": false_values,
-        f"{keys['accuracy']}": f"{round((true_values / (true_values + false_values)) *100, 2)} %",
+        f"{keys['accuracy']}": f"{round((true_values / (true_values + false_values)) * 100, 2)} %",
         "matrix_explanation": matrix_explanation,
     }
 
 
 def __create_matrix(cm, class_names):
-
     fig = px.imshow(
         img=cm,
         title="MATRIZ DE CONFUSION",
@@ -209,13 +293,13 @@ def __create_matrix(cm, class_names):
 
 
 def initialize_matrix(
-    dropdown_value,
-    slider_value,
-    y_test,
-    x_test,
-    classifier_model: RandomForestClassifier,
-    class_names,
-    old_class_names,
+        dropdown_value,
+        slider_value,
+        y_test,
+        x_test,
+        classifier_model: RandomForestClassifier,
+        class_names,
+        old_class_names,
 ):
     y_pred_new = classifier_model.predict(x_test)
 
@@ -260,7 +344,7 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
         auc_score = metrics.auc(fpr, tpr)
 
         if pointer >= 0 or not useScatter:
-            name = f"{options[cont]['label']} (AUC={auc_score*100:.2f} %)"
+            name = f"{options[cont]['label']} (AUC={auc_score * 100:.2f} %)"
             trace2 = go.Scatter(x=fpr, y=tpr, name=name, mode="lines")
             data.append(trace2)
 
@@ -336,9 +420,9 @@ ROCclass_selector = dcc.Dropdown(
 
 ROCslider = dcc.Slider(0.01, 0.99, value=0.5, id="ROC-cutoff-slider", disabled=True)
 
-id_sufix = ["confusion-matrix", "roc-curve"]
+id_sufix = ["confusion-matrix", "roc-curve", "pred-real", "real-pred"]
 
-metricsLayout = html.Div(
+metricsClassifierLayout = html.Div(
     [
         html.Div(
             [
@@ -494,188 +578,339 @@ metricsLayout = html.Div(
     style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
 )
 
+metricsRegressorLayout = html.Div(
+    [
+        html.Div(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+
+                                html.Div(
+                                    [
+                                        html.I(
+                                            id=f"{id_sufix[2]}-info",
+                                            className="fa fa-info-circle info-icon",
+                                        ),
+                                        dbc.Tooltip(
+                                            [
+                                                html.Plaintext(
+                                                    [
+                                                        "Evalúa la precisión del modelo en la "
+                                                        "regresión de resultados de modo que un mejor modelo "
+                                                        "está representado por los ",
+                                                        html.Strong("puntos más cercanos a la linea discontinua "),
+                                                        "central.",
+                                                    ]
+                                                ),
+                                                html.Plaintext(
+                                                    [
+                                                        "La línea discontínua representa los ",
+                                                        html.Strong("valores reales "),
+                                                    ]
+                                                ),
+                                            ],
+                                            className="personalized-tooltip",
+                                            target=f"{id_sufix[2]}-info",
+                                        ),
+                                    ],
+                                    style={"display": "flex", "justify-content": "end"},
+                                ),
+                                dbc.Row([html.Div(id="regression-simple-vs-actual")]),
+                            ],
+                            xs=12,
+                            sm=12,
+                            md=6,
+                            lg=6,
+                            xl=6,
+                            xxl=6,
+                        ),
+                        dbc.Col(
+                            [
+                                html.Div(
+                                    [
+                                        html.I(
+                                            id=f"{id_sufix[3]}-info",
+                                            className="fa fa-info-circle info-icon",
+                                        ),
+                                        dbc.Tooltip(
+                                            [
+                                                html.Plaintext(
+                                                    [
+                                                        "Evalúa la precisión del modelo en la "
+                                                        "regresión de resultados de modo que un mejor modelo "
+                                                        "está representado por los ",
+                                                        html.Strong("puntos más cercanos a la linea discontinua "),
+                                                        "central.",
+                                                    ]
+                                                ),
+                                                html.Plaintext(
+                                                    [
+                                                        "La línea discontínua representa la ",
+                                                        html.Strong("predicción "),
+                                                    ]
+                                                ),
+                                            ],
+                                            className="personalized-tooltip",
+                                            target=f"{id_sufix[3]}-info",
+                                        ),
+                                    ],
+                                    style={"display": "flex", "justify-content": "end"},
+                                ),
+                                html.Div(
+                                    id="regression-simple-vs-pred",
+                                ),
+                            ],
+                            xs=12,
+                            sm=12,
+                            md=6,
+                            lg=6,
+                            xl=6,
+                            xxl=6,
+                        ),
+                    ],
+                ),
+                dbc.Row(
+                    [
+                        html.Div(id="regression-metrics", style={'width': 'max-content', 'margin': 'auto'}),
+                    ],
+                ),
+            ]
+        )
+    ],
+    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
+)
+
 
 def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
-    @app.callback(
-        Output("matrix-output-upload", "children"),
-        Output("matrix-explanation", "children"),
-        Output("cutoff-slider", "disabled"),
-        Output("positive-class-selector", "disabled"),
-        Output("positive-class-selector", "options"),
-        Input("check-cutoff", "value"),
-        Input("positive-class-selector", "value"),
-        Input("cutoff-slider", "value"),
-        Input("path", "href"),
-    )
-    def graph_matrix(cutoff, positive_class, slider, cl):
-        f = furl(cl)
-        model_id = f.args["model_id"]
-        try:
-            classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.explainer_model_id == model_id
-            ).first()
-            
-            model_x = classifier_dbmodel.explainer_model
+    if isRegressor:
+        @app.callback(
+            Output("regression-simple-vs-actual", "children"),
+            Output("regression-simple-vs-pred", "children"),
+            Output("regression-metrics", "children"),
+            Input("path", "href"),
+        )
+        def graph_pred_vs_real(cl):
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+                model_x: ExplainedModel = ExplainedModel.query.filter(
+                    ExplainedModel.id == model_id
+                ).first()
 
-            classifier_model: RandomForestClassifier = model_x.getElement("model")
-            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
-                "dataset"
-            )
+                regressor_model: RandomForestRegressor = model_x.getElement("model")
+                regressor_dataset: pd.DataFrame = model_x.data_set_data.getElement(
+                    "dataset"
+                )
+                y = regressor_dataset[model_x.getElement('target_row')]
+                y_pred = regressor_model.predict(regressor_dataset.drop(columns=model_x.getElement('target_row')))
+                fig = px.scatter(x=y, y=y_pred, title='Prediccción vs Valores Reales', marginal_y='histogram',
+                                 labels={'x': 'Valor Real', 'y': 'Predicción'})
+                fig.add_shape(
+                    type="line", line=dict(dash='dash'),
+                    x0=y.min(), y0=y.min(),
+                    x1=y.max(), y1=y.max()
+                )
 
-            target_description = classifier_dbmodel.getElement("target_names_dict")
-            class_names = [
-                element["new_value"] for element in target_description["variables"]
-            ]
-            old_class_names = [
-                element["old_value"] for element in target_description["variables"]
-            ]
+                fig_1 = dcc.Graph(figure=fig)
 
-            if positive_class or slider or cutoff:
-                if cutoff and positive_class is not None:
-                    matrix_graph, matrix_explanation = initialize_matrix(
-                        dropdown_value=positive_class,
-                        slider_value=slider,
-                        y_test=classifier_dataset[model_x.target_row],
-                        x_test=classifier_dataset.drop(columns=model_x.target_row),
-                        classifier_model=classifier_model,
-                        class_names=class_names,
-                        old_class_names=old_class_names,
-                    )
-                    return (
-                        dcc.Graph(figure=matrix_graph),
-                        generateMatrixExplanationLayout(matrix_explanation),
-                        False,
-                        False,
-                        get_target_dropdown(target_description["variables"]),
-                    )
-                else:
-                    matrix_graph, matrix_explanation = initialize_matrix(
-                        dropdown_value=None,
-                        slider_value=None,
-                        y_test=classifier_dataset[model_x.target_row],
-                        x_test=classifier_dataset.drop(columns=model_x.target_row),
-                        classifier_model=classifier_model,
-                        class_names=class_names,
-                        old_class_names=old_class_names,
-                    )
-                    div = dcc.Graph(figure=matrix_graph)
-                    explanation = generateMatrixExplanationLayout(matrix_explanation)
-                    if cutoff and positive_class is None:
+                fig = px.scatter(x=y_pred, y=y, title='Valores Reales vs Prediccción', marginal_y='histogram',
+                                 labels={'x': 'Prediccción', 'y': 'Valor Real'})
+                fig.add_shape(
+                    type="line", line=dict(dash='dash'),
+                    x0=y_pred.min(), y0=y_pred.min(),
+                    x1=y_pred.max(), y1=y_pred.max()
+                )
+
+                fig_2 = dcc.Graph(figure=fig)
+
+                return fig_1, fig_2, generate_regression_metrics(y, y_pred)
+            except Exception as e:
+                print(e)
+                raise PreventUpdate
+
+    else:
+        @app.callback(
+            Output("matrix-output-upload", "children"),
+            Output("matrix-explanation", "children"),
+            Output("cutoff-slider", "disabled"),
+            Output("positive-class-selector", "disabled"),
+            Output("positive-class-selector", "options"),
+            Input("check-cutoff", "value"),
+            Input("positive-class-selector", "value"),
+            Input("cutoff-slider", "value"),
+            Input("path", "href"),
+        )
+        def graph_matrix(cutoff, positive_class, slider, cl):
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+                classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                    ExplainedClassifierModel.explainer_model_id == model_id
+                ).first()
+
+                model_x = classifier_dbmodel.explainer_model
+
+                classifier_model: RandomForestClassifier = model_x.getElement("model")
+                classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
+                    "dataset"
+                )
+
+                target_description = classifier_dbmodel.getElement("target_names_dict")
+                class_names = [
+                    element["new_value"] for element in target_description["variables"]
+                ]
+                old_class_names = [
+                    element["old_value"] for element in target_description["variables"]
+                ]
+
+                if positive_class or slider or cutoff:
+                    if cutoff and positive_class is not None:
+                        matrix_graph, matrix_explanation = initialize_matrix(
+                            dropdown_value=positive_class,
+                            slider_value=slider,
+                            y_test=classifier_dataset[model_x.target_row],
+                            x_test=classifier_dataset.drop(columns=model_x.target_row),
+                            classifier_model=classifier_model,
+                            class_names=class_names,
+                            old_class_names=old_class_names,
+                        )
                         return (
-                            div,
-                            explanation,
-                            True,
+                            dcc.Graph(figure=matrix_graph),
+                            generateMatrixExplanationLayout(matrix_explanation),
+                            False,
                             False,
                             get_target_dropdown(target_description["variables"]),
                         )
                     else:
-                        return (
-                            div,
-                            explanation,
-                            True,
-                            True,
-                            get_target_dropdown(target_description["variables"]),
+                        matrix_graph, matrix_explanation = initialize_matrix(
+                            dropdown_value=None,
+                            slider_value=None,
+                            y_test=classifier_dataset[model_x.target_row],
+                            x_test=classifier_dataset.drop(columns=model_x.target_row),
+                            classifier_model=classifier_model,
+                            class_names=class_names,
+                            old_class_names=old_class_names,
                         )
-            else:
-                return (
-                    None,
-                    None,
-                    None,
-                    get_target_dropdown(target_description["variables"]),
-                )
-        except Exception as e:
-            print(e)
-            raise PreventUpdate
-
-    @app.callback(
-        Output("roc-output-upload", "children"),
-        Output("ROC-cutoff-slider", "disabled"),
-        Output("ROC-positive-class-selector", "disabled"),
-        Output("ROC-positive-class-selector", "options"),
-        Input("ROC-check-cutoff", "value"),
-        Input("ROC-positive-class-selector", "value"),
-        Input("ROC-cutoff-slider", "value"),
-        Input("path", "href"),
-    )
-    def graph_roc(cutoff, positive_class, slider, cl):
-        f = furl(cl)
-        model_id = f.args["model_id"]
-        try:
-            classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
-                ExplainedClassifierModel.explainer_model_id == model_id
-            ).first()
-            
-            model_x = classifier_dbmodel.explainer_model
-
-            classifier_model: RandomForestClassifier = model_x.getElement("model")
-            classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
-                "dataset"
-            )
-
-            target_description = classifier_dbmodel.getElement("target_names_dict")
-
-            if positive_class or slider or cutoff:
-                if cutoff and positive_class is not None:
-                    pointers = [
-                        slider / (len(target_description["variables"]) - 1)
-                        for _ in target_description["variables"]
-                    ]
-                    pointers[positive_class] = 1 - slider
-                    return (
-                        dcc.Graph(
-                            figure=create_curve(
-                                y_scores=classifier_model.predict_proba(
-                                    classifier_dataset.drop(columns=model_x.target_row)
-                                ),
-                                y_true=classifier_dataset[model_x.target_row],
-                                options=get_target_dropdown(
-                                    target_description["variables"]
-                                ),
-                                pointers=pointers,
-                                useScatter=True,
+                        div = dcc.Graph(figure=matrix_graph)
+                        explanation = generateMatrixExplanationLayout(matrix_explanation)
+                        if cutoff and positive_class is None:
+                            return (
+                                div,
+                                explanation,
+                                True,
+                                False,
+                                get_target_dropdown(target_description["variables"]),
                             )
-                        ),
-                        False,
-                        False,
+                        else:
+                            return (
+                                div,
+                                explanation,
+                                True,
+                                True,
+                                get_target_dropdown(target_description["variables"]),
+                            )
+                else:
+                    return (
+                        None,
+                        None,
+                        None,
                         get_target_dropdown(target_description["variables"]),
                     )
-                else:
-                    pointers = [-1 for element in target_description["variables"]]
-                    div = (
-                        dcc.Graph(
-                            figure=create_curve(
-                                y_scores=classifier_model.predict_proba(
-                                    classifier_dataset.drop(columns=model_x.target_row)
-                                ),
-                                y_true=classifier_dataset[model_x.target_row],
-                                options=get_target_dropdown(
-                                    target_description["variables"]
-                                ),
-                                pointers=pointers,
-                            )
-                        ),
-                    )
-                    if cutoff and positive_class is None:
+            except Exception as e:
+                print(e)
+                raise PreventUpdate
+
+        @app.callback(
+            Output("roc-output-upload", "children"),
+            Output("ROC-cutoff-slider", "disabled"),
+            Output("ROC-positive-class-selector", "disabled"),
+            Output("ROC-positive-class-selector", "options"),
+            Input("ROC-check-cutoff", "value"),
+            Input("ROC-positive-class-selector", "value"),
+            Input("ROC-cutoff-slider", "value"),
+            Input("path", "href"),
+        )
+        def graph_roc(cutoff, positive_class, slider, cl):
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+                classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                    ExplainedClassifierModel.explainer_model_id == model_id
+                ).first()
+
+                model_x = classifier_dbmodel.explainer_model
+
+                classifier_model: RandomForestClassifier = model_x.getElement("model")
+                classifier_dataset: pd.DataFrame = model_x.data_set_data.getElement(
+                    "dataset"
+                )
+
+                target_description = classifier_dbmodel.getElement("target_names_dict")
+
+                if positive_class or slider or cutoff:
+                    if cutoff and positive_class is not None:
+                        pointers = [
+                            slider / (len(target_description["variables"]) - 1)
+                            for _ in target_description["variables"]
+                        ]
+                        pointers[positive_class] = 1 - slider
                         return (
-                            div,
-                            True,
+                            dcc.Graph(
+                                figure=create_curve(
+                                    y_scores=classifier_model.predict_proba(
+                                        classifier_dataset.drop(columns=model_x.target_row)
+                                    ),
+                                    y_true=classifier_dataset[model_x.target_row],
+                                    options=get_target_dropdown(
+                                        target_description["variables"]
+                                    ),
+                                    pointers=pointers,
+                                    useScatter=True,
+                                )
+                            ),
+                            False,
                             False,
                             get_target_dropdown(target_description["variables"]),
                         )
                     else:
-                        return (
-                            div,
-                            True,
-                            True,
-                            get_target_dropdown(target_description["variables"]),
+                        pointers = [-1 for element in target_description["variables"]]
+                        div = (
+                            dcc.Graph(
+                                figure=create_curve(
+                                    y_scores=classifier_model.predict_proba(
+                                        classifier_dataset.drop(columns=model_x.target_row)
+                                    ),
+                                    y_true=classifier_dataset[model_x.target_row],
+                                    options=get_target_dropdown(
+                                        target_description["variables"]
+                                    ),
+                                    pointers=pointers,
+                                )
+                            ),
                         )
-            else:
-                return (
-                    None,
-                    None,
-                    None,
-                    get_target_dropdown(target_description["variables"]),
-                )
-        except Exception as e:
-            print(e)
-            raise PreventUpdate
+                        if cutoff and positive_class is None:
+                            return (
+                                div,
+                                True,
+                                False,
+                                get_target_dropdown(target_description["variables"]),
+                            )
+                        else:
+                            return (
+                                div,
+                                True,
+                                True,
+                                get_target_dropdown(target_description["variables"]),
+                            )
+                else:
+                    return (
+                        None,
+                        None,
+                        None,
+                        get_target_dropdown(target_description["variables"]),
+                    )
+            except Exception as e:
+                print(e)
+                raise PreventUpdate

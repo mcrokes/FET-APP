@@ -11,7 +11,7 @@ from Dashboard.importances.importancesLayout import (
     importancesCallbacks,
     importancesLayout,
 )
-from Dashboard.metrics.metricsLayout import metricsCallbacks, metricsLayout
+from Dashboard.metrics.metricsLayout import metricsCallbacks, metricsClassifierLayout
 from Dashboard.predictions.predictionsLayout import (
     predictionsCallbacks,
     predictionsLayout,
@@ -54,7 +54,7 @@ tab1_content = dbc.Card(
 )
 
 tab2_content = dbc.Card(
-    dbc.CardBody([html.Div([metricsLayout], id="graph-metrics-layout-output-upload")]),
+    dbc.CardBody([html.Div([metricsClassifierLayout], id="graph-metrics-layout-output-upload")]),
     className="mt-3 section-card",
 )
 

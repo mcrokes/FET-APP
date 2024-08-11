@@ -18,6 +18,8 @@ virtual_env
 # other
 .DS_Store
 .vscode/
+.idea
+.git
 
 # sphinx docs 
 _build
