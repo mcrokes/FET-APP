@@ -19,14 +19,14 @@ from app.proccessor.models import (
     TreeRuleCause,
 )
 from . import blueprint
-from flask import current_app, render_template, request
+from flask import current_app, render_template, request, redirect
 from flask_login import current_user, login_required
 import pandas as pd
 
 import joblib
 
 
-def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regressor"]):
+def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regressor"], modelId):
     with app:
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == model_id
@@ -64,62 +64,113 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
         db_model.db_commit()
 
         #### BASE MODEL ####
-
-        model_data = ExplainedModel(
-            **{
-                "name": db_model.name,
-                "model": db_model_model,
-                "indexesDict": "dict of indexes",
-                "indexColumnName": "column name for indexes",
-                "model_description": db_model.description,
-                "features_description": db_model.getElement("features_description"),
-                "target_row": db_model.target_row,
-                "q_variables_dict": db_model_qualitative_columns,
-                "test_size": 0.6,
-                "random_state": 123,
-            }
-        )
+        if modelId:
+            model_data: ExplainedModel = ExplainedModel.query.filter(
+                ExplainedModel.id == modelId
+            ).first()
+            model_data.setElements(
+                **{
+                    "name": db_model.name,
+                    "model": db_model_model,
+                    "indexesDict": "dict of indexes",
+                    "indexColumnName": "column name for indexes",
+                    "model_description": db_model.description,
+                    "features_description": db_model.getElement("features_description"),
+                    "target_row": db_model.target_row,
+                    "q_variables_dict": db_model_qualitative_columns,
+                    "test_size": 0.6,
+                    "random_state": 123,
+                }
+            )
+        else:
+            model_data = ExplainedModel(
+                **{
+                    "name": db_model.name,
+                    "model": db_model_model,
+                    "indexesDict": "dict of indexes",
+                    "indexColumnName": "column name for indexes",
+                    "model_description": db_model.description,
+                    "features_description": db_model.getElement("features_description"),
+                    "target_row": db_model.target_row,
+                    "q_variables_dict": db_model_qualitative_columns,
+                    "test_size": 0.6,
+                    "random_state": 123,
+                }
+            )
 
         db_model.percent_processed = 30
         db_model.process_message = "Cargando metricas del conjunto de datos..."
         db_model.db_commit()
 
         #### DATASET DATA ####
-
-        dataset_data = DataSetData(
-            **{
-                "dataset": db_model_dataset,
-                "dataset_modified": get_modified_dataframe(
-                    df=db_model_dataset,
-                    target_description=(
-                        db_model_classifier_target_description
-                        if type == "Classifier"
-                        else None
+        if modelId:
+            model_data.data_set_data.setElements(
+                **{
+                    "dataset": db_model_dataset,
+                    "dataset_modified": get_modified_dataframe(
+                        df=db_model_dataset,
+                        target_description=(
+                            db_model_classifier_target_description
+                            if type == "Classifier"
+                            else None
+                        ),
+                        qualitative_columns=db_model_qualitative_columns,
                     ),
-                    qualitative_columns=db_model_qualitative_columns,
-                ),
-            }
-        )
-
-        dataset_data_distribution_qualitative = DataSetDataDistribution(
-            **{
-                "isNumeric": False,
-                "rows_amount": 3,
-                "columns_amount": 3,
-                "distribution_dataset": "Dataset for the distribution type",
-                "isPrime": False,
-            }
-        )
-        dataset_data_distribution_qualitative.data_set_data = dataset_data
-
-        dataset_data_distribution_numeric = DataSetDataDistribution(
-            **{
-                "rows_amount": 3,
-                "columns_amount": 3,
-                "distribution_dataset": "Dataset for the distribution type",
-            }
-        )
-        dataset_data_distribution_numeric.data_set_data = dataset_data
+                }
+            )
+        else:
+            dataset_data = DataSetData(
+                **{
+                    "dataset": db_model_dataset,
+                    "dataset_modified": get_modified_dataframe(
+                        df=db_model_dataset,
+                        target_description=(
+                            db_model_classifier_target_description
+                            if type == "Classifier"
+                            else None
+                        ),
+                        qualitative_columns=db_model_qualitative_columns,
+                    ),
+                }
+            )
+        if modelId:
+            model_data.data_set_data.data_set_data_distributions[0].setElements(
+                **{
+                    "isNumeric": False,
+                    "rows_amount": 3,
+                    "columns_amount": 3,
+                    "distribution_dataset": "Dataset for the distribution type",
+                    "isPrime": False,
+                }
+            )
+            model_data.data_set_data.data_set_data_distributions[1].setElements(
+                **{
+                    "rows_amount": 3,
+                    "columns_amount": 3,
+                    "distribution_dataset": "Dataset for the distribution type",
+                }
+            )
+            model_data.data_set_data.data_set_data_distributions[0].db_commit()
+            model_data.data_set_data.data_set_data_distributions[1].db_commit()
+        else:
+            dataset_data_distribution_qualitative = DataSetDataDistribution(
+                **{
+                    "isNumeric": False,
+                    "rows_amount": 3,
+                    "columns_amount": 3,
+                    "distribution_dataset": "Dataset for the distribution type",
+                    "isPrime": False,
+                }
+            )
+            dataset_data_distribution_numeric = DataSetDataDistribution(
+                **{
+                    "rows_amount": 3,
+                    "columns_amount": 3,
+                    "distribution_dataset": "Dataset for the distribution type",
+                }
+            )
+            dataset_data_distribution_qualitative.data_set_data = dataset_data
+            dataset_data_distribution_numeric.data_set_data = dataset_data
 
         db_model.percent_processed = 40
         db_model.process_message = "Creando modelo subrogado datos..."
@@ -127,6 +178,8 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
 
         tree_depth = 3
         surrogate_inexact_rules_amount = -1
+        if modelId:
+            model_data.surrogate_trees_data = []
         while surrogate_inexact_rules_amount != 0:
 
             db_model.process_message = (
@@ -197,31 +250,51 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
         db_model.process_message = "Guardando la base de datos del modelo..."
         db_model.db_commit()
 
-        model_data.data_set_data = dataset_data
-
-        dataset_data_distribution_numeric.add_to_db()
-        dataset_data_distribution_qualitative.add_to_db()
-        dataset_data.add_to_db()
-        model_data.add_to_db()
+        if modelId:
+            model_data.data_set_data.db_commit()
+            model_data.db_commit()
+        else:
+            print('Saving Models...')
+            model_data.data_set_data = dataset_data
+            dataset_data_distribution_numeric.add_to_db()
+            dataset_data_distribution_qualitative.add_to_db()
+            dataset_data.add_to_db()
+            model_data.add_to_db()
 
         if type == "Classifier":
-            classifier_model_data = ExplainedClassifierModel(
-                **{
-                    "target_names_dict": db_model_classifier_target_description,
-                }
-            )
-            classifier_model_data.explainer_model = model_data
-            classifier_model_data.user = User.query.filter(User.id == user_id).first()
-            classifier_model_data.add_to_db()
+            if modelId:
+                model_data.explainer_classifier.setElements(
+                    **{
+                        "target_names_dict": db_model_classifier_target_description,
+                    }
+                )
+                model_data.explainer_classifier.db_commit()
+            else:
+                classifier_model_data = ExplainedClassifierModel(
+                    **{
+                        "target_names_dict": db_model_classifier_target_description,
+                    }
+                )
+                classifier_model_data.explainer_model = model_data
+                classifier_model_data.user = User.query.filter(User.id == user_id).first()
+                classifier_model_data.add_to_db()
         else:
-            regressor_model_data = ExplainedRegressorModel(
-                **{
-                    "unit": db_model_regressor_unit,
-                }
-            )
-            regressor_model_data.explainer_model = model_data
-            regressor_model_data.user = User.query.filter(User.id == user_id).first()
-            regressor_model_data.add_to_db()
+            if modelId:
+                model_data.explainer_regressor.setElements(
+                    **{
+                        "unit": db_model_regressor_unit,
+                    }
+                )
+                model_data.explainer_regressor.db_commit()
+            else:
+                regressor_model_data = ExplainedRegressorModel(
+                    **{
+                        "unit": db_model_regressor_unit,
+                    }
+                )
+                regressor_model_data.explainer_model = model_data
+                regressor_model_data.user = User.query.filter(User.id == user_id).first()
+                regressor_model_data.add_to_db()
 
         db_model.percent_processed = 100
         db_model.process_message = "Completado !!!"
@@ -229,9 +302,18 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
 
 
 @blueprint.route("/add_classifier", methods=["GET", "POST"])
+@blueprint.route("/edit_classifier/<modelId>", methods=["GET", "POST"])
 @login_required
-def save_classifier():
+def save_classifier(modelId: int = 0):
+    if modelId:
+        print('Entering..')
     form = add_model(request.form)
+    if modelId:
+        classifier: ExplainedModel = ExplainedModel.query.filter(
+            ExplainedModel.id == modelId
+        ).first()
+        form.name.default = classifier.name
+        form.description.default = classifier.model_description
     cancel = None
     try:
         cancel = request.form["cancel"]
@@ -244,11 +326,13 @@ def save_classifier():
 
     if cancel == "Second":
         print(cancel)
-        db_model: ModelForProccess = ModelForProccess.query.filter(
-            ModelForProccess.id == request.form["model_id"]
-        ).first()
-        db_model.delete_from_db()
-        return render_template("add_model_classifier.html", form=form, status="Initial")
+        db_models: ModelForProccess = ModelForProccess.query.filter(
+            ModelForProccess.user_id == current_user.id
+        ).all()
+        for db_model in db_models:
+            db_model.delete_from_db()
+        return render_template("add_model_classifier.html", form=form, status="Initial",
+                               type='edit' if modelId else 'add')
 
     if "Initial" in request.form or cancel == "Add":
         print(cancel)
@@ -260,12 +344,20 @@ def save_classifier():
             else:
                 name = request.form["name"]
                 description = request.form["description"]
-                model = joblib.load(request.files["model"])
-                training_df: pd.DataFrame
-                try:
-                    training_df = pd.read_csv(request.files["dataset"])
-                except:  # noqa: E722
-                    training_df = pd.read_excel(request.files["dataset"])
+                if modelId:
+                    classifier: ExplainedModel = ExplainedModel.query.filter(
+                        ExplainedModel.id == modelId
+                    ).first()
+                    model = classifier.getElement('model')
+                    training_df: pd.DataFrame = classifier.data_set_data.getElement('dataset')
+                else:
+                    model = joblib.load(request.files["model"])
+                    training_df: pd.DataFrame
+                    print('request.files["dataset"]: ', request.files["dataset"])
+                    try:
+                        training_df = pd.read_csv(request.files["dataset"])
+                    except:  # noqa: E722
+                        training_df = pd.read_excel(request.files["dataset"])
 
                 db_model = ModelForProccess(
                     **{
@@ -287,15 +379,15 @@ def save_classifier():
                 form=possible_targets,
                 status=status,
                 model_id=db_model.id,
+                type='edit' if modelId else 'add'
             )
         except Exception as e:
             print(e)
             status = "Wrong Data"
             return render_template(
-                "add_model_classifier.html", form=form, status=status
+                "add_model_classifier.html", form=form, status=status, type='edit' if modelId else 'add'
             )
     elif "Second" in request.form or cancel == "Create":
-
         try:
             db_model: ModelForProccess = ModelForProccess.query.filter(
                 ModelForProccess.id == request.form["model_id"]
@@ -340,6 +432,7 @@ def save_classifier():
                         {
                             "name": column,
                             "variables": list(set(df[column])),
+                            "values_on_current": []
                         }
                     )
 
@@ -350,14 +443,14 @@ def save_classifier():
                 variables=list(df.columns),
                 status=status,
                 model_id=db_model.id,
+                type='edit' if modelId else 'add'
             )
         except Exception as e:
             print(e)
             status = "Wrong Data"
             return render_template(
-                "add_model_classifier.html", form=form, status=status
+                "add_model_classifier.html", form=form, status=status, type='edit' if modelId else 'add'
             )
-
     elif "Add" in request.form:
 
         db_model: ModelForProccess = ModelForProccess.query.filter(
@@ -421,15 +514,14 @@ def save_classifier():
 
         print("current_user_on_creation: ", current_user)
         user_id = current_user.id
+
         x = threading.Thread(
             target=thread_function,
-            args=(db_model.id, current_app.app_context(), user_id, "Classifier"),
+            args=(db_model.id, current_app.app_context(), user_id, "Classifier", modelId),
         )
         x.start()
-        x.daemon
-        # Function to add, the models
         return render_template(
-            "add_model_classifier.html", model_id=db_model.id, status="Create"
+            "add_model_classifier.html", model_id=db_model.id, status="Create", type='edit' if modelId else 'add'
         )
     elif "Create" in request.form:
         db_models: ModelForProccess = ModelForProccess.query.filter(
@@ -437,7 +529,9 @@ def save_classifier():
         ).all()
         for model in db_models:
             model.delete_from_db()
-    return render_template("add_model_classifier.html", form=form, status="Initial")
+        if modelId:
+            return redirect('/processor/manage_classifiers')
+    return render_template("add_model_classifier.html", form=form, status="Initial", type='edit' if modelId else 'add')
 
 
 @blueprint.route("/add_regressor", methods=["GET", "POST"])

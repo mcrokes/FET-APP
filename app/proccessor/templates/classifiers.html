@@ -100,8 +100,8 @@
           orderable: false,
           render: function (data, type, row) {
             var buttons = '<a href="/DashExample/app2?model_id=' + row.id + '" class="btn btn-success btn-xs btn-flat"><i class="fa fa-check"></i></a> '
-            buttons += '<a href="' + row.id + '" class="btn btn-warning btn-xs btn-flat"><i class="fa fa-edit"></i></a> '
-            buttons += '<a href="' + row.id + '" type="button" class="btn btn-danger btn-xs btn-flat" data-bs-toggle="modal" onclick="saveModelId(' + row.id + ')" data-bs-target="#staticBackdrop"><i class="fa fa-trash"></i></a>'
+            buttons += '<a href="/processor/edit_classifier/' + row.id + '" class="btn btn-warning btn-xs btn-flat"><i class="fa fa-edit"></i></a> '
+            buttons += '<a href="" type="button" class="btn btn-danger btn-xs btn-flat" data-bs-toggle="modal" onclick="saveModelId(' + row.id + ')" data-bs-target="#staticBackdrop"><i class="fa fa-trash"></i></a>'
             return buttons
           }
         }
