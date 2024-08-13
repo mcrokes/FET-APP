@@ -359,6 +359,7 @@ def save_classifier(modelId: int = 0):
                     except:  # noqa: E722
                         training_df = pd.read_excel(request.files["dataset"])
 
+
                 db_model = ModelForProccess(
                     **{
                         "name": name,
@@ -426,13 +427,35 @@ def save_classifier(modelId: int = 0):
             df = db_model.getElement("dataset")
             print('df: ', df)
 
+            values_on_current = {}
+            if modelId:
+                classifier: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+                    ExplainedClassifierModel.explainer_model_id == modelId
+                ).first()
+
+                qualitative_target = classifier.getElement('target_names_dict')
+                qualitative_variables_values = classifier.explainer_model.getElement('q_variables_dict')
+
+                print(qualitative_target)
+                values_on_current[f'{db_model.target_row}'] = []
+                for variable in qualitative_target['variables']:
+                    values_on_current[f'{db_model.target_row}'].append(variable['new_value'])
+
+                print(qualitative_variables_values)
+                for column in qualitative_variables_values:
+                    values_on_current[f'{column["column_name"]}'] = []
+                    for variable in column['variables']:
+                        print('variable: ', variable)
+                        values_on_current[f'{column["column_name"]}'].append(variable['new_value'])
+            print('values_on_current: ', values_on_current)
             for column in df:
                 if len(set(df[column])) < 5 or column == db_model.target_row:
+
                     qualitative_variables_form.append(
                         {
                             "name": column,
                             "variables": list(set(df[column])),
-                            "values_on_current": []
+                            "values_on_current": values_on_current[column] if modelId else []
                         }
                     )
 
@@ -529,15 +552,27 @@ def save_classifier(modelId: int = 0):
         ).all()
         for model in db_models:
             model.delete_from_db()
-        if modelId:
-            return redirect('/processor/manage_classifiers')
+        return redirect('/processor/manage_classifiers')
+    db_models: ModelForProccess = ModelForProccess.query.filter(
+        ModelForProccess.user_id == current_user.id
+    ).all()
+    for model in db_models:
+        model.delete_from_db()
     return render_template("add_model_classifier.html", form=form, status="Initial", type='edit' if modelId else 'add')
 
 
 @blueprint.route("/add_regressor", methods=["GET", "POST"])
+@blueprint.route("/edit_regressor/<modelId>", methods=["GET", "POST"])
 @login_required
-def save_regressor():
+def save_regressor(modelId: int = 0):
     form = add_model(request.form)
+    if modelId:
+        regressor: ExplainedModel = ExplainedModel.query.filter(
+            ExplainedModel.id == modelId
+        ).first()
+        form.name.default = regressor.name
+        form.description.default = regressor.model_description
+        unit = regressor.explainer_regressor.getElement('unit')
     cancel = None
     try:
         cancel = request.form["cancel"]
@@ -553,7 +588,7 @@ def save_regressor():
             ModelForProccess.id == request.form["model_id"]
         ).first()
         db_model.delete_from_db()
-        return render_template("add_model_regressor.html", form=form, status="Initial")
+        return render_template("add_model_regressor.html", form=form, status="Initial", type='edit' if modelId else 'add')
 
     if "Initial" in request.form or cancel == "Add":
         print(cancel)
@@ -566,12 +601,20 @@ def save_regressor():
                 name = request.form["name"]
                 description = request.form["description"]
                 unit = request.form["unit"]
-                model = joblib.load(request.files["model"])
-                training_df: pd.DataFrame
-                try:
-                    training_df = pd.read_csv(request.files["dataset"])
-                except:  # noqa: E722
-                    training_df = pd.read_excel(request.files["dataset"])
+                if modelId:
+                    classifier: ExplainedModel = ExplainedModel.query.filter(
+                        ExplainedModel.id == modelId
+                    ).first()
+                    model = classifier.getElement('model')
+                    training_df: pd.DataFrame = classifier.data_set_data.getElement('dataset')
+                else:
+                    model = joblib.load(request.files["model"])
+                    training_df: pd.DataFrame
+                    try:
+                        training_df = pd.read_csv(request.files["dataset"])
+                    except:  # noqa: E722
+                        training_df = pd.read_excel(request.files["dataset"])
+
                 db_model = ModelForProccess(
                     **{
                         "name": name,
@@ -581,7 +624,7 @@ def save_regressor():
                         "unit": unit,
                     }
                 )
-
+                db_model.user = User.query.filter(User.id == current_user.id).first()
                 db_model.add_to_db()
             status = "Second"
             possible_targets = list(
@@ -593,11 +636,12 @@ def save_regressor():
                 form=possible_targets,
                 status=status,
                 model_id=db_model.id,
+                type='edit' if modelId else 'add'
             )
         except Exception as e:
             print(e)
             status = "Wrong Data"
-            return render_template("add_model_regressor.html", form=form, status=status)
+            return render_template("add_model_regressor.html", form=form, status=status, type='edit' if modelId else 'add')
     elif "Second" in request.form or cancel == "Create":
 
         try:
@@ -634,12 +678,29 @@ def save_regressor():
 
             qualitative_variables_form = []
             df = db_model.getElement("dataset")
+            values_on_current = {}
+            if modelId:
+                regressor: ExplainedRegressorModel = ExplainedRegressorModel.query.filter(
+                    ExplainedRegressorModel.explainer_model_id == modelId
+                ).first()
+
+                unit = regressor.getElement('unit')
+                qualitative_variables_values = regressor.explainer_model.getElement('q_variables_dict')
+
+                print(qualitative_variables_values)
+                for column in qualitative_variables_values:
+                    values_on_current[f'{column["column_name"]}'] = []
+                    for variable in column['variables']:
+                        print('variable: ', variable)
+                        values_on_current[f'{column["column_name"]}'].append(variable['new_value'])
+            print('values_on_current: ', values_on_current)
             for column in df:
                 if len(set(df[column])) < 5 and column != db_model.target_row:
                     qualitative_variables_form.append(
                         {
                             "name": column,
                             "variables": list(set(df[column])),
+                            "values_on_current": values_on_current[column] if modelId else []
                         }
                     )
 
@@ -650,11 +711,12 @@ def save_regressor():
                 variables=list(df.columns),
                 status=status,
                 model_id=db_model.id,
+                type='edit' if modelId else 'add'
             )
         except Exception as e:
             print(e)
             status = "Wrong Data"
-            return render_template("add_model_regressor.html", form=form, status=status)
+            return render_template("add_model_regressor.html", form=form, status=status, type='edit' if modelId else 'add')
 
     elif "Add" in request.form:
 
@@ -717,19 +779,31 @@ def save_regressor():
         user_id = current_user.id
         x = threading.Thread(
             target=thread_function,
-            args=(db_model.id, current_app.app_context(), user_id, "Regressor"),
+            args=(db_model.id, current_app.app_context(), user_id, "Regressor", modelId),
         )
         x.start()
         # Function to add, the models
         return render_template(
-            "add_model_regressor.html", model_id=db_model.id, status="Create"
+            "add_model_regressor.html", model_id=db_model.id, status="Create", type='edit' if modelId else 'add'
         )
     elif "Create" in request.form:
-        db_model: ModelForProccess = ModelForProccess.query.filter(
-            ModelForProccess.id == request.form["model_id"]
-        ).first()
-        db_model.delete_from_db()
-    return render_template("add_model_regressor.html", form=form, status="Initial")
+        db_models: ModelForProccess = ModelForProccess.query.filter(
+            ModelForProccess.user_id == current_user.id
+        ).all()
+        for model in db_models:
+            model.delete_from_db()
+        return redirect('/processor/manage_regressors')
+    db_models: ModelForProccess = ModelForProccess.query.filter(
+        ModelForProccess.user_id == current_user.id
+    ).all()
+    for model in db_models:
+        model.delete_from_db()
+    return render_template(
+        "add_model_regressor.html",
+        form=form,
+        status="Initial",
+        type='edit' if modelId else 'add',
+        unit=unit if modelId else '')
 
 
 @blueprint.route("/manage_classifiers", methods=["GET", "POST"])

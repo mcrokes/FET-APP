@@ -157,9 +157,15 @@
                           <div class="col col-lg-6 custom-col custom-qualitative-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
                             <label>{{ col.name }}</label>
                             {% for var in col.variables %}
-                              <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
-                                <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
-                              </div>
+                              {% if col.values_on_current[loop.index-1]|string != var|string %}
+                                <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                                  <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" value="{{ col.values_on_current[loop.index-1] }}" />
+                                </div>
+                              {% else %}
+                                <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                                  <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
+                                </div>
+                              {% endif %}
                             {% endfor %}
                           </div>
                         {% endfor %}

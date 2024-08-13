@@ -48,6 +48,7 @@
       background: #fff;
       border-radius: 4px !important;
       height: unset;
+      min-width: 300px;
     }
     .custom-file-input::file-selector-button {
       margin-right: 20px;
@@ -75,6 +76,32 @@
         width: unset !important;
       }
     }
+
+    .select2-selection {
+      border-radius: 2px;
+      min-height: 5rem !important;
+      width: 10rem;
+    }
+
+    .select2-selection span {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .unit-selector-container {
+      display: flex;
+      justify-content: <start></start>;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .unit-selector-container label {
+      white-space: nowrap;
+    }
+
+    .select2-container {
+      width: 10rem !important;
+    }
   </style>
 {% endblock %}
 
@@ -101,35 +128,47 @@
                       <div id="progress-message">Creating Dataset Distributions</div>
                     {% else %}
                       {% if status == 'Initial' %}
-                        {% for field in form if field.widget.input_type != 'hidden' %}
+                        <!-- Name -->
+                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                          <span style="color: red;">*Requerido</span>
+                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" placeholder="{{form.name.label.text}}" type="text" value="{{form.name.default}}"/>
+                        </div>
+                        {% if type == 'add' %}
+                          <!-- Model -->
                           <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
-                            {% if field.id != 'model-description' %}
-                              <span style="color: red;">*Requerido</span>
-                            {% else %}
-                              <span style="color: green;">*Opcional</span>
-                            {% endif %}
-                            {% if field.widget.input_type == 'file' %}
-                              {{ field(class='form-control custom-file-input', style='display: none', placeholder=field.label.text, accept=field.render_kw.accept) }}
-                              <label class="form-control custom-file-input" for="{{ field.id }}" style="align-items: center; display: flex;"><p id="{{ field.id }}-holder" style="font-weight: 100; color: darkgray; margin: 0; width: 500px;">{{ field.label.text }}</p></label>
-                            {% else %}
-                              {{ field(class='form-control custom-input', placeholder=field.label.text) }}
-                            {% endif %}
+                            <span style="color: red;">*Requerido</span>
+                            <input accept="{{form.model.render_kw.accept}}" class="form-control custom-file-input" id="{{form.model.id}}" name="model" placeholder="{{form.model.label.text}}" style="display: none" type="file">
+                            <label class="form-control custom-file-input" for="{{form.model.id}}" style="align-items: center; display: flex;">
+                              <p id="{{form.model.id}}-holder" style="font-weight: 100; color: darkgray; margin: 0px; width: 500px;">{{ form.model.label.text }}</p>
+                            </label>
                           </div>
-                        {% endfor %}
+                        {% endif %}
+                        <!-- Description -->
                         <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
                           <span style="color: green;">*Opcional</span>
-                          <input class="form-control custom-input" list="datalistOptions" id="exampleDataList" name="unit" placeholder="Elige o escribe la unidad de Medida" />
-                          <datalist id="datalistOptions" style="background-color: white;">
-                            <option value="$" />
-                            <option value="%" />
-                            <option value="Ltr" />
-                            <option value="g" />
-                            <option value="kg" />
-                            <option value="cm" />
-                            <option value="dm" />
-                            <option value="m" />
-                            <option value="km" />
-                          </datalist>
+                          <textarea class="form-control custom-input" id="{{form.description.id}}" name="description" placeholder="{{form.description.label.text}}">{{form.description.default}}</textarea>
+                        </div>
+                        {% if type == 'add' %}
+                          <!-- Dataset -->
+                          <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                            <span style="color: red;">*Requerido</span>
+                            <input accept="{{form.dataset.render_kw.accept}}"  class="form-control custom-file-input" id="{{form.dataset.id}}" name="dataset"
+                                    placeholder="{{form.dataset.label.text}}" style="display: none" type="file" />
+                            <label class="form-control custom-file-input" for="{{form.dataset.id}}" style="align-items: center; display: flex;">
+                              <p id="{{form.dataset.id}}-holder" style="font-weight: 100; color: darkgray; margin: 0px; width: 500px;">{{ form.dataset.label.text }}</p>
+                            </label>
+                          </div>
+                        {% endif %}
+                        <div class="col custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                          <span style="color: green;">*Opcional</span>
+                          <div class="unit-selector-container">
+                            <label for="unit-selector">Unidad de Medida</label>
+                            <select id="unit-selector" class="form-control custom-input" name="unit">
+                              {% if unit %}
+                                <option value="{{ unit }}" selected>{{ unit }}</option>
+                              {% endif %}
+                            </select>
+                          </div>
                         </div>
                       {% elif status == 'Second' %}
                         <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; width: 100%;">
@@ -154,9 +193,15 @@
                           <div class="col col-lg-6 custom-col custom-qualitative-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
                             <label for="">{{ col.name }}</label>
                             {% for var in col.variables %}
-                              <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
-                                <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
-                              </div>
+                              {% if col.values_on_current[loop.index-1]|string != var|string %}
+                                <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                                  <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" value="{{ col.values_on_current[loop.index-1] }}" />
+                                </div>
+                              {% else %}
+                                <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                                  <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
+                                </div>
+                              {% endif %}
                             {% endfor %}
                           </div>
                         {% endfor %}
@@ -194,6 +239,22 @@
 {% block javascripts %}
   {{ super() }}
   <script>
+    const units = [
+      { id: '', text: 'Ninguna' },
+      { id: '$', text: '$' },
+      { id: '%', text: '%' },
+      { id: 'Ltr', text: 'Ltr' },
+      { id: 'g', text: 'g' },
+      { id: 'kg', text: 'kg' },
+      { id: 'cm', text: 'cm' },
+      { id: 'dm', text: 'dm' },
+      { id: 'm', text: 'm' },
+      { id: 'km', text: 'km' },
+    ];
+    $("#unit-selector").select2({
+      tags: true,
+      data: units,
+    });
     let interval = 0
     const getProgressPercent = async () => {
       // get
@@ -237,12 +298,13 @@
     const model_field = document.getElementById('model')
     const model_description_field = document.getElementById('model-description')
     const model_data_set_field = document.getElementById('model-data-set')
+    const unit = document.getElementById('unit-selector')
     
     const model_field_holder = document.getElementById('model-holder')
     const model_data_set_field_holder = document.getElementById('model-data-set-holder')
     
     const verify_imputs = () => {
-      if (model_name_field == null || (model_name_field.value && model_field.value && model_data_set_field.value)) {
+      if (model_name_field == null || (model_data_set_field == null && model_name_field.value) || (model_name_field.value && model_field.value && model_data_set_field.value)) {
         add_button.disabled = false
         add_button.classList.remove('btn-danger')
         add_button.classList.add('btn-success')
