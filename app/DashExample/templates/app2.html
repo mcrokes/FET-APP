@@ -6,8 +6,8 @@
   {{ super() }}
 {% endblock stylesheets %}
 
-{% block content %}
-  <div class="right_col" style="background-color: white;" role="main">
+{% block content_top %}
+  <div class="right_col iframe-container" role="main">
     <iframe 
       noresize='noresize' 
       style='background: transparent; width: 100%; height:87vh; bottom: 0;' 
@@ -15,7 +15,7 @@
       frameborder="0">
     </iframe>
   </div>
-{% endblock content %}
+{% endblock content_top %}
 
 {% block javascripts %}
   {{ super()}}  
