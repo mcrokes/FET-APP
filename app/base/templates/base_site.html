@@ -15,6 +15,32 @@
         padding-left: 20px;
         padding-right: 10px;
       }
+      #body-container{
+        background-image: url("/static/images/BACKGROUND.png");
+      }
+      .dropdown-config {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .dropdown-config li {
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        color: white;
+        width: 100%;
+      }
+      .dropdown-config li:first-child {
+        border-top: 1px solid #ccc;
+      }
+      .dropdown-config li:last-child {
+        border-bottom: none;
+      }
+      .dropdown-config li a::before {
+        content: "\25CF";
+        margin-right: 10px;
+      }
     </style>
     {% block head %}
       {% block meta %}
@@ -51,34 +77,33 @@
 
   <body class="{% block body_class %} nav-md {% endblock body_class %}">
     {% block body %}
-      <div class="container body" style="margin: 0;">
-        <div class="main_container" style="width: 100vw; height: 100vh; margin-left: 0;">
+      <div class="main_container" style="width: 100vw; height: 100vh; margin-left: 0;">
 
-          <div style="display: grid; grid-template-columns: min-content auto; gap: 0; height: 100%;">
-            {% block sidebar %}
-              <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}" style="width: min-content; top: 0; left: 0; height: 100%;">
-                {% include "site_template/sidebar.html" %}
+        <div style="display: grid; grid-template-columns: min-content auto; gap: 0; height: 100%;">
+          {% block sidebar %}
+            <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}" style="width: min-content; top: 0; left: 0; height: 100%; background-color: #2b701f; position: fixed;">
+              {% include "site_template/sidebar.html" %}
+            </div>
+          {% endblock sidebar %}
+          <div id="body-container" style="min-height: 100%; position: absolute; width: 100vw; right: 0px; height: fit-content;">
+            {% block top_navigation %}
+              <div id="top-nav-container" class="top_nav" style="margin-left: 0; position: fixed; right: 0; width: 100%;">
+                {% include "site_template/top_navigation.html" %}
               </div>
-            {% endblock sidebar %}
+            {% endblock top_navigation %}
 
-            <div id="body-container" style="height: 100%; position: absolute; right: 0;">
-              {% block top_navigation %}
-                <div class="top_nav" style="margin-left: 0;">
-                  {% include "site_template/top_navigation.html" %}
-                </div>
-              {% endblock top_navigation %}
-
-              <div class="right_col" role="main" style="height: 100%; margin-left: 0;">
+            {% block content_top %}
+              <div class="right_col" role="main" style="height: fit-content; min-height: 100vh; margin-left: 0; background-color: #0093ff2b; padding: 10px; padding-top: 7rem;">
                 {% block content %}
                   <!-- {{ content }} -->
                 {% endblock content %}
               </div>
-              {% block footer %}
-                <footer style="margin-left:0 !important;">
-                  {% include "site_template/footer.html" %}
-                </footer>
-              {% endblock footer %}
-            </div>
+            {% endblock content_top %}
+            {% block footer %}
+              <footer style="margin-left:0 !important; position: fixed; width: 100%; bottom: 0; right: 0; background-color: #2b701f;">
+                {% include "site_template/footer.html" %}
+              </footer>
+            {% endblock footer %}
           </div>
         </div>
       </div>
@@ -90,9 +115,12 @@
         const sidebarItems = document.getElementsByClassName('sidebar-item');
         const sidebarIcons = document.getElementsByClassName('sidebar-icon');
         const body = document.getElementById('body-container');
+        const topNav = document.getElementById('top-nav-container');
+        const sidebarCollapseList = document.getElementById('collapseOne');
 
         const setSmallSideBar = () => {
-          body.style.width = '100%';
+          body.style.width = window.innerWidth + 'px';
+          topNav.style.width = window.innerWidth + 'px';
           sidebarImage.style.display = 'none'
           sidebarChevronIcon.style.display = 'none'
           for (const item of sidebarItems) {
@@ -103,11 +131,13 @@
             icon.style.marginLeft = '0.5rem';
           }
           body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+          topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
           window.localStorage.setItem('sidebar-expanded', 'false');
         }
 
         const setNormalSideBar = () => {
-          body.style.width = '100%';
+          body.style.width = window.innerWidth + 'px';
+          topNav.style.width = window.innerWidth + 'px';
           sidebarImage.style.display = 'unset'
           sidebarChevronIcon.style.display = 'unset'
           for (const item of sidebarItems) {
@@ -118,6 +148,7 @@
             icon.style.marginLeft = '0';
           }
           body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+          topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
           window.localStorage.removeItem('sidebar-expanded');
         }
 
@@ -128,8 +159,10 @@
               setSmallSideBar();
               window.localStorage.setItem('sidebar-mobile-expanded', 'true');
             } else {
+
               sidebar.style.display = 'none';
-              body.style.width = '100%';
+              body.style.width = window.innerWidth + 'px';
+              topNav.style.width = window.innerWidth + 'px';
               window.localStorage.setItem('sidebar-mobile-expanded', 'false');
             }
           } else if (sidebarImage.style.display !== 'none') {
@@ -145,15 +178,17 @@
           show_sidebar(false);
         } else {
           body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+          topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
         }
 
-        window.addEventListener('resize', ()=> {
-          console.log('resize: ', window.innerWidth);
+        const checkPosition = ()=> {
           if (window.innerWidth <= 800 && window.localStorage.getItem('sidebar-mobile-expanded') !== 'true') {
             console.log('sidebar: ', window.localStorage.getItem('sidebar-mobile-expanded'));
             sidebar.style.display = 'none';
-            body.style.width = '100%';
+            body.style.width = window.innerWidth  + 'px';
+            topNav.style.width = window.innerWidth  + 'px';
             window.localStorage.setItem('sidebar-mobile-expanded', 'false');
+            window.localStorage.setItem('sidebar-expanded', 'false');
           } else {
             sidebar.style.display = 'unset';
             if (window.localStorage.getItem('sidebar-mobile-expanded') === 'true' && window.innerWidth <= 800 || window.localStorage.getItem('sidebar-expanded') === 'false') {
@@ -162,7 +197,15 @@
               setNormalSideBar()
             }
           }
-        })
+          if (sidebar.style.display != 'none') {
+            console.log('DISPLAYING')
+            body.style.width = (window.innerWidth - sidebar.style.width) + 'px';
+            topNav.style.width = (window.innerWidth - sidebar.style.width) + 'px';
+          }
+        }
+
+        window.addEventListener('resize', checkPosition);
+        sidebarCollapseList.addEventListener('transitionend', checkPosition);
       </script>
       {% block javascripts %}
         <!-- jQuery -->

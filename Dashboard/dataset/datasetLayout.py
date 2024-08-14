@@ -128,7 +128,7 @@ datasetLayout = html.Div(
                             "Variables Numéricas",
                             className="rules-title",
                         ),
-                        dbc.Row(id="numeric-plot"),
+                        dbc.Row(id="numeric-plot", style={'row-gap': '1rem'}),
                         html.Plaintext(
                             "Variables Objeto",
                             className="rules-title",
