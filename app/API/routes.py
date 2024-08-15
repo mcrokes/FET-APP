@@ -32,7 +32,7 @@ def get_percent():
 @blueprint.route("/classifier/list", methods=["GET", "POST"])
 @login_required
 def get_classifier_list():
-    classifiers: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
+    classifiers: Array[ExplainedClassifierModel] = ExplainedClassifierModel.query.filter(
         ExplainedClassifierModel.user_id == current_user.id).all()
     response = []
     for classifier in classifiers:
@@ -43,9 +43,33 @@ def get_classifier_list():
 @blueprint.route("/regression/list", methods=["GET", "POST"])
 @login_required
 def get_regressor_list():
-    regressors: ExplainedRegressorModel = ExplainedRegressorModel.query.filter(
+    regressors: Array[ExplainedRegressorModel] = ExplainedRegressorModel.query.filter(
         ExplainedRegressorModel.user_id == current_user.id).all()
     response = []
     for regressor in regressors:
         response.append(regressor.to_dict())
     return {"data": response}
+
+
+@blueprint.route("/classifier/namelist", methods=["GET", "POST"])
+@login_required
+def get_classifier_namelist():
+    classifiers: Array[ExplainedClassifierModel] = ExplainedClassifierModel.query.all()
+    nameList = []
+    idPath = {}
+    for classifier in classifiers:
+        nameList.append(classifier.name)
+        idPath[f'{classifier.explainer_model.id}'] = classifier.name
+    return {"data": nameList, "idPath": idPath }
+
+
+@blueprint.route("/regressor/namelist", methods=["GET", "POST"])
+@login_required
+def get_regressor_namelist():
+    regressors: Array[ExplainedRegressorModel] = ExplainedRegressorModel.query.all()
+    nameList = []
+    idPath = {}
+    for regressor in regressors:
+        nameList.append(regressor.name)
+        idPath[f'{regressor.explainer_model.id}'] = regressor.name
+    return {"data": nameList}

@@ -194,7 +194,7 @@
 {% block javascripts %}
   {{ super() }}
   <script>
-    let interval = 0
+    let interval = 0;
     const getProgressPercent = async () => {
       // get
       const progress_bar = document.getElementById('progress_bar')
@@ -240,9 +240,28 @@
     
     const model_field_holder = document.getElementById('model-holder')
     const model_data_set_field_holder = document.getElementById('model-data-set-holder')
-    
-    const verify_imputs = () => {
-      if (model_name_field == null || (model_name_field.value && model_field.value && model_data_set_field.value)) {
+
+    let models_list = null;
+    let editedModelName = '';
+    const getModelsList = async () => {
+      // get
+      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/regressor/namelist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      models_list = await response.json().then((value) => {
+        if(window.location.hash) {
+          editedModelName = value.idPath[window.location.hash];
+        }
+        return value.data;
+      })
+    }
+
+    const isNameValid = () => editedModelName === model_name_field.value || !models_list.includes(model_name_field.value);
+
+    const verify_inputs = () => {
+      if (model_name_field == null || ((model_name_field.value && model_field.value && model_data_set_field.value)) && isNameValid()) {
         add_button.disabled = false
         add_button.classList.remove('btn-danger')
         add_button.classList.add('btn-success')
@@ -264,6 +283,14 @@
         model_field_holder.style.color = 'black'
       }
     }
+
+    const initial_check = async () => {
+      if (model_name_field) {
+        await getModelsList();
+        console.log('models_list:', models_list);
+      }
+      verify_inputs();
+    }
     
     const manage_percent = async () => {
       const model_id = document.getElementById('model_id')
@@ -273,7 +300,7 @@
     }
     
     window.addEventListener('DOMContentLoaded', manage_percent)
-    window.addEventListener('DOMContentLoaded', verify_imputs)
-    window.addEventListener('input', verify_imputs)
+    window.addEventListener('DOMContentLoaded', initial_check)
+    window.addEventListener('input', verify_inputs)
   </script>
 {% endblock %}

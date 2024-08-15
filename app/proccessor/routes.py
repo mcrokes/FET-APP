@@ -67,7 +67,6 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
 
         model_data = ExplainedModel(
             **{
-                "name": db_model.name,
                 "model": db_model_model,
                 "indexesDict": "dict of indexes",
                 "indexColumnName": "column name for indexes",
@@ -208,6 +207,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
             classifier_model_data = ExplainedClassifierModel(
                 **{
                     "target_names_dict": db_model_classifier_target_description,
+                    "name": db_model.name,
                 }
             )
             classifier_model_data.explainer_model = model_data
@@ -217,6 +217,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
             regressor_model_data = ExplainedRegressorModel(
                 **{
                     "unit": db_model_regressor_unit,
+                    "name": db_model.name,
                 }
             )
             regressor_model_data.explainer_model = model_data
