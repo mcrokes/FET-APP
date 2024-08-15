@@ -203,6 +203,7 @@
 {% block javascripts %}
   {{ super() }}
   <script>
+    const editedModelID = window.location.href.split('/')[5];
     let interval = 0;
     const getProgressPercent = async () => {
       // get
@@ -260,8 +261,9 @@
       })
 
       models_list = await response.json().then((value) => {
-        if(window.location.hash) {
-          editedModelName = value.idPath[window.location.hash];
+        if(editedModelID) {
+          editedModelName = value.idPath[editedModelID];
+          console.log('editedModelName: ', editedModelName);
         }
         return value.data;
       })
@@ -270,7 +272,8 @@
     const isNameValid = () => editedModelName === model_name_field.value || !models_list.includes(model_name_field.value);
 
     const verify_inputs = () => {
-      if (model_name_field == null || ((model_data_set_field == null && model_name_field.value) || (model_name_field.value && model_field.value && model_data_set_field.value) && isNameValid())) {
+      if (model_name_field == null || (((model_data_set_field == null && model_name_field.value) || (model_name_field.value && model_field.value && model_data_set_field.value)) && isNameValid() == true)) {
+        console.log('isNameValid: ', isNameValid());
         add_button.disabled = false
         add_button.classList.remove("btn-danger")
         add_button.classList.add("btn-success")

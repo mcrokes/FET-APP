@@ -314,7 +314,7 @@ def save_classifier(modelId: int = 0):
         classifier: ExplainedModel = ExplainedModel.query.filter(
             ExplainedModel.id == modelId
         ).first()
-        form.name.default = classifier.name
+        form.name.default = classifier.explainer_classifier.name
         form.description.default = classifier.model_description
     cancel = None
     try:
@@ -564,7 +564,7 @@ def save_classifier(modelId: int = 0):
 
 
 @blueprint.route("/add_regressor", methods=["GET", "POST"])
-@blueprint.route("/edit_regressor/<modelId>", methods=["GET", "POST"])
+@blueprint.route("/edit_regressor/?<modelId>", methods=["GET", "POST"])
 @login_required
 def save_regressor(modelId: int = 0):
     form = add_model(request.form)
@@ -572,7 +572,7 @@ def save_regressor(modelId: int = 0):
         regressor: ExplainedModel = ExplainedModel.query.filter(
             ExplainedModel.id == modelId
         ).first()
-        form.name.default = regressor.name
+        form.name.default = regressor.explainer_regressor.name
         form.description.default = regressor.model_description
         unit = regressor.explainer_regressor.getElement('unit')
     cancel = None
