@@ -119,7 +119,6 @@ class ExplainedModel(db.Model, dbInteractionMethods):
     __tablename__ = "explained_model"
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
     model = Column(String)  # Encoded
     indexesDict = Column(String)  # Encoded
     indexColumnName = Column(String)
@@ -158,7 +157,6 @@ class ExplainedModel(db.Model, dbInteractionMethods):
     def to_dict(self):
         return {
             "id": self.id,
-            "name": self.name,
             "model_description": self.model_description,
             "target_row": self.target_row,
         }
@@ -167,7 +165,6 @@ class ExplainedModel(db.Model, dbInteractionMethods):
             self,
             name: Literal[
                 "id",
-                "name",
                 "model",
                 "indexesDict",
                 "indexColumnName",
@@ -190,6 +187,7 @@ class ExplainedRegressorModel(db.Model, dbInteractionMethods):
         "polymorphic_identity": "explained_regressor_model",
     }
 
+    name = Column(String, unique=True)
     unit = Column(String)
     explainer_model_id = Column(Integer, ForeignKey("explained_model.id"), primary_key=True)
     explainer_model = relationship("ExplainedModel", uselist=False, back_populates="explainer_regressor",
@@ -206,11 +204,13 @@ class ExplainedRegressorModel(db.Model, dbInteractionMethods):
         _initDB_model(self, kwargs)
 
     def to_dict(self):
-        return self.explainer_model.to_dict()
+        regressor_dict = self.explainer_model.to_dict()
+        regressor_dict["name"] = self.name
+        return regressor_dict
 
     def getElement(
             self,
-            name: Literal["unit",],
+            name: Literal["unit", "name",],
     ):
         return super().getElement(name)
 
@@ -221,7 +221,7 @@ class ExplainedClassifierModel(db.Model, dbInteractionMethods):
     __mapper_args__ = {
         "polymorphic_identity": "explained_classifier_model",
     }
-
+    name = Column(String, unique=True)
     target_names_dict = Column(String)  # Encoded
     explainer_model_id = Column(Integer, ForeignKey("explained_model.id"), primary_key=True)
     explainer_model = relationship("ExplainedModel", uselist=False, back_populates="explainer_classifier",
@@ -234,14 +234,16 @@ class ExplainedClassifierModel(db.Model, dbInteractionMethods):
     )
 
     def to_dict(self):
-        return self.explainer_model.to_dict()
+        classifier_dict = self.explainer_model.to_dict()
+        classifier_dict["name"] = self.name
+        return classifier_dict
 
     def __init__(self, **kwargs):
         _initDB_model(self, kwargs)
 
     def getElement(
             self,
-            name: Literal["target_names_dict",],
+            name: Literal["target_names_dict", "name",],
     ):
         return super().getElement(name)
 
