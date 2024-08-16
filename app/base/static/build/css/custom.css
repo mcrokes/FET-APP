@@ -378,9 +378,6 @@ body .container.body .right_col {
         width: 100%;
         padding-right: 0
     }
-    .right_col {
-        padding: 10px !important
-    }
 }
 @media (max-width: 1200px) {
     .x_title h2 {
@@ -493,7 +490,7 @@ body .container.body .right_col {
 }
 body {
     color: #73879C;
-    background: #2b701f;
+    background: rgb(95, 118, 91);
     font-family: "Helvetica Neue", Roboto, Arial, "Droid Sans", sans-serif;
     font-size: 13px;
     font-weight: 400;

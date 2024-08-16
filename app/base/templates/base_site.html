@@ -81,7 +81,8 @@
 
         <div style="display: grid; grid-template-columns: min-content auto; gap: 0; height: 100%;">
           {% block sidebar %}
-            <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}" style="width: min-content; top: 0; left: 0; height: 100%; background-color: rgb(95, 118, 91); position: fixed;">
+            <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}"
+                 style="width: min-content; top: 0; left: 0; height: 100%; background-color: rgb(95, 118, 91); position: fixed;">
               {% include "site_template/sidebar.html" %}
             </div>
           {% endblock sidebar %}
@@ -198,9 +199,12 @@
             }
           }
           if (sidebar.style.display != 'none') {
-            console.log('DISPLAYING')
-            body.style.width = (window.innerWidth - sidebar.style.width) + 'px';
-            topNav.style.width = (window.innerWidth - sidebar.style.width) + 'px';
+            console.log('DISPLAYING');
+            setTimeout(() => {console.log('sidebar.style.width: ', sidebar.getBoundingClientRect().width);
+              body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+              topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+              console.log('body.style.width: ', body.style.width);
+            }, 200);
           }
         }
 

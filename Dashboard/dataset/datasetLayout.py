@@ -92,7 +92,7 @@ datasetLayout = html.Div(
                                 className="title-hint-container",
                             ),
                             html.Div(
-                                id="modified-dataset-view", style={"overflow": "scroll"}
+                                id="modified-dataset-view", style={"overflow": "scroll", "border-radius": "5px"}
                             ),
                             html.Div(id="test-tert"),
                         ]
@@ -103,7 +103,7 @@ datasetLayout = html.Div(
                                 "Conjunto de Datos Original",
                                 className="rules-title",
                             ),
-                            html.Div(id="dataset-view", style={"overflow": "scroll"}),
+                            html.Div(id="dataset-view", style={"overflow": "scroll", "border-radius": "5px"}),
                         ]
                     ),
                     dbc.Row(

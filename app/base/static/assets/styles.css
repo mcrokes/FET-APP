@@ -79,6 +79,8 @@ div.section-card {
   font-size: 1rem !important;
   text-align: center;
   font-family: monospace;
+  height: 90vh;
+  overflow: scroll;
 }
 
 #toggle-modal-1 {
