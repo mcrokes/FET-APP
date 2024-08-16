@@ -473,7 +473,7 @@ predictionsLayout = html.Div(
         html.Div(id="trees-output-upload"),
         html.Div(slider, id="trees-slider-container", hidden=True),
     ],
-    className="section-content",
+    className="section-content container",
     style={"margin": "auto"},
 )
 

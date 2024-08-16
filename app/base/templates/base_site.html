@@ -81,7 +81,7 @@
 
         <div style="display: grid; grid-template-columns: min-content auto; gap: 0; height: 100%;">
           {% block sidebar %}
-            <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}" style="width: min-content; top: 0; left: 0; height: 100%; background-color: #2b701f; position: fixed;">
+            <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}" style="width: min-content; top: 0; left: 0; height: 100%; background-color: rgb(95, 118, 91); position: fixed;">
               {% include "site_template/sidebar.html" %}
             </div>
           {% endblock sidebar %}
@@ -93,14 +93,14 @@
             {% endblock top_navigation %}
 
             {% block content_top %}
-              <div class="right_col" role="main" style="height: fit-content; min-height: 100vh; margin-left: 0; background-color: #0093ff2b; padding: 10px; padding-top: 7rem;">
+              <div class="right_col" role="main" style="height: fit-content; min-height: 100vh; margin-left: 0; background-color: #0093ff2b; padding: 10px; padding-top: 7rem !important;">
                 {% block content %}
                   <!-- {{ content }} -->
                 {% endblock content %}
               </div>
             {% endblock content_top %}
             {% block footer %}
-              <footer style="margin-left:0 !important; position: fixed; width: 100%; bottom: 0; right: 0; background-color: #2b701f;">
+              <footer style="margin-left:0 !important; position: fixed; width: 100%; bottom: 0; right: 0; background-color: rgb(95, 118, 91);">
                 {% include "site_template/footer.html" %}
               </footer>
             {% endblock footer %}

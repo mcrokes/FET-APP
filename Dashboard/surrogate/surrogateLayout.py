@@ -71,7 +71,7 @@ surrogateLayout = html.Div(
                     [
                         dbc.Col(
                             [
-                                dbc.Row(
+                                html.Div(
                                     [
                                         html.Plaintext(
                                             "REGLAS DEL MODELO", className="rules-title"
@@ -80,14 +80,15 @@ surrogateLayout = html.Div(
                                             id="rules-output-upload",
                                             className="rules-table-container",
                                         ),
-                                    ]
+                                    ],
+                                    className="container"
                                 )
                             ]
                         )
                     ],
                     style={"padding-top": "20px"},
                 ),
-                dbc.Row(
+                html.Div(
                     [
                         html.Plaintext(
                             "VISUALIZACION DEL ARBOL", className="rules-title"
@@ -122,7 +123,7 @@ surrogateLayout = html.Div(
                             target="build-tree-btn",
                         ),
                     ],
-                    className="tree-creator",
+                    className="tree-creator container",
                     style={"padding-top": "20px", "justify-content": "flex-start"},
                 ),
                 html.Div(

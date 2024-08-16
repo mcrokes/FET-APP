@@ -59,7 +59,7 @@ def delete_classifier():
     classifier: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
         ExplainedClassifierModel.explainer_model_id == modelId
     ).first()
-    print(classifier.explainer_model.name)
+    print(classifier.name)
     try:
         classifier.delete_from_db()
         return {'status': 200, 'statusText': 'OK'}

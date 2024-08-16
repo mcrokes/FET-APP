@@ -572,7 +572,7 @@ metricsClassifierLayout = html.Div(
                         dbc.Row([ROCslider], style={"padding-top": "20px"}),
                     ]
                 ),
-            ]
+            ], className="container"
         )
     ],
     style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
@@ -676,7 +676,7 @@ metricsRegressorLayout = html.Div(
                         html.Div(id="regression-metrics", style={'width': 'max-content', 'margin': 'auto'}),
                     ],
                 ),
-            ]
+            ], className="container"
         )
     ],
     style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},

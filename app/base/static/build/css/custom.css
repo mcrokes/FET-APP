@@ -1,28 +1,25 @@
-
 html , body{
-	
- height:100%;
- font-family: monospace !important;
- 
+
+    height:100%;
+    font-family: monospace !important;
+
 }
 
 .iframe-container {
-  background-color: #f0f8ffcc !important;
-  border-radius: 10px !important;
-  padding-top: 5rem !important;
-  padding-bottom: 5rem !important;
-  height: 100vh !important;
+    background-color: #ffffffde !important;
+    border-radius: 10px !important;
+    padding-top: 5rem !important;
+    padding-bottom: 5rem !important;
+    height: 100vh !important;
 }
 
 .full-width {
-	
- width:100%;
- 
- }
- 
+    width:100%;
+}
+
 .full-height{
- height:100%;
- }
+    height:100%;
+}
 
 .daterangepicker .ranges li {
     color: #73879C
@@ -771,7 +768,7 @@ a:focus {
     top: 0
 }
 .nav-md ul.nav.child_menu li:last-child::after {
-  bottom: 50%;
+    bottom: 50%;
 }
 .nav.side-menu>li>a,
 .nav.child_menu>li>a {
@@ -1683,7 +1680,7 @@ span.right {
     position: fixed;
     width: 230px;
     background: #2A3F54;
-	z-index:999;
+    z-index:999;
 }
 .sidebar-footer a {
     padding: 7px 0 3px;
@@ -1766,7 +1763,8 @@ span.right {
     padding: 7px 10px;
     border-radius: 10px;
     margin: auto;
-    width: fit-content;
+    width: 100% !important;
+    max-width: 1200px;
 }
 
 .dashboard_graph > div {
@@ -2453,7 +2451,8 @@ textarea:focus {
     border-color: #e6e6e6 #e6e6e6 #bfbfbf;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
     filter: progid: DXImageTransform.Microsoft.gradient(enabled=false);
-    border: 1px solid #cccccc;
+}
+border: 1px solid #cccccc;
     border-bottom-color: #b3b3b3;
     border-radius: 4px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05)
@@ -2808,7 +2807,7 @@ ul.widget_tally .count {
     border-radius: 4px;
     filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffe6e6e6', GradientType=0);
     filter: progid: DXImageTransform.Microsoft.gradient(enabled=false);
-    padding-bottom: 10px;
+padding-bottom: 10px;
     box-shadow: 0 4px 6px -6px #222
 }
 .widget_tally_box .flex {
@@ -4203,7 +4202,7 @@ ul.notifications {
 
 
 @media (max-width: 767px) {
-   .dataTables_length { float:none; }
+    .dataTables_length { float:none; }
 }
 
 
@@ -4257,11 +4256,11 @@ ul.notifications {
 table thead .checkbox { margin-top:-7px;margin-top:-21px; }
 table thead .checkbox.radio { margin-top:-7px;margin-top:-21px; }
 */
-			
+
 .daterangepicker.xdisplay { width:228px; }
 
 .dataTables_wrapper > .row{
-  overflow:auto !important; /*prevent datatables overflowing its container*/
+    overflow:auto !important; /*prevent datatables overflowing its container*/
 }
 
 /** bootstrap-datetimepicker **/

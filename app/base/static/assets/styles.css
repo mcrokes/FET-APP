@@ -17,7 +17,7 @@ div.section-card {
 }
 
 .svg-container > svg:first-child {
-  background: #76ca5e6b !important;
+  background: transparent !important;
   border-radius: 1rem;
 }
 
@@ -91,6 +91,10 @@ div.section-card {
 
 .rules-table-container {
   /* overflow: scroll; */
+  max-width: 1400px;
+  margin: auto;
+  max-height: 50vh;
+  overflow: scroll;
 }
 
 .rules-table th,
@@ -102,7 +106,7 @@ div.section-card {
   border-style: dotted;
   background-color: rgb(251, 254, 255);
   color: #000000;
-  font-size: small;
+  font-size: medium;
   line-height: 12px;
   padding: 4px 1px;
   vertical-align: middle;
@@ -174,6 +178,11 @@ div.section-card {
 .tree-img-container {
   width: 100%;
   overflow: scroll;
+  border-radius: 10px;
+}
+
+.tree-img-container img {
+  border-radius: 10px;
 }
 
 .title-hint-container {
