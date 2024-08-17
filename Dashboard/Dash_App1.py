@@ -153,7 +153,7 @@ def Add_Dash(server):
         ],
     )
     apply_layout_with_auth(app, layout)
-    datasetCallbacks(app, furl)
+    datasetCallbacks(app, furl, True)
     importancesCallbacks(app, furl, True)
     metricsCallbacks(app, furl, True)
     surrogateCallbacks(app, furl, True)

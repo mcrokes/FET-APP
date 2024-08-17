@@ -473,7 +473,7 @@ predictionsLayout = html.Div(
         html.Div(id="trees-output-upload"),
         html.Div(slider, id="trees-slider-container", hidden=True),
     ],
-    className="section-content",
+    className="section-content container",
     style={"margin": "auto"},
 )
 
@@ -545,6 +545,8 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                 target_dropdown = get_target_dropdown(target_description["variables"])
             options = []
             for index, _ in x_test.iterrows():
+                print(f'row value {index}: ', _)
+                print()
                 options.append({"label": index, "value": index})
 
             drop_down = dcc.Dropdown(
@@ -573,8 +575,8 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
         Input("prediction-positive-class-selector", "value"),
     )
     def graph_trees_predictions(cl, n, cut_point, positive_class):
-        if n:
-            n = int(n)
+        if n or n == 0:
+            n = int(n)+1
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
@@ -591,7 +593,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                 ds = model_x.data_set_data.getElement("dataset")
                 x_test = ds.drop(columns=model_x.getElement("target_row"))
                 instance: pd.DataFrame = (
-                    x_test[n - 1: n] if 1 <= n <= len(x_test) else x_test[-1:]
+                    x_test[n - 1: n] if 0 <= n <= len(x_test) else x_test[-1:]
                 )
 
                 if not isRegressor:
@@ -644,8 +646,9 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
         Input("prediction-positive-class-selector", "value"),
     )
     def graph_explainers(cl, n, positive_class):
-        if n:
-            n = int(n)
+        if n or n == 0:
+            print('N: ', n)
+            n = int(n)+1
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
@@ -669,11 +672,13 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                 instance: pd.DataFrame = (
                     x_test[n - 1: n] if 1 <= n <= len(x_test) else x_test[-1:]
                 )
+                print('instance: ', instance)
                 instanceModified: pd.DataFrame = (
                     x_testModified[n - 1: n]
-                    if 1 <= n <= len(x_test)
+                    if 0 <= n <= len(x_test)
                     else x_testModified[-1:]
                 )
+                print('instance modified: ', instanceModified)
                 if isRegressor:
                     contribution_graph_data, general_dict, predictions_graph_data = (
                         getTreeInterpreterParamethersRegressor(

@@ -71,7 +71,7 @@ specificTreesLayout = html.Div(
                     [
                         dbc.Col(
                             [
-                                dbc.Row(
+                                html.Div(
                                     [
                                         html.Plaintext(
                                             "REGLAS DEL MODELO", className="rules-title"
@@ -80,14 +80,15 @@ specificTreesLayout = html.Div(
                                             id="s-rules-output-upload",
                                             className="rules-table-container",
                                         ),
-                                    ]
+                                    ],
+                                    className="container"
                                 )
                             ]
                         )
                     ],
                     style={"padding-top": "20px"},
                 ),
-                dbc.Row(
+                html.Div(
                     [
                         html.Plaintext(
                             "VISUALIZACION DEL ARBOL", className="rules-title"
@@ -122,7 +123,7 @@ specificTreesLayout = html.Div(
                             target="s-build-tree-btn",
                         ),
                     ],
-                    className="tree-creator",
+                    className="tree-creator container",
                     style={"padding-top": "20px", "justify-content": "flex-start"},
                 ),
                 html.Div(
@@ -246,7 +247,7 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
                             html.Th("SAMPLES"),
                         ]
                     ),
-                ]
+                ], style={"position": "sticky", "top": "0"}
             )
         ]
 

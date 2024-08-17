@@ -1,0 +1,148 @@
+.add-model-container {
+    width: fit-content;
+    margin: auto;
+}
+
+.common_header {
+    font-family: monospace;
+    font-weight: 900;
+    margin: auto !important;
+    white-space: wrap;
+    text-align: center;
+}
+
+.form-fields {
+    width: max-content;
+    margin: auto !important;
+    max-width: 100%;
+}
+
+.custom-col {
+    margin: auto;
+    margin-bottom: 20px;
+    max-width: 100%;
+}
+
+.custom-col-no-media {
+    margin: auto;
+    margin-bottom: 20px;
+    max-width: 100%;
+}
+
+
+@media (min-width: 800px) {
+    .custom-col {
+        width: 50%;
+    }
+}
+
+@media (max-width: 800px) {
+    .custom-col {
+        float: unset !important;
+    }
+}
+
+textarea {
+    resize: vertical;
+    min-height: 5rem;
+    max-height: 10rem;
+}
+.custom-input,
+.custom-file-input {
+    min-height: 5rem !important;
+    width: 100%;
+    max-width: 100%;
+    color: #444;
+    padding: 5px;
+    background: #fff;
+    border-radius: 4px !important;
+    height: unset;
+    min-width: 300px;
+}
+
+input.custom-file-input {
+    display: none;
+}
+
+label.custom-file-input {
+    align-items: center;
+    display: flex;
+}
+
+label.custom-file-input > p:first-child {
+    font-weight: 100;
+    color: darkgray;
+    margin: 0px;
+    width: 500px;
+}
+
+.custom-file-input::file-selector-button {
+    margin-right: 20px;
+    border: none;
+    background: springgreen;
+    padding: 10px 20px;
+    border-radius: 4px;
+    color: #444;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+
+.custom-file-input::file-selector-text {
+    color: red;
+}
+
+.custom-file-input:focus::file-selector-button,
+.custom-file-input::file-selector-button:hover {
+    background: limegreen;
+    color: #fff;
+}
+
+.q-vars-header {
+    padding-left: 5rem;
+}
+
+@media (min-width: 1200px) {
+    .custom-qualitative-col {
+        width: unset !important;
+    }
+}
+
+.progress {
+    width: 70vw;
+}
+.progress-bar {
+    width: 0%;
+}
+
+.fet-navbar-right {
+    justify-content: center;
+    display: flex;
+}
+
+/* Only for Regressor */
+
+.select2-selection {
+    border-radius: 2px;
+    min-height: 5rem !important;
+    width: 10rem;
+}
+
+.select2-selection span {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.unit-selector-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem;
+}
+
+.unit-selector-container label {
+    white-space: nowrap;
+}
+
+.select2-container {
+    width: 10rem !important;
+}

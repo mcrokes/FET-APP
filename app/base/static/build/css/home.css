@@ -1,0 +1,73 @@
+.index-container {
+  padding-bottom: 5rem;
+}
+
+.index-container > div:first-child {
+  display: flex;
+  justify-content: center;
+  gap: 5rem;
+  flex-wrap: wrap;
+}
+
+.linked-button-card {
+  width: 18rem;
+  text-align: right;
+  margin-top: 1rem;
+  padding-top: 17rem;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 1rem !important;
+  text-align: center;
+  color: white !important;
+  text-shadow: 5px 5px 10px red, -5px -5px 10px #1400ff, -5px 5px 10px #ff009b, 5px -5px 10px #ebff00;
+  text-transform: uppercase;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.linked-button-card:hover{
+  color: #b7b7fb !important;
+  border-color: grey;
+}
+
+.linked-button-card:active{
+  border-color: black;
+}
+
+#classifier-models-button {
+  background-image: url("/static/images/CLASSIFIER.jpg");
+}
+
+#regressor-models-button {
+  background-image: url("/static/images/REGRESSOR.jpg");
+}
+
+#home-info {
+  color: black;
+  font-weight: bold;
+  background-color: #eeeeee78;
+  padding: 3rem;
+  text-align: initial;
+  margin-top: 3rem;
+  border-radius: 4px;
+}
+
+#home-info > h1 {
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: bold;
+}
+
+#home-info > h2 {
+  margin-top: 4rem;
+}
+
+#home-info > ul > li {
+  list-style: none;
+  margin-top: 1rem;
+}
+
+#home-info a {
+  font-size: 16px;
+  color: #095e49;
+}

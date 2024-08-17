@@ -17,7 +17,7 @@ div.section-card {
 }
 
 .svg-container > svg:first-child {
-  background: #76ca5e6b !important;
+  background: transparent !important;
   border-radius: 1rem;
 }
 
@@ -79,6 +79,8 @@ div.section-card {
   font-size: 1rem !important;
   text-align: center;
   font-family: monospace;
+  height: 90vh;
+  overflow: scroll;
 }
 
 #toggle-modal-1 {
@@ -91,6 +93,10 @@ div.section-card {
 
 .rules-table-container {
   /* overflow: scroll; */
+  max-width: 1400px;
+  margin: auto;
+  max-height: 50vh;
+  overflow: scroll;
 }
 
 .rules-table th,
@@ -102,7 +108,7 @@ div.section-card {
   border-style: dotted;
   background-color: rgb(251, 254, 255);
   color: #000000;
-  font-size: small;
+  font-size: medium;
   line-height: 12px;
   padding: 4px 1px;
   vertical-align: middle;
@@ -116,12 +122,12 @@ div.section-card {
 }
 
 .rules-title {
-  color: #070b55e5;
+  color: #095e49;
   font-weight: 500;
   font-size: 24px;
   text-align: initial;
   padding-left: 3rem;
-  width: min-content;
+  white-space: wrap;
 }
 
 .tree-creator {
@@ -174,6 +180,11 @@ div.section-card {
 .tree-img-container {
   width: 100%;
   overflow: scroll;
+  border-radius: 10px;
+}
+
+.tree-img-container img {
+  border-radius: 10px;
 }
 
 .title-hint-container {

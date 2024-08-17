@@ -23,13 +23,21 @@ class Config(object):
 class ProductionConfig(Config):
     DEBUG = False
 
+    # # PostgreSQL database
+    # SQLALCHEMY_DATABASE_URI = "postgresql://{}:{}@{}:{}/{}".format(
+    #     os.environ.get("FET_DATABASE_USER", "gentelella"),
+    #     os.environ.get("FET_DATABASE_PASSWORD", "gentelella"),
+    #     os.environ.get("FET_DATABASE_HOST", "db"),
+    #     os.environ.get("FET_DATABASE_PORT", 5432),
+    #     os.environ.get("FET_DATABASE_NAME", "gentelella"),
+    # )
     # PostgreSQL database
-    SQLALCHEMY_DATABASE_URI = "postgresql://{}:{}@{}:{}/{}".format(
-        os.environ.get("FET_DATABASE_USER", "gentelella"),
-        os.environ.get("FET_DATABASE_PASSWORD", "gentelella"),
+    SQLALCHEMY_DATABASE_URI = "sqlite://{}:{}@{}:{}/{}".format(
+        os.environ.get("FET_DATABASE_USER", "admin"),
+        os.environ.get("FET_DATABASE_PASSWORD", "admin"),
         os.environ.get("FET_DATABASE_HOST", "db"),
         os.environ.get("FET_DATABASE_PORT", 5432),
-        os.environ.get("FET_DATABASE_NAME", "gentelella"),
+        os.environ.get("FET_DATABASE_NAME", "fet_database"),
     )
 
 

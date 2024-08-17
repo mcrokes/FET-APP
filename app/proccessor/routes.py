@@ -2,6 +2,7 @@ import threading
 from typing import Literal
 
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
 from app.base.models import User
 from app.proccessor.forms import add_model
 from app.proccessor.model.dataset_interaction_methods import get_modified_dataframe
@@ -16,7 +17,7 @@ from app.proccessor.models import (
     SurrogateTreeData,
     Tree,
     TreeRule,
-    TreeRuleCause,
+    TreeRuleCause, dbInteractionMethods,
 )
 from . import blueprint
 from flask import current_app, render_template, request, redirect
@@ -26,7 +27,7 @@ import pandas as pd
 import joblib
 
 
-def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regressor"], modelId):
+def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "Regressor"], modelId):
     with app:
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == model_id
@@ -36,7 +37,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
         db_model.process_message = "Sincronizando datos..."
         db_model.db_commit()
 
-        if type == "Classifier":
+        if model_type == "Classifier":
             db_model_model: RandomForestClassifier = db_model.getElement("model")
             db_model_classifier_target_description: dict = db_model.getElement(
                 "target_description"
@@ -109,7 +110,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
                         df=db_model_dataset,
                         target_description=(
                             db_model_classifier_target_description
-                            if type == "Classifier"
+                            if model_type == "Classifier"
                             else None
                         ),
                         qualitative_columns=db_model_qualitative_columns,
@@ -124,7 +125,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
                         df=db_model_dataset,
                         target_description=(
                             db_model_classifier_target_description
-                            if type == "Classifier"
+                            if model_type == "Classifier"
                             else None
                         ),
                         qualitative_columns=db_model_qualitative_columns,
@@ -148,8 +149,8 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
                     "distribution_dataset": "Dataset for the distribution type",
                 }
             )
-            model_data.data_set_data.data_set_data_distributions[0].db_commit()
-            model_data.data_set_data.data_set_data_distributions[1].db_commit()
+            # model_data.data_set_data.data_set_data_distributions[0].db_commit()
+            # model_data.data_set_data.data_set_data_distributions[1].db_commit()
         else:
             dataset_data_distribution_qualitative = DataSetDataDistribution(
                 **{
@@ -180,9 +181,8 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
             model_data.surrogate_trees_data = []
         while surrogate_inexact_rules_amount != 0:
 
-            db_model.process_message = (
-                f"Creando modelo subrogado datos (de rofundidad {tree_depth})..."
-            )
+            db_model.process_message = f"Creando modelo subrogado datos (de profundidad {tree_depth})..."
+            db_model.percent_processed += 1
             db_model.db_commit()
             surrogate_tree = ExplainSingleTree.createSurrogateTree(
                 trainedModel=db_model_model,
@@ -197,10 +197,10 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
                 features=surrogate_tree.feature_names_in_,
                 class_names=(
                     db_model_classifier_target_class_names
-                    if type == "Classifier"
+                    if model_type == "Classifier"
                     else None
                 ),
-                model_type=type,
+                model_type=model_type,
             )
 
             db_tree = Tree(
@@ -249,8 +249,9 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
         db_model.db_commit()
 
         if modelId:
-            model_data.data_set_data.db_commit()
-            model_data.db_commit()
+            pass
+            # model_data.data_set_data.db_commit()
+            # model_data.db_commit()
         else:
             print('Saving Models...')
             model_data.data_set_data = dataset_data
@@ -259,15 +260,16 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
             dataset_data.add_to_db()
             model_data.add_to_db()
 
-        if type == "Classifier":
+        if model_type == "Classifier":
             if modelId:
+                print('Entering with modelId: ', modelId)
                 model_data.explainer_classifier.setElements(
                     **{
                         "target_names_dict": db_model_classifier_target_description,
                         "name": db_model.name,
                     }
                 )
-                model_data.explainer_classifier.db_commit()
+                # model_data.explainer_classifier.db_commit()
             else:
                 classifier_model_data = ExplainedClassifierModel(
                     **{
@@ -286,7 +288,7 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
                         "name": db_model.name,
                     }
                 )
-                model_data.explainer_regressor.db_commit()
+                # model_data.explainer_regressor.db_commit()
             else:
                 regressor_model_data = ExplainedRegressorModel(
                     **{
@@ -307,8 +309,6 @@ def thread_function(model_id, app, user_id, type: Literal["Classifier", "Regress
 @blueprint.route("/edit_classifier/<modelId>", methods=["GET", "POST"])
 @login_required
 def save_classifier(modelId: int = 0):
-    if modelId:
-        print('Entering..')
     form = add_model(request.form)
     if modelId:
         classifier: ExplainedModel = ExplainedModel.query.filter(
@@ -322,12 +322,12 @@ def save_classifier(modelId: int = 0):
     except:  # noqa: E722
         pass
 
-    print(cancel)
-    print(request.args)
-    print(request.form)
+    print('cancel: ', cancel)
+    print('request.args: ', request.args)
+    print('request.form: ', request.form)
 
     if cancel == "Second":
-        print(cancel)
+        print('cancel: ', cancel)
         db_models: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.user_id == current_user.id
         ).all()
@@ -337,7 +337,7 @@ def save_classifier(modelId: int = 0):
                                type='edit' if modelId else 'add')
 
     if "Initial" in request.form or cancel == "Add":
-        print(cancel)
+        print('cancel: ', cancel)
         try:
             if cancel == "Add":
                 db_model: ModelForProccess = ModelForProccess.query.filter(
@@ -360,7 +360,6 @@ def save_classifier(modelId: int = 0):
                         training_df = pd.read_csv(request.files["dataset"])
                     except:  # noqa: E722
                         training_df = pd.read_excel(request.files["dataset"])
-
 
                 db_model = ModelForProccess(
                     **{
@@ -385,7 +384,7 @@ def save_classifier(modelId: int = 0):
                 type='edit' if modelId else 'add'
             )
         except Exception as e:
-            print(e)
+            print('Exception on Initial: ', e)
             status = "Wrong Data"
             return render_template(
                 "add_model_classifier.html", form=form, status=status, type='edit' if modelId else 'add'
@@ -397,7 +396,6 @@ def save_classifier(modelId: int = 0):
             ).first()
 
             if cancel != "Create":
-                print('Entering on Crete...')
                 possible_not_needed_variables = list(
                     set(db_model.getElement("dataset").columns)
                     - set(db_model.getElement("model").feature_names_in_)
@@ -413,15 +411,16 @@ def save_classifier(modelId: int = 0):
                 )
                 db_model.db_commit()
             else:
-                print(cancel)
-                explainer: ExplainedClassifierModel = (
-                    ExplainedClassifierModel.query.filter(
-                        ExplainedClassifierModel.user_id == current_user.id
-                    ).all()[-1]
-                )
-                print(explainer.name)
-                if db_model.name == explainer.name:
-                    explainer.delete_from_db()
+                if not modelId:
+                    print('cancel: ', cancel)
+                    explainer: ExplainedClassifierModel = (
+                        ExplainedClassifierModel.query.filter(
+                            ExplainedClassifierModel.user_id == current_user.id
+                        ).all()[-1]
+                    )
+                    print('explainer.name: ', explainer.name)
+                    if db_model.name == explainer.name:
+                        explainer.delete_from_db()
                 db_model.percent_processed = 0
                 db_model.db_commit()
 
@@ -438,12 +437,12 @@ def save_classifier(modelId: int = 0):
                 qualitative_target = classifier.getElement('target_names_dict')
                 qualitative_variables_values = classifier.explainer_model.getElement('q_variables_dict')
 
-                print(qualitative_target)
+                print('qualitative_target: ', qualitative_target)
                 values_on_current[f'{db_model.target_row}'] = []
                 for variable in qualitative_target['variables']:
                     values_on_current[f'{db_model.target_row}'].append(variable['new_value'])
 
-                print(qualitative_variables_values)
+                print('qualitative_variables_values: ', qualitative_variables_values)
                 for column in qualitative_variables_values:
                     values_on_current[f'{column["column_name"]}'] = []
                     for variable in column['variables']:
@@ -452,7 +451,6 @@ def save_classifier(modelId: int = 0):
             print('values_on_current: ', values_on_current)
             for column in df:
                 if len(set(df[column])) < 5 or column == db_model.target_row:
-
                     qualitative_variables_form.append(
                         {
                             "name": column,
@@ -471,13 +469,12 @@ def save_classifier(modelId: int = 0):
                 type='edit' if modelId else 'add'
             )
         except Exception as e:
-            print(e)
+            print('Exception on Second: ', e)
             status = "Wrong Data"
             return render_template(
                 "add_model_classifier.html", form=form, status=status, type='edit' if modelId else 'add'
             )
     elif "Add" in request.form:
-
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == request.form["model_id"]
         ).first()
@@ -554,17 +551,23 @@ def save_classifier(modelId: int = 0):
         ).all()
         for model in db_models:
             model.delete_from_db()
+        interaction: dbInteractionMethods = dbInteractionMethods()
+        interaction.db_commit()
         return redirect('/processor/manage_classifiers')
     db_models: ModelForProccess = ModelForProccess.query.filter(
         ModelForProccess.user_id == current_user.id
     ).all()
     for model in db_models:
         model.delete_from_db()
-    return render_template("add_model_classifier.html", form=form, status="Initial", type='edit' if modelId else 'add')
+    return render_template(
+        "add_model_classifier.html",
+        form=form,
+        status="Initial",
+        type='edit' if modelId else 'add')
 
 
 @blueprint.route("/add_regressor", methods=["GET", "POST"])
-@blueprint.route("/edit_regressor/?<modelId>", methods=["GET", "POST"])
+@blueprint.route("/edit_regressor/<modelId>", methods=["GET", "POST"])
 @login_required
 def save_regressor(modelId: int = 0):
     form = add_model(request.form)
@@ -581,19 +584,20 @@ def save_regressor(modelId: int = 0):
     except:  # noqa: E722
         pass
 
-    print(cancel)
-    print(request.form)
+    print('cancel: ', cancel)
+    print('request.form: ', request.form)
 
     if cancel == "Second":
-        print(cancel)
+        print('cancel: ', cancel)
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == request.form["model_id"]
         ).first()
         db_model.delete_from_db()
-        return render_template("add_model_regressor.html", form=form, status="Initial", type='edit' if modelId else 'add')
+        return render_template("add_model_regressor.html", form=form, status="Initial",
+                               type='edit' if modelId else 'add')
 
     if "Initial" in request.form or cancel == "Add":
-        print(cancel)
+        print('cancel: ', cancel)
         try:
             if cancel == "Add":
                 db_model: ModelForProccess = ModelForProccess.query.filter(
@@ -641,11 +645,11 @@ def save_regressor(modelId: int = 0):
                 type='edit' if modelId else 'add'
             )
         except Exception as e:
-            print(e)
+            print('Exception on Initial: ', e)
             status = "Wrong Data"
-            return render_template("add_model_regressor.html", form=form, status=status, type='edit' if modelId else 'add')
+            return render_template("add_model_regressor.html", form=form, status=status,
+                                   type='edit' if modelId else 'add')
     elif "Second" in request.form or cancel == "Create":
-
         try:
             db_model: ModelForProccess = ModelForProccess.query.filter(
                 ModelForProccess.id == request.form["model_id"]
@@ -657,7 +661,7 @@ def save_regressor(modelId: int = 0):
                     - set(db_model.getElement("model").feature_names_in_)
                 )
                 possible_not_needed_variables.remove(request.form["target"])
-                print("Possible Not Needeed: ", possible_not_needed_variables)
+                print("possible_not_needed_variables: ", possible_not_needed_variables)
                 db_model.target_row = request.form["target"]
                 db_model.setElements(
                     **{
@@ -666,13 +670,13 @@ def save_regressor(modelId: int = 0):
                     })
                 db_model.db_commit()
             else:
-                print(cancel)
+                print('cancel: ', cancel)
                 explainer: ExplainedRegressorModel = (
                     ExplainedRegressorModel.query.filter(
                         ExplainedRegressorModel.user_id == current_user.id
                     ).all()[-1]
                 )
-                print(explainer.name)
+                print('explainer.name: ', explainer.name)
                 if db_model.name == explainer.name:
                     explainer.delete_from_db()
                 db_model.percent_processed = 0
@@ -680,6 +684,7 @@ def save_regressor(modelId: int = 0):
 
             qualitative_variables_form = []
             df = db_model.getElement("dataset")
+
             values_on_current = {}
             if modelId:
                 regressor: ExplainedRegressorModel = ExplainedRegressorModel.query.filter(
@@ -689,7 +694,7 @@ def save_regressor(modelId: int = 0):
                 unit = regressor.getElement('unit')
                 qualitative_variables_values = regressor.explainer_model.getElement('q_variables_dict')
 
-                print(qualitative_variables_values)
+                print('qualitative_variables_values: ', qualitative_variables_values)
                 for column in qualitative_variables_values:
                     values_on_current[f'{column["column_name"]}'] = []
                     for variable in column['variables']:
@@ -716,12 +721,12 @@ def save_regressor(modelId: int = 0):
                 type='edit' if modelId else 'add'
             )
         except Exception as e:
-            print(e)
+            print('Exception on Second: ', e)
             status = "Wrong Data"
-            return render_template("add_model_regressor.html", form=form, status=status, type='edit' if modelId else 'add')
+            return render_template("add_model_regressor.html", form=form, status=status,
+                                   type='edit' if modelId else 'add')
 
     elif "Add" in request.form:
-
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == request.form["model_id"]
         ).first()

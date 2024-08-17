@@ -50,125 +50,127 @@ datasetLayout = html.Div(
     [
         dcc.Loading(
             [
-                html.Plaintext(
-                    [
-                        "Métricas del Conjunto de Datos: ",
-                        html.Strong(id="dataset-title"),
-                    ],
-                    className="rules-title",
-                    style={"font-size": "30px"},
-                ),
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                html.Plaintext(
-                                    "Conjunto de Datos Modificado",
-                                    className="rules-title",
-                                ),
-                                html.I(
-                                    id="dataset-info",
-                                    className="fa fa-info-circle info-icon",
-                                ),
-                                dbc.Tooltip(
-                                    [
-                                        html.Plaintext(
-                                            [
-                                                "* Si desea filtrar las columnas ",
-                                                html.Strong("Numéricas"),
-                                                " deberá ingresar los símbolos (",
-                                                html.Strong(">"),
-                                                ") - (",
-                                                html.Strong("<"),
-                                                ") antes del número.",
-                                            ]
-                                        ),
-                                    ],
-                                    className="personalized-tooltip",
-                                    target="dataset-info",
-                                ),
-                            ],
-                            className="title-hint-container",
-                        ),
-                        html.Div(
-                            id="modified-dataset-view", style={"overflow": "scroll"}
-                        ),
-                        html.Div(id="test-tert"),
-                    ]
-                ),
-                html.Div(
-                    [
-                        html.Plaintext(
-                            "Conjunto de Datos Original",
-                            className="rules-title",
-                        ),
-                        html.Div(id="dataset-view", style={"overflow": "scroll"}),
-                    ]
-                ),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                html.H3("DESCRIPCIÓN PREDICTORES"),
-                                html.Div(id="features-description"),
-                            ],
-                            xs=8,
-                            sm=8,
-                            md=8,
-                            lg=8,
-                            xl=8,
-                            xxl=8,
-                        )
-                    ],
-                    style={"padding-top": "20px"},
-                ),
-                dbc.Row(
-                    [
-                        html.Plaintext(
-                            "Variables Numéricas",
-                            className="rules-title",
-                        ),
-                        dbc.Row(id="numeric-plot", style={'row-gap': '1rem'}),
-                        html.Plaintext(
-                            "Variables Objeto",
-                            className="rules-title",
-                        ),
-                        dbc.Row(id="object-plot"),
-                        html.Div(
-                            [
-                                html.Plaintext(
-                                    "Correlación de Variables",
-                                    className="rules-title",
-                                ),
-                                html.I(
-                                    id="correlation-info",
-                                    className="fa fa-info-circle info-icon",
-                                ),
-                                dbc.Tooltip(
-                                    [
-                                        html.Plaintext(
-                                            [
-                                                "Correlación: Medida de la relación entre dos variables, que varía de "
-                                                "-1 (correlación negativa) a 1 (correlación positiva). ",
-                                                html.Strong("Valores positivos"),
-                                                " indican que las variables aumentan o disminuyen juntas, mientras que ",
-                                                html.Strong("valores negativos"),
-                                                " indican que una variable aumenta cuando la otra disminuye. Valores ",
-                                                html.Strong("cercanos a 0"),
-                                                " indican poca o ninguna correlación.",
-                                            ]
-                                        ),
-                                    ],
-                                    className="personalized-tooltip",
-                                    target="correlation-info",
-                                ),
-                            ],
-                            className="title-hint-container",
-                        ),
-                        html.Div(id="correlation-plot"),
-                    ],
-                ),
-            ]
+                html.Div([
+                    html.Plaintext(
+                        [
+                            "Métricas del Conjunto de Datos: ",
+                            html.Strong(id="dataset-title"),
+                        ],
+                        className="rules-title",
+                        style={"font-size": "30px"},
+                    ),
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    html.Plaintext(
+                                        "Conjunto de Datos Modificado",
+                                        className="rules-title",
+                                    ),
+                                    html.I(
+                                        id="dataset-info",
+                                        className="fa fa-info-circle info-icon",
+                                    ),
+                                    dbc.Tooltip(
+                                        [
+                                            html.Plaintext(
+                                                [
+                                                    "* Si desea filtrar las columnas ",
+                                                    html.Strong("Numéricas"),
+                                                    " deberá ingresar los símbolos (",
+                                                    html.Strong(">"),
+                                                    ") - (",
+                                                    html.Strong("<"),
+                                                    ") antes del número.",
+                                                ]
+                                            ),
+                                        ],
+                                        className="personalized-tooltip",
+                                        target="dataset-info",
+                                    ),
+                                ],
+                                className="title-hint-container",
+                            ),
+                            html.Div(
+                                id="modified-dataset-view", style={"overflow": "scroll", "border-radius": "5px"}
+                            ),
+                            html.Div(id="test-tert"),
+                        ]
+                    ),
+                    html.Div(
+                        [
+                            html.Plaintext(
+                                "Conjunto de Datos Original",
+                                className="rules-title",
+                            ),
+                            html.Div(id="dataset-view", style={"overflow": "scroll", "border-radius": "5px"}),
+                        ]
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                [
+                                    html.H3("DESCRIPCIÓN PREDICTORES"),
+                                    html.Div(id="features-description"),
+                                ],
+                                xs=8,
+                                sm=8,
+                                md=8,
+                                lg=8,
+                                xl=8,
+                                xxl=8,
+                            )
+                        ],
+                        style={"padding-top": "20px"},
+                    ),
+                    dbc.Row(
+                        [
+                            html.Plaintext(
+                                "Variables Numéricas",
+                                className="rules-title",
+                            ),
+                            dbc.Row(id="numeric-plot", style={'row-gap': '1rem'}),
+                            html.Plaintext(
+                                "Variables Objeto",
+                                className="rules-title",
+                            ),
+                            dbc.Row(id="object-plot"),
+                            html.Div(
+                                [
+                                    html.Plaintext(
+                                        "Correlación de Variables",
+                                        className="rules-title",
+                                    ),
+                                    html.I(
+                                        id="correlation-info",
+                                        className="fa fa-info-circle info-icon",
+                                    ),
+                                    dbc.Tooltip(
+                                        [
+                                            html.Plaintext(
+                                                [
+                                                    "Correlación: Medida de la relación entre dos variables, que varía de "
+                                                    "-1 (correlación negativa) a 1 (correlación positiva). ",
+                                                    html.Strong("Valores positivos"),
+                                                    " indican que las variables aumentan o disminuyen juntas, mientras que ",
+                                                    html.Strong("valores negativos"),
+                                                    " indican que una variable aumenta cuando la otra disminuye. Valores ",
+                                                    html.Strong("cercanos a 0"),
+                                                    " indican poca o ninguna correlación.",
+                                                ]
+                                            ),
+                                        ],
+                                        className="personalized-tooltip",
+                                        target="correlation-info",
+                                    ),
+                                ],
+                                className="title-hint-container",
+                            ),
+                            html.Div(id="correlation-plot"),
+                        ],
+                    ),
+                ], className="container")
+            ],
         )
     ],
     className="section-content",
@@ -176,7 +178,7 @@ datasetLayout = html.Div(
 )
 
 
-def datasetCallbacks(app, furl: Function):
+def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
     @app.callback(
         Output("dataset-title", "children"),
         Output("modified-dataset-view", "children"),
@@ -199,7 +201,8 @@ def datasetCallbacks(app, furl: Function):
             original_df_with_index = original_df.rename_axis("Índice").reset_index()
             df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
             df_with_index = df.rename_axis("Índice").reset_index()
-            dtt = model_x.getElement("name")
+            dtt = model_x.explainer_regressor.getElement(
+                "name") if isRegressor else model_x.explainer_classifier.getElement("name")
             qualitative_graphs_array, numeric_graphs_array = (
                 generateDataSetDistributions(df)
             )

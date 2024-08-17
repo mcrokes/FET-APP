@@ -1,116 +1,20 @@
 {% extends 'base_site.html' %}
 
 {% block title %}
-  Add Models
+  Add Model Regressor
 {% endblock %}
 
 {% block stylesheets %}
   {{ super() }}
-
-  <style>
-    .common_header {
-      font-family: monospace;
-      font-weight: 900;
-      margin: auto !important;
-      white-space: wrap;
-      text-align: center;
-    }
-    
-    .form-fields {
-      width: max-content;
-      margin: auto !important;
-      max-width: 100%;
-    }
-    @media (min-width: 800px) {
-      .custom-col {
-        width: 50%;
-      }
-    }
-    
-    @media (max-width: 800px) {
-      .custom-col {
-        float: unset !important;
-      }
-    }
-    
-    textarea {
-      resize: vertical;
-      min-height: 5rem;
-      max-height: 10rem;
-    }
-    .custom-input,
-    .custom-file-input {
-      min-height: 5rem !important;
-      width: 100%;
-      max-width: 100%;
-      color: #444;
-      padding: 5px;
-      background: #fff;
-      border-radius: 4px !important;
-      height: unset;
-      min-width: 300px;
-    }
-    .custom-file-input::file-selector-button {
-      margin-right: 20px;
-      border: none;
-      background: springgreen;
-      padding: 10px 20px;
-      border-radius: 4px;
-      color: #444;
-      cursor: pointer;
-      transition: background 0.2s ease-in-out;
-    }
-    
-    .custom-file-input::file-selector-text {
-      color: red;
-    }
-    
-    .custom-file-input:focus::file-selector-button,
-    .custom-file-input::file-selector-button:hover {
-      background: limegreen;
-      color: #fff;
-    }
-    
-    @media (min-width: 1200px) {
-      .custom-qualitative-col {
-        width: unset !important;
-      }
-    }
-
-    .select2-selection {
-      border-radius: 2px;
-      min-height: 5rem !important;
-      width: 10rem;
-    }
-
-    .select2-selection span {
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .unit-selector-container {
-      display: flex;
-      justify-content: <start></start>;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .unit-selector-container label {
-      white-space: nowrap;
-    }
-
-    .select2-container {
-      width: 10rem !important;
-    }
-  </style>
+  <link href="{{ url_for('static', filename='build/css/add_model.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
     <div class="">
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="col-md-12 col-sm-12 col-xs-12 add-model-container">
           <div class="x_panel">
-            <div class="x_title" style="display: flex;">
+            <div class="x_title">
               <h2 class="common_header">Cargar Modelo de Regresión</h2>
               <div class="clearfix"></div>
             </div>
@@ -122,44 +26,44 @@
                       <input type="text" id="model_id" name="model_id" value="{{ model_id }}" data-status="{{ status }}" hidden />
                     {% endif %}
                     {% if status == 'Create' %}
-                      <div class="progress" style="width: 70vw;">
-                        <div id="progress_bar" class="progress-bar" style="width: 0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                      <div class="progress">
+                        <div id="progress_bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                       </div>
                       <div id="progress-message">Creating Dataset Distributions</div>
                     {% else %}
                       {% if status == 'Initial' %}
                         <!-- Name -->
-                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                        <div class="col col-lg-6 custom-col">
                           <span style="color: red;">*Requerido</span>
                           <input class="form-control custom-input" id="{{form.name.id}}" name="name" placeholder="{{form.name.label.text}}" type="text" value="{{form.name.default}}"/>
                         </div>
                         {% if type == 'add' %}
                           <!-- Model -->
-                          <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                          <div class="col col-lg-6 custom-col">
                             <span style="color: red;">*Requerido</span>
-                            <input accept="{{form.model.render_kw.accept}}" class="form-control custom-file-input" id="{{form.model.id}}" name="model" placeholder="{{form.model.label.text}}" style="display: none" type="file">
-                            <label class="form-control custom-file-input" for="{{form.model.id}}" style="align-items: center; display: flex;">
-                              <p id="{{form.model.id}}-holder" style="font-weight: 100; color: darkgray; margin: 0px; width: 500px;">{{ form.model.label.text }}</p>
+                            <input accept="{{form.model.render_kw.accept}}" class="form-control custom-file-input" id="{{form.model.id}}" name="model" placeholder="{{form.model.label.text}}" type="file">
+                            <label class="form-control custom-file-input" for="{{form.model.id}}">
+                              <p id="{{form.model.id}}-holder">{{ form.model.label.text }}</p>
                             </label>
                           </div>
                         {% endif %}
                         <!-- Description -->
-                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                        <div class="col col-lg-6 custom-col">
                           <span style="color: green;">*Opcional</span>
                           <textarea class="form-control custom-input" id="{{form.description.id}}" name="description" placeholder="{{form.description.label.text}}">{{form.description.default}}</textarea>
                         </div>
                         {% if type == 'add' %}
                           <!-- Dataset -->
-                          <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                          <div class="col col-lg-6 custom-col">
                             <span style="color: red;">*Requerido</span>
                             <input accept="{{form.dataset.render_kw.accept}}"  class="form-control custom-file-input" id="{{form.dataset.id}}" name="dataset"
-                                    placeholder="{{form.dataset.label.text}}" style="display: none" type="file" />
-                            <label class="form-control custom-file-input" for="{{form.dataset.id}}" style="align-items: center; display: flex;">
-                              <p id="{{form.dataset.id}}-holder" style="font-weight: 100; color: darkgray; margin: 0px; width: 500px;">{{ form.dataset.label.text }}</p>
+                                    placeholder="{{form.dataset.label.text}}" type="file" />
+                            <label class="form-control custom-file-input" for="{{form.dataset.id}}">
+                              <p id="{{form.dataset.id}}-holder">{{ form.dataset.label.text }}</p>
                             </label>
                           </div>
                         {% endif %}
-                        <div class="col custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                        <div class="col custom-col">
                           <span style="color: green;">*Opcional</span>
                           <div class="unit-selector-container">
                             <label for="unit-selector">Unidad de Medida</label>
@@ -171,34 +75,34 @@
                           </div>
                         </div>
                       {% elif status == 'Second' %}
-                        <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; width: 100%;">
-                          <label for="target-slector">Columna de Clasificación</label>
-                          <select name="target" id="target-slector" class="form-control custom-input form-select form-select-lg mb-3" aria-label="Large select example">
+                        <div class="col custom-col">
+                          <label for="target-selector">Columna de Clasificación</label>
+                          <select name="target" id="target-selector" class="form-control custom-input form-select form-select-lg mb-3" aria-label="Large select example">
                             {% for option in form %}
                               <option value="{{ option }}">{{ option }}</option>
                             {% endfor %}
                           </select>
                         </div>
                       {% elif status == 'Add' %}
-                        <h5 style="padding-left: 5rem;">Descripción de variables.</h5>
+                        <h5 class="q-vars-header">Descripción de variables.</h5>
                         {% for var in variables %}
-                          <div class="col col-lg-6 custom-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
-                            <label for="">{{ var }}</label>
+                          <div class="col col-lg-6 custom-col">
+                            <label>{{ var }}</label>
                             <textarea class="form-control custom-input" placeholder="Descripción..." type="text" name="{{ var }}"></textarea>
                           </div>
                         {% endfor %}
-                        <h5 style="padding-left: 5rem;">Valores de las posibles variables cualitativas.</h5>
+                        <h5 class="q-vars-header">Valores de las posibles variables cualitativas.</h5>
                         {% for col in form %}
                           <input type="text" name="Q-Variable-{{ col.name }}" value="{{ col.name }}" hidden />
-                          <div class="col col-lg-6 custom-col custom-qualitative-col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
-                            <label for="">{{ col.name }}</label>
+                          <div class="col col-lg-6 custom-col custom-qualitative-col">
+                            <label>{{ col.name }}</label>
                             {% for var in col.variables %}
                               {% if col.values_on_current[loop.index-1]|string != var|string %}
-                                <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                                <div class="col custom-col-no-media">
                                   <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" value="{{ col.values_on_current[loop.index-1] }}" />
                                 </div>
                               {% else %}
-                                <div class="col" style="margin: auto; margin-bottom: 20px; max-width: 100%;">
+                                <div class="col custom-col-no-media">
                                   <input class="form-control custom-input" placeholder="Original Value: {{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
                                 </div>
                               {% endif %}
@@ -209,10 +113,14 @@
                     {% endif %}
                   </section>
 
-                  <div class="navbar-right" style="padding-right: 5rem; justify-content: center; display: flex; padding-left: 5rem;">
+                  <div class="navbar-right fet-navbar-right">
                     <button type="submit" id="cancel" style="display: none;" class="btn btn-warning submit" name="cancel" value="{{ status }}">
                       {% if status == 'Create' %}
-                        Cancelar
+                        {% if type == 'add' %}
+                          Cancelar
+                        {% else %}
+                          Atrás
+                        {% endif %}
                       {% else %}
                         Atrás
                       {% endif %}
@@ -222,6 +130,8 @@
                         Aceptar
                       {% elif status != 'Add' %}
                         Siguiente
+                      {% elif type != 'add' %}
+                        Modificar
                       {% else %}
                         Crear
                       {% endif %}
@@ -238,133 +148,6 @@
 
 {% block javascripts %}
   {{ super() }}
-  <script>
-    const units = [
-      { id: '', text: 'Ninguna' },
-      { id: '$', text: '$' },
-      { id: '%', text: '%' },
-      { id: 'Ltr', text: 'Ltr' },
-      { id: 'g', text: 'g' },
-      { id: 'kg', text: 'kg' },
-      { id: 'cm', text: 'cm' },
-      { id: 'dm', text: 'dm' },
-      { id: 'm', text: 'm' },
-      { id: 'km', text: 'km' },
-    ];
-    $("#unit-selector").select2({
-      tags: true,
-      data: units,
-    });
-    const editedModelID = window.location.href.split('/')[5];
-    let interval = 0;
-    const getProgressPercent = async () => {
-      // get
-      const progress_bar = document.getElementById('progress_bar')
-      const progress_message = document.getElementById('progress-message')
-      const model_id = document.getElementById('model_id')
-    
-      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/model/percent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: model_id.value
-      })
-    
-      res = await response.json().then((value) => {
-        progress_bar.style.width = `${value[0].percent}%`
-        progress_bar.ariaValueNow = value[0].percent
-        progress_bar.innerHTML = `${value[0].percent}%`
-        progress_message.innerHTML = value[0].message
-        console.log(value[0])
-        return value[0].percent
-      })
-    
-      if (res >= 100) {
-        clearInterval(interval)
-        add_button.disabled = false
-        cancel_button.disabled = false
-      } else {
-        add_button.disabled = true
-        cancel_button.disabled = true
-      }
-    }
-    
-    const add_button = document.getElementById('submit')
-    const cancel_button = document.getElementById('cancel')
-    
-    cancel_button.addEventListener('click', () => {
-      //cancel_button.value = 'cancel'
-    })
-    
-    const model_name_field = document.getElementById('model-name')
-    const model_field = document.getElementById('model')
-    const model_description_field = document.getElementById('model-description')
-    const model_data_set_field = document.getElementById('model-data-set')
-    const unit = document.getElementById('unit-selector')
-
-    const model_field_holder = document.getElementById('model-holder')
-    const model_data_set_field_holder = document.getElementById('model-data-set-holder')
-
-    let models_list = null;
-    let editedModelName = '';
-    const getModelsList = async () => {
-      // get
-      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/regressor/namelist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      models_list = await response.json().then((value) => {
-        if(editedModelID) {
-          editedModelName = value.idPath[editedModelID];
-          console.log('editedModelName: ', editedModelName);
-        }
-        return value.data;
-      })
-    }
-
-    const isNameValid = () => editedModelName === model_name_field.value || !models_list.includes(model_name_field.value);
-
-    const verify_inputs = () => {
-      if (model_name_field == null || (((model_data_set_field == null && model_name_field.value) || (model_name_field.value && model_field.value && model_data_set_field.value)) && isNameValid())) {
-        add_button.disabled = false
-        add_button.classList.remove('btn-danger')
-        add_button.classList.add('btn-success')
-        if (model_name_field == null) cancel_button.style.display = ''
-        console.log('ACTIVATED')
-      } else {
-        add_button.disabled = true
-        add_button.classList.remove('btn-success')
-        add_button.classList.add('btn-danger')
-        cancel_button.style.display = 'none'
-        console.log('DEACTIVATED')
-      }
-      if (model_data_set_field && model_data_set_field.value) {
-        model_data_set_field_holder.innerHTML = model_data_set_field.value
-        model_data_set_field_holder.style.color = 'black'
-      }
-      if (model_field && model_field.value) {
-        model_field_holder.innerHTML = model_field.value
-        model_field_holder.style.color = 'black'
-      }
-    }
-
-    const initial_check = async () => {
-      if (model_name_field) {
-        await getModelsList();
-        console.log('models_list:', models_list);
-      }
-      verify_inputs();
-    }
-
-    const manage_percent = async () => {
-      const model_id = document.getElementById('model_id')
-      if (model_id && model_id.dataset.status == 'Create') {
-        interval = setInterval(await getProgressPercent, 3000)
-      }
-    }
-    
-    window.addEventListener('DOMContentLoaded', manage_percent)
-    window.addEventListener('DOMContentLoaded', initial_check)
-    window.addEventListener('input', verify_inputs)
-  </script>
+  <script src="{{ url_for('static', filename='build/js/add_model.js') }}"></script>
+  <script src="{{ url_for('static', filename='build/js/add_model_regressor.js') }}"></script>
 {% endblock %}

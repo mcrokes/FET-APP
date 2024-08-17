@@ -1,0 +1,85 @@
+.main_container {
+    width: 100vw;
+    height: 100vh;
+    margin-left: 0;
+}
+
+.main_container > div:first-child {
+    display: grid;
+    grid-template-columns: min-content auto;
+    gap: 0;
+    height: 100%;
+}
+
+#sidebar-container {
+    width: min-content;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #095e49;
+    position: fixed;
+    z-index: 3;
+}
+
+.remove-icon {
+    display: flex;
+    justify-content: space-between;
+}
+.remove-icon::after{
+    display: none;
+}
+.sidebar-link {
+    white-space: nowrap;
+    padding-right: 3rem;
+    padding-left: 20px;
+    padding-right: 10px;
+}
+.dropdown-config {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.dropdown-config li {
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    color: white;
+    width: 100%;
+}
+.dropdown-config li:first-child {
+    border-top: 1px solid #ccc;
+}
+.dropdown-config li:last-child {
+    border-bottom: none;
+}
+
+#body-container {
+    background-image: url("/static/images/BACKGROUND.png");
+    min-height: 100%;
+    position: absolute;
+    width: 100vw;
+    right: 0px;
+    overflow: scroll;
+    height: 100%;
+}
+
+.flask-view-container {
+    height: fit-content;
+    min-height: 100vh;
+    margin-left: 0;
+    background-color: #ffffffd6;
+    padding: 10px;
+    padding-top: 7rem !important;
+}
+
+footer {
+    margin-left:0 !important;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    right: 0;
+    background-color: #095e49;
+    display: none;
+    z-index: 2;
+}
