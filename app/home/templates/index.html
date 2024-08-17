@@ -4,69 +4,12 @@
 
 {% block stylesheets %}
   {{ super() }}
-  <style>
-    .linked-button-card {
-      width: 18rem;
-      text-align: right;
-      margin-top: 1rem;
-      padding-top: 17rem;
-      font-size: 20px;
-      font-weight: bold;
-      border-radius: 1rem !important;
-      text-align: center;
-      color: white !important;
-      text-shadow: 5px 5px 10px red, -5px -5px 10px #1400ff, -5px 5px 10px #ff009b, 5px -5px 10px #ebff00;
-      text-transform: uppercase;
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-    }
-
-    .linked-button-card:hover{
-      color: #b7b7fb !important;
-      border-color: grey;
-    }
-
-    .linked-button-card:active{
-      border-color: black;
-    }
-
-    #classifier-models-button {
-      background-image: url("/static/images/CLASSIFIER.jpg");
-    }
-
-    #regressor-models-button {
-      background-image: url("/static/images/REGRESSOR.jpg");
-    }
-
-    #home-info {
-      color: black;
-      font-weight: bold;
-      background-color: #eeeeee78;
-      padding: 3rem;
-      text-align: initial;
-      margin-top: 3rem;
-      border-radius: 4px;
-    }
-
-    #home-info > h2 {
-      margin-top: 4rem;
-    }
-
-    #home-info > ul > li {
-      list-style: none;
-      margin-top: 1rem;
-    }
-
-    #home-info a {
-      font-size: 16px;
-      color: #002f6b;
-    }
-  </style>
+  <link href="{{ url_for('static', filename='build/css/home.css') }}" rel="stylesheet">
 {% endblock stylesheets %}
 
 {% block content %}
-  <div class="container text-center" style="padding-bottom: 5rem;">
-    <div style="display: flex; justify-content: center; gap: 5rem; flex-wrap: wrap; margin-top: 10rem;">
+  <div class="container text-center index-container">
+    <div>
       <div>
         <a id="classifier-models-button" href="/processor/manage_classifiers" class="btn linked-button-card" role="button" aria-pressed="true">Modelos de Clasificación</a>
       </div>
@@ -75,10 +18,10 @@
       </div>
     </div>
     <div id="home-info">
-      <h1 style="text-transform: uppercase; text-align: center; font-weight: bold;">Modelos de Clasificación y Regresión con Random Forest</h1>
+      <h1>Modelos de Clasificación y Regresión con Random Forest</h1>
       <hr>
       <h2>Índice</h2>
-      <ul style="text-align: initial;">
+      <ul>
         <li><a href="#introduccion">Introducción</a></li>
         <li><a href="#clasificacion-con-random-forest">Clasificación con Random Forest</a></li>
         <li><a href="#regresion-con-random-forest">Regresión con Random Forest</a></li>
@@ -90,60 +33,54 @@
       <h2 id="clasificacion-con-random-forest">Clasificación con Random Forest</h2>
       <h3>Cómo funciona</h3>
       <p>El algoritmo de Random Forest para clasificación funciona de la siguiente manera:</p>
-      <ol style="text-align: initial;">
+      <ol>
         <li>Se crea un conjunto de árboles de decisión, cada uno con una muestra aleatoria de características y observaciones.</li>
         <li>Cada árbol de decisión se entrena con una parte del conjunto de datos y se utiliza para predecir la clase de las observaciones.</li>
         <li>Las predicciones de cada árbol se combinan para obtener una predicción final.</li>
       </ol>
       <h3>Ventajas</h3>
-      <ul style="text-align: initial;">
+      <ul>
         <li>Robustez: Random Forest es resistente a la sobreajuste y puede manejar grandes conjuntos de datos.</li>
         <li>Flexibilidad: Puede manejar diferentes tipos de características, incluyendo numéricas y categóricas.</li>
         <li>Interpretabilidad: Los árboles de decisión individuales pueden ser interpretados para entender las relaciones entre las características y la clase.</li>
       </ul>
       <h3>Desventajas</h3>
-      <ul style="text-align: initial;">
+      <ul>
         <li>Computacionalmente costoso: El entrenamiento de un modelo de Random Forest puede ser lento para grandes conjuntos de datos.</li>
         <li>Sensibilidad a la elección de hiperparámetros: La elección de los hiperparámetros, como el número de árboles y la profundidad máxima, puede afectar la precisión del modelo.</li>
       </ul>
       <h2 id="regresion-con-random-forest">Regresión con Random Forest</h2>
       <h3>Cómo funciona</h3>
       <p>El algoritmo de Random Forest para regresión funciona de la siguiente manera:</p>
-      <ol style="text-align: initial;">
+      <ol>
         <li>Se crea un conjunto de árboles de decisión, cada uno con una muestra aleatoria de características y observaciones.</li>
         <li>Cada árbol de decisión se entrena con una parte del conjunto de datos y se utiliza para predecir el valor continuo.</li>
         <li>Las predicciones de cada árbol se combinan para obtener una predicción final.</li>
       </ol>
       <h3>Ventajas</h3>
-      <ul style="text-align: initial;">
+      <ul>
         <li>Robustez: Random Forest es resistente a la sobreajuste y puede manejar grandes conjuntos de datos.</li>
         <li>Flexibilidad: Puede manejar diferentes tipos de características, incluyendo numéricas y categóricas.</li>
         <li>Interpretabilidad: Los árboles de decisión individuales pueden ser interpretados para entender las relaciones entre las características y la variable objetivo.</li>
       </ul>
       <h3>Desventajas</h3>
-      <ul style="text-align: initial;">
+      <ul>
         <li>Computacionalmente costoso: El entrenamiento de un modelo de Random Forest puede ser lento para grandes conjuntos de datos.</li>
         <li>Sensibilidad a la elección de hiperparámetros: La elección de los hiperparámetros, como el número de árboles y la profundidad máxima, puede afectar la precisión del modelo.</li>
       </ul>
       <h2 id="ejemplos-de-aplicacion">Ejemplos de aplicación</h2>
-      <ul style="text-align: initial;">
+      <ul>
         <li>Clasificación de imágenes: Random Forest se puede utilizar para clasificar imágenes en diferentes categorías, como objetos, personas o lugares.</li>
         <li>Predicción de precios de viviendas: Utilizar características como número de habitaciones, superficie, ubicación, etc. para predecir el precio de una vivienda.</li>
         <li>Predicción de demanda de productos: Utilizar características como temporada, día de la semana, festividades, etc. para predecir la demanda de un producto.</li>
         <li>Predicción de resultados deportivos: Utilizar características como estadísticas de equipo, lesiones, condiciones climáticas, etc. para predecir el resultado de un partido.</li>
       </ul>
       <h2 id="conclusion">Conclusión</h2>
-      <ul style="text-align: initial;">
+      <ul>
          En resumen, los modelos de clasificación y regresión con Random Forest son herramientas poderosas para analizar y predecir resultados en una variedad de campos. Su capacidad para manejar grandes conjuntos de datos y su robustez frente a la sobreajuste los hacen ideales para aplicaciones en la vida real.
       </ul>
-
-
-
-
-
     </div>
   </div>
-
 {% endblock content %}
 
 {% block javascripts %}

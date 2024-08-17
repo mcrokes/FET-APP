@@ -19,7 +19,7 @@
     }
     
     #regressor_data th {
-      background-color: #04aa6d;
+      background-color: #095e49;
       color: white;
       padding: 0.5rem;
     }
@@ -34,7 +34,7 @@
 
 {% block content %}
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="col-md-12 col-sm-12 col-xs-12" style="position: initial">
         <div class="dashboard_graph">
           <div style="width: 100%; padding: 1rem">
             <h2 style="font-weight: bold; margin-bottom: 1.5rem; text-align: center;">MODELOS DE REGRESIÓN</h2>
@@ -52,6 +52,9 @@
             </table>
           </div>
           <div class="clearfix"></div>
+          <a href="/processor/add_regressor" style="margin: 3rem;" class="btn btn-success">
+            <i class="fa fa-sitemap"></i> Nuevo Modelo
+          </a>
         </div>
       </div>
     </div>

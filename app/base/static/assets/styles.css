@@ -122,12 +122,12 @@ div.section-card {
 }
 
 .rules-title {
-  color: #070b55e5;
+  color: #095e49;
   font-weight: 500;
   font-size: 24px;
   text-align: initial;
   padding-left: 3rem;
-  width: min-content;
+  white-space: wrap;
 }
 
 .tree-creator {

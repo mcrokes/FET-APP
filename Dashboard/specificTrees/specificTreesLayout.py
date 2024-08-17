@@ -247,7 +247,7 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
                             html.Th("SAMPLES"),
                         ]
                     ),
-                ]
+                ], style={"position": "sticky", "top": "0"}
             )
         ]
 

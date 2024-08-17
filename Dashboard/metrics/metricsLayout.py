@@ -558,7 +558,8 @@ metricsClassifierLayout = html.Div(
                             [
                                 html.Plaintext(
                                     [
-                                        "Punto porcentual en el que el modelo decide clasificar una clase como verdadera.",
+                                        "Punto porcentual en el que el modelo decide clasificar una clase como "
+                                        "verdadera.",
                                     ]
                                 ),
                             ],
@@ -584,9 +585,13 @@ metricsRegressorLayout = html.Div(
             [
                 dbc.Row(
                     [
+                        html.Div(id="regression-metrics", style={'width': 'max-content', 'margin': 'auto'}),
+                    ],
+                ),
+                dbc.Row(
+                    [
                         dbc.Col(
                             [
-
                                 html.Div(
                                     [
                                         html.I(
@@ -669,11 +674,6 @@ metricsRegressorLayout = html.Div(
                             xl=6,
                             xxl=6,
                         ),
-                    ],
-                ),
-                dbc.Row(
-                    [
-                        html.Div(id="regression-metrics", style={'width': 'max-content', 'margin': 'auto'}),
                     ],
                 ),
             ], className="container"

@@ -489,8 +489,8 @@ body .container.body .right_col {
     background: #D9DEE4
 }
 body {
-    color: #73879C;
-    background: rgb(95, 118, 91);
+    color: #095e49;
+    background: #095e49;
     font-family: "Helvetica Neue", Roboto, Arial, "Droid Sans", sans-serif;
     font-size: 13px;
     font-weight: 400;
@@ -872,7 +872,6 @@ a:focus {
     float: left;
     margin: 0;
     padding-top: 16px;
-    width: 70px
 }
 .toggle a {
     padding: 15px 15px 0;
@@ -907,7 +906,8 @@ a:focus {
     line-height: 30px
 }
 .main_menu_side {
-    padding: 0
+    padding: 0;
+    margin-top: .2rem;
 }
 .bs-docs-sidebar .nav>li>a {
     display: block;
@@ -1065,9 +1065,6 @@ h2 {
     margin-bottom: 10px;
     padding: 10px 17px;
     display: inline-block;
-    background: aliceblue;
-    border: 1px solid #E6E9ED;
-    border-radius: 10px;
     -webkit-column-break-inside: avoid;
     -moz-column-break-inside: avoid;
     column-break-inside: avoid;
@@ -1077,7 +1074,8 @@ h2 {
 .x_title {
     border-bottom: 2px solid #E6E9ED;
     padding: 1px 5px 6px;
-    margin-bottom: 10px
+    margin-bottom: 10px;
+    display: flex;
 }
 .x_title .filter {
     width: 40%;
@@ -1672,25 +1670,26 @@ span.right {
 .sidebar-footer {
     bottom: 0px;
     clear: both;
-    display: block;
+    display: flex;
     padding: 5px 0 0 0;
-    position: fixed;
-    width: 230px;
-    background: #2A3F54;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
     z-index:999;
 }
 .sidebar-footer a {
-    padding: 7px 0 3px;
+    padding: 1rem 0;
     text-align: center;
-    width: 25%;
+    width: inherit;
     font-size: 17px;
     display: block;
     float: left;
-    background: #172D44;
+    background: transparent;
+    color: white !important;
     cursor: pointer;
 }
 .sidebar-footer a:hover {
-    background: #425567
+    background: #9b959594;
 }
 .tile_count {
     margin-bottom: 20px;
@@ -1756,9 +1755,7 @@ span.right {
     width: 12px
 }
 .dashboard_graph {
-    background: aliceblue;
     padding: 7px 10px;
-    border-radius: 10px;
     margin: auto;
     width: 100% !important;
     max-width: 1200px;

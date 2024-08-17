@@ -1,61 +1,45 @@
 <div class="left_col scroll-view" style="height: 100%; width: 100%;">
-  <div class="clearfix"></div>
-
-  <!-- menu profile quick info -->
-  <div class="profile clearfix" id="sidebar-img">
-    <div class="profile_pic">
-      <img src="/static/images/img.jpg" alt="..." class="img-circle profile_img" />
-    </div>
-    <div class="profile_info">
-      <span>Bienvenido,</span>
-      <h2>{{ current_user.username }}</h2>
-    </div>
+  <div class="profile clearfix" id="sidebar-site-logo">
+    <h3 style="color: white; font-weight: bold; padding: 0 1rem; line-height: unset; text-transform: uppercase; margin-top: 1.5rem; text-align: center;">
+      <i class="fa fa-tree"></i> FORESTAL <i class="fa fa-tree"></i>
+    </h3>
+    <br />
   </div>
-  <!-- /menu profile quick info -->
-
-  <br />
 
   <!-- sidebar menu -->
   <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
     <div class="menu_section">
-      <h3 style="padding-right: 15px">General</h3>
       <ul class="nav side-menu">
         <li style="width: 100%">
-          <a href="/home" class="sidebar-link"><i class="fa fa-home sidebar-icon"></i> <span class="sidebar-item">Inicio</span> </a>
-        </li>
-        <li style="width: 100%">
-          <a href="/processor/add_classifier" class="sidebar-link"><i class="fa fa-cubes sidebar-icon"></i> <span class="sidebar-item">Cargar Clasificador</span></a>
-        </li>
-        <li style="width: 100%">
-          <a href="/processor/add_regressor" class="sidebar-link"><i class="fa fa-sitemap sidebar-icon"></i> <span class="sidebar-item">Cargar Regresor</span></a>
+          <a data-toggle="tooltip" title="Inicio"  href="/home" class="sidebar-link"><i class="fa fa-home sidebar-icon"></i> <span class="sidebar-item">Inicio</span> </a>
         </li>
 
         <li style="width: 100%">
-          <a class="sidebar-link" style="overflow: hidden; text-overflow: ellipsis;" href="/processor/manage_classifiers"><i class="fa fa-pie-chart sidebar-icon"></i> <span class="sidebar-item">Clasificación</span></a>
+          <a data-toggle="tooltip" title="Modelos de Clasificación"  class="sidebar-link" style="overflow: hidden; text-overflow: ellipsis;" href="/processor/manage_classifiers"><i class="fa fa-pie-chart sidebar-icon"></i> <span class="sidebar-item">Clasificación</span></a>
         </li>
 
         <li style="width: 100%">
-          <a href="/processor/manage_regressors" class="sidebar-link"><i class="fa fa-line-chart sidebar-icon"></i> <span class="sidebar-item">Regresión</span></a>
+          <a data-toggle="tooltip" title="Modelos de Regresión"  href="/processor/manage_regressors" class="sidebar-link"><i class="fa fa-line-chart sidebar-icon"></i> <span class="sidebar-item">Regresión</span></a>
         </li>
         <li style="width: 100%">
           <div class="accordion accordion-flush" id="configuration-collapse">
             <div class="accordion-item" style="background-color: transparent; border: none;">
-              <a class="accordion-header collapsed sidebar-link" style="background-color: transparent; border: none; color: white;" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                <i class="fa fa-cog sidebar-icon"></i> <span class="sidebar-item" style="margin-right: 2rem; font-size: 13px">Configuración</span> <i id="chevron-icon-sidebar" class="fa fa-chevron-down ml-2" style="font-size: 12px;"></i>
+              <a class="accordion-header collapsed sidebar-link" style="background-color: transparent; border: none; color: white;" data-toggle="tooltip" title="Configuración" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                <i class="fa fa-cogs sidebar-icon"></i> <span class="sidebar-item" style="margin-right: 2rem; font-size: 13px">Configuración</span> <i id="chevron-icon-sidebar" class="fa fa-chevron-down ml-2" style="font-size: 12px;"></i>
               </a>
               <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#configuration-collapse">
                 <div class="accordion-body">
                   <ul class="nav dropdown-config">
                     {% if Is_admin %}
                       <li>
-                        <a href="/setting/manage_users" style="color: white;">Configurar Usuarios</a>
+                        <a class="sidebar-link" data-toggle="tooltip" title="Configurar Usuarios"  href="/setting/manage_users" style="color: white;"><i class="fa fa-cog sidebar-icon"></i> <span class="sidebar-item">Configurar Usuarios</span></a>
                       </li>
                       <li>
-                        <a href="/setting/add_user" style="color: white;">Añadir Usuario</a>
+                        <a class="sidebar-link" data-toggle="tooltip" title="Añadir Usuario" href="/setting/add_user" style="color: white;"><i class="fa fa-user-plus sidebar-icon"></i> <span class="sidebar-item">Añadir Usuario</span></a>
                       </li>
                     {% endif %}
                     <li>
-                      <a href="/setting/change_password" style="color: white;">Cambiar Contraseña</a>
+                      <a class="sidebar-link" data-toggle="tooltip" title="Cambiar Contraseña"  href="/setting/change_password" style="color: white;"><i class="fa fa-key sidebar-icon"></i> <span class="sidebar-item">Cambiar Contraseña</span></a>
                     </li>
                   </ul>
                 </div>
@@ -69,15 +53,14 @@
   <!-- /sidebar menu -->
 
   <!-- /menu footer buttons -->
-  <div class="sidebar-footer">
+  <div id="sidebar-footer" class="sidebar-footer">
     {% if Is_admin %}
-      <a data-toggle="tooltip" data-placement="top" title="Admin Settings" href="/setting/add_user"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
+      <a data-toggle="tooltip" data-placement="top" title="Configuración de Administrador" href="/setting/manage_users"><span class="fa fa-cog" aria-hidden="true"></span></a>
     {% else %}
-      <a data-toggle="tooltip" data-placement="top" title="Settings" href="/setting/change_password"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>
+      <a data-toggle="tooltip" data-placement="top" title="Configuración" href="/setting/change_password"><span class="fa fa-cogs" aria-hidden="true"></span></a>
     {% endif %}
-    <a data-toggle="tooltip" data-placement="top" title="FullScreen"><span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span></a>
-    <a data-toggle="tooltip" data-placement="top" title="Lock"><span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span></a>
-    <a data-toggle="tooltip" data-placement="top" title="Logout" href="/logout"><span class="glyphicon glyphicon-off" aria-hidden="true"></span></a>
+    <a data-toggle="tooltip" onclick="hide_sidebar()" data-placement="top" title="Pantalla Completa"><span class="fa fa-desktop" aria-hidden="true"></span></a>
+    <a data-toggle="tooltip" data-placement="top" title="Salir" href="/logout"><span class="fa fa-sign-out" aria-hidden="true"></span></a>
   </div>
   <!-- /menu footer buttons -->
 

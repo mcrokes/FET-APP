@@ -1,6 +1,4 @@
 from ctypes import Array
-import threading
-import time
 
 from app.proccessor.models import ExplainedClassifierModel, ExplainedRegressorModel, ExplainedModel
 from app.proccessor.models import ModelForProccess
@@ -88,7 +86,7 @@ def get_classifier_namelist():
     idPath = {}
     for classifier in classifiers:
         nameList.append(classifier.name)
-        idPath[f'{classifier.explainer_model.id}'] = classifier.name
+        idPath[f'{classifier.explainer_model_id}'] = classifier.name
     return {"data": nameList, "idPath": idPath }
 
 
@@ -100,5 +98,5 @@ def get_regressor_namelist():
     idPath = {}
     for regressor in regressors:
         nameList.append(regressor.name)
-        idPath[f'{regressor.explainer_model.id}'] = regressor.name
-    return {"data": nameList}
+        idPath[f'{regressor.explainer_model_id}'] = regressor.name
+    return {"data": nameList, "idPath": idPath}
