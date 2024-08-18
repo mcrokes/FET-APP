@@ -3,7 +3,7 @@ from flask_login import current_user
 from .extensions import db, login_manager
 from importlib import import_module
 from .base.models import User
-from Dashboard import Dash_App1, Dash_App2
+from Dashboard import regression_dashboard, classification_dashboard
 from os import path, environ
 import logging
 
@@ -14,7 +14,7 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
-    for module_name in ("base", "home", "DashExample", "setting", "proccessor", "API"):
+    for module_name in ("base", "home", "dashboard", "setting", "proccessor", "API"):
         module = import_module("app.{}.routes".format(module_name))
         app.register_blueprint(module.blueprint)
 
@@ -119,6 +119,6 @@ def create_app(config, selenium=False):
     configure_database(app)
     configure_logs(app)
     apply_themes(app)
-    app = Dash_App1.Add_Dash(app)
-    app = Dash_App2.Add_Dash(app)
+    app = regression_dashboard.Add_Dash(app)
+    app = classification_dashboard.Add_Dash(app)
     return app

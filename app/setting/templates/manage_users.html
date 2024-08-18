@@ -68,6 +68,7 @@
   <script>
     let table = $('#user_data').DataTable({
       ajax: '/INTERNAL_API/users/list',
+      language: { url: '/static/languages/datatable-en.json' },
       columns: [{ data: 'id' }, { data: 'name' }, { data: 'email' }, { data: 'id' }],
       columnDefs: [
         {
