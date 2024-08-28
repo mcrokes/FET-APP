@@ -27,7 +27,7 @@ from .Dash_fun import apply_layout_with_auth, load_object, save_object
 import dash_bootstrap_components as dbc
 from furl import furl
 
-url_base = "/dash/app2/"
+url_base = "/dash/classification_dashboard/"
 
 holder = html.Plaintext("No se ha insertado ninugún modelo")
 

@@ -6,7 +6,7 @@
 
 {% block stylesheets %}
   {{ super() }}
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.css" />
+  <link href="{{ url_for('static', filename='vendors/datatable/datatables.min.css') }}" rel="stylesheet">
   <style>
     .dataTables_filter {
       width: unset !important;
@@ -28,6 +28,16 @@
     td {
       border-bottom: 1px solid #ddd;
       text-align: center !important;
+    }
+
+    tr.selected {
+      background-color: darkorange;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr {
+      cursor: pointer;
     }
   </style>
 {% endblock %}
@@ -55,6 +65,9 @@
           <a href="/processor/add_regressor" style="margin: 3rem;" class="btn btn-success">
             <i class="fa fa-sitemap"></i> Nuevo Modelo
           </a>
+          <button id="open-comparison" style="margin: 3rem;" onclick="redirect('regression')" class="btn btn-warning" disabled>
+            <i class="fa fa-sitemap"></i> Abrir Vista Comparativa
+          </button>
         </div>
       </div>
     </div>
@@ -72,7 +85,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="deleteModel()">Eliminar</button>
+            <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="deleteModel('regressor')">Eliminar</button>
           </div>
         </div>
       </div>
@@ -82,8 +95,7 @@
 {% block javascripts %}
   {{ super() }}
 
-  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
-  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
+  <script src="{{ url_for('static', filename='vendors/datatable/datatables.min.js') }}"></script>
 
   <script>
     let modelForDelete = null;
@@ -93,6 +105,10 @@
     }
     let table = $('#regressor_data').DataTable({
       ajax: '/INTERNAL_API/regression/list',
+      language: { url: '/static/languages/datatable-en.json' },
+      select: {
+        style: 'multi'
+      },
       columns: [{ data: 'id' }, { data: 'name' }, { data: 'model_description' }, { data: 'target_row' }, { data: 'name' }],
       columnDefs: [
         {
@@ -100,7 +116,7 @@
           class: 'text-center',
           orderable: false,
           render: function (data, type, row) {
-            var buttons = '<a href="/DashExample/app1?model_id=' + row.id + '" class="btn btn-success btn-xs btn-flat"><i class="fa fa-check"></i></a> '
+            var buttons = '<a href="/dashboard/regression?model_id=' + row.id + '" class="btn btn-success btn-xs btn-flat"><i class="fa fa-check"></i></a> '
             buttons += '<a href="/processor/edit_regressor/' + row.id + '" class="btn btn-warning btn-xs btn-flat"><i class="fa fa-edit"></i></a> '
             buttons += '<a href="" type="button" class="btn btn-danger btn-xs btn-flat" data-bs-toggle="modal" onclick="saveModelId(' + row.id + ')" data-bs-target="#staticBackdrop"><i class="fa fa-trash"></i></a>'
             return buttons
@@ -108,8 +124,9 @@
         }
       ]
     })
-    const deleteModel = async () => {
-      response = await fetch('http://127.0.0.1:5000/INTERNAL_API/regressor/delete', {
+    let selectedModels = []
+    const deleteModel = async (modelType) => {
+      response = await fetch(`/INTERNAL_API/${modelType}/delete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: modelForDelete,
@@ -122,7 +139,34 @@
         }
         modelForDelete = null;
       })
-
+      comparison_btn.disabled = true;
+      selectedModels = []
+    }
+    const comparison_btn = document.getElementById('open-comparison');
+    table.on('select deselect', function ( e, dt, type, ix ) {
+      var selected = dt.rows({selected: true});
+      console.log('selected: ', selected[0]);
+      if ( selected[0].length > 2 ) {
+        dt.rows(ix).deselect();
+        comparison_btn.disabled = false;
+      } else {
+        selectedModels = []
+        selected[0].forEach((selection)=>{
+          console.log('selection: ', selection);
+          selectedModels.push(table.cell(selection, 0).data());
+        })
+        if (selectedModels.length < 2) {
+          comparison_btn.disabled = true;
+        } else {
+          comparison_btn.disabled = false;
+        }
+        console.log('selectedModels: ', selectedModels);
+      }
+    })
+    const redirect = (modelType) => {
+      const enlace = document.createElement('a');
+      enlace.href = `/dashboard/${modelType}/comparison?model_1_id=${selectedModels[0]}&model_2_id=${selectedModels[1]}`;
+      enlace.click()
     }
   </script>
 {% endblock %}
