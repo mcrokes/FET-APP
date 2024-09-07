@@ -303,6 +303,12 @@ class_selector = dcc.Dropdown(
     clearable=False,
     style={"cursor": "pointer"},
 )
+class_selector2 = dcc.Dropdown(
+    id="prototypes-dropdown",
+    placeholder="Seleccione una clase",
+    clearable=True,
+    style={"cursor": "pointer", "width": "250px", "margin-right": "1rem"},
+)
 
 marks = {}
 for n in range(11):
@@ -314,7 +320,7 @@ slider = dcc.Slider(
     min=1, max=100, step=1, marks=marks, value=50, id="trees-cutoff-slider"
 )
 
-id_sufix = ["contributions", "trees-graph"]
+id_sufix = ["contributions", "trees-graph", "prototypes"]
 predictionsLayout = html.Div(
     [
         dcc.Store(id="current-class-data"),
@@ -328,6 +334,43 @@ predictionsLayout = html.Div(
                     lg=5,
                     xl=5,
                     xxl=5,
+                    style={'margin-bottom': '1rem'}
+                ),
+                dbc.Col(
+                    [
+                        class_selector2,
+                        html.Div(
+                            [
+                                html.I(
+                                    id=f"{id_sufix[2]}-info",
+                                    className="fa fa-info-circle info-icon",
+                                ),
+                                dbc.Tooltip(
+                                    [
+                                        html.Plaintext(
+                                            [
+                                                "Limita la instancias a elegir a elementos que son prototipos "
+                                                "respuesta de la clase seleccionada ",
+                                            ]
+                                        ),
+                                    ],
+                                    className="personalized-tooltip",
+                                    target=f"{id_sufix[2]}-info",
+                                    placement='right',
+                                ),
+                            ],
+                            id=f"{id_sufix[2]}-container",
+                            style={"display": "flex", "justify-content": "end"},
+                        )
+                    ],
+                    xs=12,
+                    sm=12,
+                    md=5,
+                    lg=5,
+                    xl=5,
+                    xxl=5,
+                    style={'display': 'flex'}
+
                 )
             ]
         ),
@@ -465,6 +508,7 @@ predictionsLayout = html.Div(
                     ],
                     className="personalized-tooltip",
                     target=f"{id_sufix[1]}-info",
+
                 ),
             ],
             id=f"{id_sufix[1]}-container",
@@ -479,6 +523,88 @@ predictionsLayout = html.Div(
 
 
 def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
+    if not isRegressor:
+        @app.callback(
+            Output("prototypes-dropdown", "options"),
+            Output("prototypes-dropdown", "value"),
+            Input("path", "href"),
+        )
+        def prototypes(cl):
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+
+                model_x: ExplainedModel = ExplainedModel.query.filter(
+                    ExplainedModel.id == model_id
+                ).first()
+
+                ds = model_x.data_set_data.getElement("dataset")
+                x_test = ds.drop(columns=model_x.getElement("target_row"))
+                target_description = model_x.explainer_classifier.getElement("target_names_dict")
+                target_dropdown = get_target_dropdown(target_description["variables"])
+                options = []
+                for index, _ in x_test.iterrows():
+                    print(f'row value {index}: ', _)
+                    print()
+                    options.append({"label": index, "value": index})
+
+                return (
+                    target_dropdown,
+                    None,
+                )
+
+            except Exception as e:
+                print(e)
+                raise PreventUpdate
+
+        @app.callback(
+            Output("instances-dropdown", "children", allow_duplicate=True),
+            State("path", "href"),
+            Input("prototypes-dropdown", "value"),
+            prevent_initial_call=True,
+        )
+        def load_data(cl, class_value):
+            print('CLASS VALUE: ', class_value)
+            if class_value is not None:
+                f = furl(cl)
+                model_id = f.args["model_id"]
+                try:
+
+                    model_x: ExplainedModel = ExplainedModel.query.filter(
+                        ExplainedModel.id == model_id
+                    ).first()
+
+                    ds = model_x.data_set_data.getElement("dataset")
+                    print('TARGET SET: ', set(ds[model_x.getElement("target_row")]))
+                    targets = list(set(ds[model_x.getElement("target_row")]))
+                    x_test = ds[ds[model_x.getElement("target_row")] == targets[class_value]].drop(
+                        columns=model_x.getElement("target_row"))
+                    options = []
+                    for index, _ in x_test.iterrows():
+                        options.append({"label": index, "value": index})
+
+                    drop_down = dcc.Dropdown(
+                        id="select",
+                        placeholder="Seleccione la Instancia a Analizar",
+                        options=options,
+                    )
+
+                    return (
+                        drop_down,
+                    )
+                except Exception as e:
+                    print(e)
+            raise PreventUpdate
+
+    else:
+        @app.callback(
+            Output("prototypes-dropdown", "style"),
+            Output(f"{id_sufix[2]}-container", "style"),
+            Input("path", "href"),
+        )
+        def hide_classifier_stuffs(cl):
+            return {'display': 'none'}, {'display': 'none'}
+
     @app.callback(
         Output("test_graph", "figure"),
         State("current-class-data", "data"),
@@ -576,7 +702,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
     )
     def graph_trees_predictions(cl, n, cut_point, positive_class):
         if n or n == 0:
-            n = int(n)+1
+            n = int(n) + 1
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
@@ -648,7 +774,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
     def graph_explainers(cl, n, positive_class):
         if n or n == 0:
             print('N: ', n)
-            n = int(n)+1
+            n = int(n) + 1
             f = furl(cl)
             model_id = f.args["model_id"]
             try:

@@ -239,8 +239,8 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
                 html.Tr(
                     [
                         html.Th("PREDICTOR", style={"width": "40%"}),
-                        html.Th("SIGN", style={"width": "20%"}),
-                        html.Th("VALUE", style={"width": "40%"}),
+                        html.Th("CONDICIÓN", style={"width": "20%"}),
+                        html.Th("VALOR", style={"width": "40%"}),
                     ]
                 )
             )
@@ -254,17 +254,17 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
                 [
                     html.Tr(
                         [
-                            html.Th("RULE", rowSpan=2),
-                            html.Th("CAUSES"),
-                            html.Th("RESULTS", colSpan=3),
+                            html.Th("REGLA", rowSpan=2),
+                            html.Th("CAUSAS"),
+                            html.Th("REULTADO", colSpan=3),
                         ]
                     ),
                     html.Tr(
                         [
                             html.Th(sub_header_table, style={"padding": "0"}),
-                            html.Th("TARGET VALUE"),
-                            html.Th("PROBABILITY"),
-                            html.Th("SAMPLES"),
+                            html.Th("VALOR OBJETIVO"),
+                            html.Th("PROBABILIDAD"),
+                            html.Th("MUESTRAS"),
                         ]
                     ),
                 ], style={"position": "sticky", "top": "0"}
