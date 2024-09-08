@@ -350,7 +350,8 @@ predictionsLayout = html.Div(
                                         html.Plaintext(
                                             [
                                                 "Limita la instancias a elegir a elementos que son prototipos "
-                                                "respuesta de la clase seleccionada ",
+                                                "respuesta de la clase seleccionada en el conjunto original de "
+                                                "datos.",
                                             ]
                                         ),
                                     ],
@@ -523,88 +524,6 @@ predictionsLayout = html.Div(
 
 
 def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
-    if not isRegressor:
-        @app.callback(
-            Output("prototypes-dropdown", "options"),
-            Output("prototypes-dropdown", "value"),
-            Input("path", "href"),
-        )
-        def prototypes(cl):
-            f = furl(cl)
-            model_id = f.args["model_id"]
-            try:
-
-                model_x: ExplainedModel = ExplainedModel.query.filter(
-                    ExplainedModel.id == model_id
-                ).first()
-
-                ds = model_x.data_set_data.getElement("dataset")
-                x_test = ds.drop(columns=model_x.getElement("target_row"))
-                target_description = model_x.explainer_classifier.getElement("target_names_dict")
-                target_dropdown = get_target_dropdown(target_description["variables"])
-                options = []
-                for index, _ in x_test.iterrows():
-                    print(f'row value {index}: ', _)
-                    print()
-                    options.append({"label": index, "value": index})
-
-                return (
-                    target_dropdown,
-                    None,
-                )
-
-            except Exception as e:
-                print(e)
-                raise PreventUpdate
-
-        @app.callback(
-            Output("instances-dropdown", "children", allow_duplicate=True),
-            State("path", "href"),
-            Input("prototypes-dropdown", "value"),
-            prevent_initial_call=True,
-        )
-        def load_data(cl, class_value):
-            print('CLASS VALUE: ', class_value)
-            if class_value is not None:
-                f = furl(cl)
-                model_id = f.args["model_id"]
-                try:
-
-                    model_x: ExplainedModel = ExplainedModel.query.filter(
-                        ExplainedModel.id == model_id
-                    ).first()
-
-                    ds = model_x.data_set_data.getElement("dataset")
-                    print('TARGET SET: ', set(ds[model_x.getElement("target_row")]))
-                    targets = list(set(ds[model_x.getElement("target_row")]))
-                    x_test = ds[ds[model_x.getElement("target_row")] == targets[class_value]].drop(
-                        columns=model_x.getElement("target_row"))
-                    options = []
-                    for index, _ in x_test.iterrows():
-                        options.append({"label": index, "value": index})
-
-                    drop_down = dcc.Dropdown(
-                        id="select",
-                        placeholder="Seleccione la Instancia a Analizar",
-                        options=options,
-                    )
-
-                    return (
-                        drop_down,
-                    )
-                except Exception as e:
-                    print(e)
-            raise PreventUpdate
-
-    else:
-        @app.callback(
-            Output("prototypes-dropdown", "style"),
-            Output(f"{id_sufix[2]}-container", "style"),
-            Input("path", "href"),
-        )
-        def hide_classifier_stuffs(cl):
-            return {'display': 'none'}, {'display': 'none'}
-
     @app.callback(
         Output("test_graph", "figure"),
         State("current-class-data", "data"),
@@ -644,6 +563,15 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
         else:
             raise PreventUpdate
 
+    def getIndexesDropOptions(model_x, x_test):
+        options = []
+        indexes_list = model_x.getElement('indexesList') if model_x.indexesList else None
+        print('indexes_list: ', indexes_list is not None)
+        for index, _ in x_test.iterrows():
+            options.append({"label": index if indexes_list is None else indexes_list[index], "value": index})
+
+        return options
+
     @app.callback(
         Output("instances-dropdown", "children"),
         Output("trees-cutoff-slider", "value"),
@@ -651,11 +579,10 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
         Output("prediction-positive-class-selector", "value"),
         Input("path", "href"),
     )
-    def load_data(cl):
+    def load_init_data(cl):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
-
             model_x: ExplainedModel = ExplainedModel.query.filter(
                 ExplainedModel.id == model_id
             ).first()
@@ -669,16 +596,11 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                 target_description = model_x.explainer_classifier.getElement("target_names_dict")
                 class_names = [var["new_value"] for var in target_description["variables"]]
                 target_dropdown = get_target_dropdown(target_description["variables"])
-            options = []
-            for index, _ in x_test.iterrows():
-                print(f'row value {index}: ', _)
-                print()
-                options.append({"label": index, "value": index})
 
             drop_down = dcc.Dropdown(
                 id="select",
                 placeholder="Seleccione la Instancia a Analizar",
-                options=options,
+                options=getIndexesDropOptions(model_x, x_test),
             )
 
             slider_initial_value = 100 / len(class_names) + 1 if not isRegressor else 50
@@ -943,3 +865,94 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
 
         else:
             return [], [], [], [], True, True, True, True, True, None
+
+    if not isRegressor:
+        @app.callback(
+            Output("prototypes-dropdown", "options"),
+            Output("prototypes-dropdown", "value"),
+            Input("path", "href"),
+        )
+        def prototypes(cl):
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+
+                model_x: ExplainedModel = ExplainedModel.query.filter(
+                    ExplainedModel.id == model_id
+                ).first()
+
+                ds = model_x.data_set_data.getElement("dataset")
+                iterrows = list(set(ds[model_x.getElement("target_row")]))
+                options = []
+                for index in iterrows:
+                    print()
+                    options.append({"label": index, "value": index})
+
+                # print('target: ', target_dropdown)
+                return (
+                    options,
+                    None,
+                )
+
+            except Exception as e:
+                print(e)
+                raise PreventUpdate
+
+        @app.callback(
+            Output("instances-dropdown", "children", allow_duplicate=True),
+            State("path", "href"),
+            Input("prototypes-dropdown", "value"),
+            prevent_initial_call=True,
+        )
+        def load_data(cl, class_value):
+            print('CLASS VALUE: ', class_value)
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+                model_x: ExplainedModel = ExplainedModel.query.filter(
+                    ExplainedModel.id == model_id
+                ).first()
+
+                ds = model_x.data_set_data.getElement("dataset")
+                if class_value is not None:
+                    print('TARGET SET: ', set(ds[model_x.getElement("target_row")]))
+                    x_test = ds[ds[model_x.getElement("target_row")] == class_value].drop(
+                        columns=model_x.getElement("target_row"))
+                    options = []
+                    indexes_list = model_x.getElement('indexesList') if model_x.indexesList else None
+                    for index, _ in x_test.iterrows():
+                        options.append(
+                            {"label": index if indexes_list is None else indexes_list[index], "value": index})
+
+                    drop_down = dcc.Dropdown(
+                        id="select",
+                        placeholder="Seleccione la Instancia a Analizar",
+                        options=options,
+                    )
+
+                    return (
+                        drop_down,
+                    )
+
+                else:
+                    x_test = ds.drop(columns=model_x.getElement("target_row"))
+                    drop_down = dcc.Dropdown(
+                        id="select",
+                        placeholder="Seleccione la Instancia a Analizar",
+                        options=getIndexesDropOptions(model_x, x_test),
+                    )
+                    return drop_down
+            except Exception as e:
+                print(e)
+
+            raise PreventUpdate
+
+
+    else:
+        @app.callback(
+            Output("prototypes-dropdown", "style"),
+            Output(f"{id_sufix[2]}-container", "style"),
+            Input("path", "href"),
+        )
+        def hide_classifier_stuffs(cl):
+            return {'display': 'none'}, {'display': 'none'}
