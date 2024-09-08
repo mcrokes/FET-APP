@@ -9,7 +9,7 @@
 
 {% block content %}
   <div class="container text-center index-container">
-    <div>
+    <div id="model-buttons">
       <div>
         <a id="classifier-models-button" href="/processor/manage_classifiers" class="btn linked-button-card" role="button" aria-pressed="true">Modelos de Clasificación</a>
       </div>
@@ -20,6 +20,9 @@
     <div id="home-info">
       <h1>Modelos de Clasificación y Regresión con Random Forest</h1>
       <hr>
+      <div  id="home-tree_img">
+        <img src="{{ url_for('static', filename='images/home-tree-1.png') }}" />
+      </div>
       <h2>Índice</h2>
       <ul>
         <li><a href="#introduccion">Introducción</a></li>
@@ -79,6 +82,7 @@
       <ul>
          En resumen, los modelos de clasificación y regresión con Random Forest son herramientas poderosas para analizar y predecir resultados en una variedad de campos. Su capacidad para manejar grandes conjuntos de datos y su robustez frente a la sobreajuste los hacen ideales para aplicaciones en la vida real.
       </ul>
+      <span>Para más información <a href="https://cienciadedatos.net/documentos/py08_random_forest_python" target="_blank">haga click aquí</a></span>
     </div>
   </div>
 {% endblock content %}
