@@ -125,7 +125,7 @@ def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
                 ),
                 x="Importancia",
                 y="Predictor",
-                title="Importance GINI",
+                title="IMPORTANCIAS GINI",
             )
 
             if not isRegressor:

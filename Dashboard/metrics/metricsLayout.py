@@ -767,10 +767,10 @@ def generateDependencePlots(X: pd.DataFrame, qualitative_dict,
         graph['graph_data'].append(go.Scatter(
             x=x,
             y=y,
-            name="Line",
+            name="Lineal",
             line=dict(color="royalblue", width=1, dash="dot"),
         ))
-        graph['graph_data'].append(go.Bar(name="Bar", x=x, y=y, width=0.5))
+        graph['graph_data'].append(go.Bar(name="Barras", x=x, y=y, width=0.5))
 
     return graph
 

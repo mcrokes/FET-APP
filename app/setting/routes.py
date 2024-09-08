@@ -25,15 +25,18 @@ def add_User():
     if check_admin():
         form = add_user_Form(request.form)
         if "Add" in request.form:
-            user = User.query.filter_by(username=request.form["username"]).first()
-            email = User.query.filter_by(email=request.form["email"]).first()
-            if user:
-                status = "Username is existing"
-            elif email:
-                status = "Email is existing"
+            if request.form["username"] and request.form["email"] and request.form["password"]:
+                user = User.query.filter_by(username=request.form["username"]).first()
+                email = User.query.filter_by(email=request.form["email"]).first()
+                if user:
+                    status = "El nombre de usuario ya existe"
+                elif email:
+                    status = "Este email ya existe"
+                else:
+                    User(**request.form).add_to_db()
+                    status = "Usuario añadido con éxito !"
             else:
-                User(**request.form).add_to_db()
-                status = "Add user success !"
+                status = "Debe Insertar Todos los Datos"
             return render_template("add_user.html", form=form, status=status)
         return render_template("add_user.html", form=form, status="")
     return redirect("/page_403")
@@ -49,14 +52,7 @@ def delete_user(id):
             if "Delete" in request.form:
                 username = request.form["username"]
                 user = User.query.filter_by(username=username).first()
-                # if user:
-                #     if username == admin_user:
-                #         status = "admin user can't be deleted !"
-                #     else:
                 user.delete_from_db()
-                #         status = "delete user success !"
-                # else:
-                #     status = "user doesn't exist !"
                 return redirect("/setting/manage_users")
             return render_template("delete_user.html", form=form, status="", user=user)
         return redirect("/page_404")
@@ -73,7 +69,6 @@ def setting_password(id):
             if "Setting" in request.form:
                 user.password = user.hashpw(request.form["password"])
                 user.db_commit()
-                # status = "Setting password success !"
                 return redirect("/setting/manage_users")
             return render_template(
                 "setting_password.html", form=form, status="", user=user
@@ -85,10 +80,6 @@ def setting_password(id):
 @blueprint.route("/change_password", methods=["GET", "POST"])
 @login_required
 def change_password():
-    # admin_user = current_app.config["ADMIN"]["username"]
-    # if current_user.username == admin_user:
-    #     return "please change admin password from server"
-    # else:
     form = change_password_Form(request.form)
     if "Change" in request.form:
         user = User.query.filter_by(username=current_user.username).first()
@@ -96,10 +87,10 @@ def change_password():
             if request.form["new_password"] == request.form["new_password2"]:
                 user.password = user.hashpw(request.form["new_password"])
                 user.db_commit()
-                status = "Change Password Success !"
+                status = "Contraseña cambiada con éxito !"
             else:
-                status = "Both New Password is Not Equal !"
+                status = "Las nuevas Contraseñas no son iguales !"
         else:
-            status = "Origin Password Error !"
+            status = "Error en la Contraseña Original !"
         return render_template("change_password.html", form=form, status=status)
     return render_template("change_password.html", form=form, status="")
