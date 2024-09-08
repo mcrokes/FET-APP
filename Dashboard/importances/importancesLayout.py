@@ -62,12 +62,13 @@ importancesLayout = html.Div(
                             [
                                 html.Plaintext(
                                     [
-                                        "Importancia por Permutación: Evalúa la importancia de cada característica al medir"
-                                        " la pérdida de precisión del modelo al aleatorizar sus valores. ",
+                                        "Importancia por Permutación: Evalúa la importancia de cada característica al "
+                                        "medir la pérdida de precisión del modelo al aleatorizar sus valores. ",
                                         html.Strong("Valores altos"),
                                         " indican características clave.",
                                     ]
                                 ),
+                                html.Plaintext(id="extra-hint"),
                             ],
                             className="personalized-tooltip",
                             target=f"{id_sufix[1]}-info",
@@ -86,6 +87,8 @@ importancesLayout = html.Div(
     style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
 )
 
+classifier_hint = html.Strong("Cada clase respuesta puede tener valores divergentes")
+
 
 def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
     @app.callback(
@@ -93,6 +96,7 @@ def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
         Output("permutation-importance-output-upload", "children"),
         Output("importances-permut-positive-class-selector", "options"),
         Output("selector-container", "hidden"),
+        Output("extra-hint", "children"),
         Input("path", "href"),
         Input("importances-permut-positive-class-selector", "value"),
     )
@@ -176,6 +180,7 @@ def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
                 dcc.Graph(figure=permutation_fig),
                 get_target_dropdown(target_description["variables"]) if not isRegressor else [],
                 True if isRegressor else False,
+                '' if isRegressor else classifier_hint,
             )
         except Exception as e:
             print(e)

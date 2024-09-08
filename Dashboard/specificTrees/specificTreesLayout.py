@@ -41,40 +41,42 @@ specificTreesLayout = html.Div(
                     ],
                     className="tree-creator",
                 ),
-                html.Div(
-                    [
-                        html.I(
-                            id=f"{id_sufix[0]}-info",
-                            className="fa fa-info-circle info-icon",
-                        ),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        "Árbol de Decisión: Un ",
-                                        html.Strong("componente independiente "),
-                                        "del modelo de Random Forest que contribuye a la predicción final mediante la ",
-                                        html.Strong("combinación de sus resultados"),
-                                        " con los de otros árboles. Cada árbol se entrena con una ",
-                                        html.Strong("muestra aleatoria"),
-                                        " de características y ejemplos.",
-                                    ]
-                                ),
-                            ],
-                            className="personalized-tooltip",
-                            target=f"{id_sufix[0]}-info",
-                        ),
-                    ],
-                    style={"display": "flex", "justify-content": "end"},
-                ),
                 dbc.Row(
                     [
                         dbc.Col(
                             [
                                 html.Div(
                                     [
-                                        html.Plaintext(
-                                            "REGLAS DEL MODELO", className="rules-title"
+                                        html.Div(
+                                            [
+                                                html.Plaintext(
+                                                    "REGLAS DEL MODELO", className="rules-title"
+                                                ),
+                                                html.I(
+                                                    id=f"{id_sufix[0]}-info",
+                                                    className="fa fa-info-circle info-icon",
+                                                ),
+                                                dbc.Tooltip(
+                                                    [
+                                                        html.Plaintext(
+                                                            [
+                                                                "Árbol de Decisión: Un ",
+                                                                html.Strong("componente independiente "),
+                                                                "del modelo de Random Forest que contribuye a la "
+                                                                "predicción final mediante la ",
+                                                                html.Strong("combinación de sus resultados"),
+                                                                "con los de otros árboles. Cada árbol se entrena con "
+                                                                "una ",
+                                                                html.Strong("muestra aleatoria"),
+                                                                " de características y ejemplos.",
+                                                            ]
+                                                        ),
+                                                    ],
+                                                    className="personalized-tooltip",
+                                                    target=f"{id_sufix[0]}-info",
+                                                ),
+                                            ],
+                                            className="title-hint-container",
                                         ),
                                         html.Div(
                                             id="s-rules-output-upload",

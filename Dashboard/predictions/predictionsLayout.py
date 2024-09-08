@@ -320,6 +320,45 @@ slider = dcc.Slider(
     min=1, max=100, step=1, marks=marks, value=50, id="trees-cutoff-slider"
 )
 
+classifier_trees_tooltip = [
+    html.Plaintext(
+        [
+            html.Strong("Cada árbol"),
+            " del modelo hace una predicción. La predicción final se basa en la ",
+            html.Strong("combinación de las predicciones"),
+            " de todos los árboles.",
+        ]
+    ),
+    html.Plaintext(
+        [
+            html.Strong("* El azul"),
+            " representa los arboles que predicen la clase seleccionada como positiva.",
+        ]
+    ),
+    html.Plaintext(
+        [
+            html.Strong("* El rojo"),
+            " representa los arboles que predicen la(s) clases restantes.",
+        ]
+    ),
+]
+
+regressor_trees_tooltip = [
+    html.Plaintext(
+        [
+            html.Strong("Cada árbol"),
+            " del modelo hace una predicción. La predicción final se basa en la ",
+            html.Strong("combinación de las predicciones"),
+            " de todos los árboles.",
+        ]
+    ),
+    html.Plaintext(
+        [
+            "La línea roja representa la predicción promedio o final.",
+        ]
+    ),
+]
+
 id_sufix = ["contributions", "trees-graph", "prototypes"]
 predictionsLayout = html.Div(
     [
@@ -463,7 +502,7 @@ predictionsLayout = html.Div(
                         html.Plaintext(
                             [
                                 "Se examina la ",
-                                html.Strong("contribución individual"),
+                                html.Strong("contribución individual "),
                                 "de cada característica a la predicción, lo que permite identificar qué "
                                 "características son más relevantes para el modelo.",
                             ]
@@ -485,28 +524,7 @@ predictionsLayout = html.Div(
                     className="fa fa-info-circle info-icon",
                 ),
                 dbc.Tooltip(
-                    [
-                        html.Plaintext(
-                            [
-                                html.Strong("Cada árbol"),
-                                " del modelo hace una predicción. La predicción final se basa en la ",
-                                html.Strong("combinación de las predicciones"),
-                                " de todos los árboles.",
-                            ]
-                        ),
-                        html.Plaintext(
-                            [
-                                html.Strong("* El azul"),
-                                " representa los arboles que predicen la clase seleccionada como positiva.",
-                            ]
-                        ),
-                        html.Plaintext(
-                            [
-                                html.Strong("* El rojo"),
-                                " representa los arboles que predicen la(s) clases restantes.",
-                            ]
-                        ),
-                    ],
+                    id="trees-tooltip",
                     className="personalized-tooltip",
                     target=f"{id_sufix[1]}-info",
 
@@ -577,6 +595,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
         Output("trees-cutoff-slider", "value"),
         Output("prediction-positive-class-selector", "options"),
         Output("prediction-positive-class-selector", "value"),
+        Output("trees-tooltip", "children"),
         Input("path", "href"),
     )
     def load_init_data(cl):
@@ -610,6 +629,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                 slider_initial_value,
                 target_dropdown,
                 target_dropdown[0]["value"],
+                regressor_trees_tooltip if isRegressor else classifier_trees_tooltip,
             )
         except Exception as e:
             print(e)
@@ -750,7 +770,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                 print('predictions_graph_data: ', predictions_graph_data)
 
                 df = pd.DataFrame(general_dict)
-                dtt = "Contribución de Cada Predictor por Clase"
+                dtt = "Contribución de Cada Predictor" + ("" if isRegressor else " por Clase")
                 pie_chart = go.Figure(
                     data=[
                         go.Pie(
@@ -765,7 +785,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                     fig.update_layout(
                         title=f"Cotribucion individual por predictor{f' para {class_names[positive_class]}' if not isRegressor else ''}",
                         xaxis_title="Influeyentes",
-                        yaxis_title="Certeza de Predicción de 0 a 1",
+                        yaxis_title="Acumulado en la predicción" if isRegressor else "Certeza en la Predicción de 0 a 1",
                     )
                     return setBottomLegend(fig)
 
@@ -854,8 +874,9 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                     False,
                     False,
                     json.dumps(
-                        {"prediction": predictions_graph_data["values"][positive_class] if not isRegressor else
-                        predictions_graph_data['values'][0]}
+                        {
+                            "prediction": predictions_graph_data["values"][positive_class] if not isRegressor else
+                            predictions_graph_data['values'][0]}
                     ),
                 )
             except Exception as e:
