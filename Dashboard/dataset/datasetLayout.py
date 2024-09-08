@@ -200,7 +200,12 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
             original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
             original_df_with_index = original_df.rename_axis("Índice").reset_index()
             df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
-            df_with_index = df.rename_axis("Índice").reset_index()
+            df_with_index = df.copy()
+            if model_x.indexColumnName:
+                df_with_index.insert(0, model_x.indexColumnName, model_x.getElement('indexesList'))
+            else:
+                df_with_index = df_with_index.rename_axis("Índice").reset_index()
+
             dtt = model_x.explainer_regressor.getElement(
                 "name") if isRegressor else model_x.explainer_classifier.getElement("name")
             qualitative_graphs_array, numeric_graphs_array = (
