@@ -30,8 +30,8 @@ def getTreeInterpreterParamethersRegressor(
         model: RandomForestRegressor | DecisionTreeRegressor,
 ):
     general_dict = {
-        ("Instance", "Predictor"): [],
-        ("Instance", "Value"): [],
+        ("Instancia", "Predictor"): [],
+        ("Instancia", "Valor"): [],
     }
     contribution_graph_data = []
 
@@ -43,7 +43,7 @@ def getTreeInterpreterParamethersRegressor(
 
     point = 0
 
-    general_dict[("Contribution", "Contribution")] = []
+    general_dict[("Contribución", "Contribución")] = []
     bar_base = bias[0]
     print('bias: ', bar_base)
     print('contributions: ', list(contributions[0]))
@@ -57,10 +57,10 @@ def getTreeInterpreterParamethersRegressor(
     point += bar_base
 
     for jIndex, (contribution, feature) in enumerate(sorted_contributions):
-        if feature not in general_dict[("Instance", "Predictor")]:
-            general_dict[("Instance", "Predictor")].append(feature)
-            general_dict[("Instance", "Value")].append(instanceModified[feature])
-        general_dict[("Contribution", "Contribution")].append(
+        if feature not in general_dict[("Instancia", "Predictor")]:
+            general_dict[("Instancia", "Predictor")].append(feature)
+            general_dict[("Instancia", "Valor")].append(instanceModified[feature])
+        general_dict[("Contribución", "Contribución")].append(
             f"{round(contribution, 3)}"
         )
         bar_base += contribution
@@ -77,7 +77,7 @@ def getTreeInterpreterParamethersRegressor(
         )
         point += contribution
 
-    general_dict[("Contribution", "Contribution")].append(
+    general_dict[("Contribución", "Contribución")].append(
         f"{round(bias[0], 3)}"
     )
 
@@ -107,8 +107,8 @@ def getTreeInterpreterParamethersRegressor(
         )
     )
 
-    general_dict[("Instance", "Predictor")].append("Media Poblacional")
-    general_dict[("Instance", "Value")].append("-")
+    general_dict[("Instancia", "Predictor")].append("Media Poblacional")
+    general_dict[("Instancia", "Valor")].append("-")
     return contribution_graph_data, general_dict, predictions_graph_data
 
 
@@ -120,8 +120,8 @@ def getTreeInterpreterParamethersClassifier(
         current_class,
 ):
     general_dict = {
-        ("Instance", "Predictor"): [],
-        ("Instance", "Value"): [],
+        ("Instancia", "Predictor"): [],
+        ("Instancia", "Valor"): [],
     }
     contribution_graph_data = []
 
@@ -134,7 +134,7 @@ def getTreeInterpreterParamethersClassifier(
     point = 0
 
     for index, class_name in enumerate(class_names):
-        general_dict[("Contribution", class_name)] = []
+        general_dict[("Contribución", class_name)] = []
         bar_base = bias[0][index]
         media_array_x = ["Acumulado"]
         media_array_y = [bias[0][index]]
@@ -147,10 +147,10 @@ def getTreeInterpreterParamethersClassifier(
             point += bar_base
 
         for jIndex, (contribution, feature) in enumerate(sorted_contributions):
-            if feature not in general_dict[("Instance", "Predictor")]:
-                general_dict[("Instance", "Predictor")].append(feature)
-                general_dict[("Instance", "Value")].append(instanceModified[feature])
-            general_dict[("Contribution", class_name)].append(
+            if feature not in general_dict[("Instancia", "Predictor")]:
+                general_dict[("Instancia", "Predictor")].append(feature)
+                general_dict[("Instancia", "Valor")].append(instanceModified[feature])
+            general_dict[("Contribución", class_name)].append(
                 f"{round(contribution[index], 3)} ({round(contribution[index] * 100, 1)}%)"
             )
             bar_base += contribution[index]
@@ -167,7 +167,7 @@ def getTreeInterpreterParamethersClassifier(
                 )
                 point += contribution[index]
 
-        general_dict[("Contribution", class_name)].append(
+        general_dict[("Contribución", class_name)].append(
             f"{round(bias[0][index], 3)} ({round(bias[0][index] * 100, 1)}%)"
         )
         if index == current_class:
@@ -197,8 +197,8 @@ def getTreeInterpreterParamethersClassifier(
                 )
             )
 
-    general_dict[("Instance", "Predictor")].append("Media Poblacional")
-    general_dict[("Instance", "Value")].append("-")
+    general_dict[("Instancia", "Predictor")].append("Media Poblacional")
+    general_dict[("Instancia", "Valor")].append("-")
     return contribution_graph_data, general_dict, predictions_graph_data
 
 
@@ -806,7 +806,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                                 ]
                             ],
                             columns=[
-                                {"name": [i, j], "id": f"{i}_{j}"} if not isRegressor or i != 'Contribution' else {
+                                {"name": [i, j], "id": f"{i}_{j}"} if not isRegressor or i != 'Contribución' else {
                                     "name": [i], "id": f"{i}_{j}", "rowspan": 2}
                                 for i, j in df.columns
                             ],
@@ -822,7 +822,7 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
                                 {
                                     'if': {
                                         'header_index': 1,
-                                        'column_id': 'Contribution_Contribution'
+                                        'column_id': 'Contribución_Contribución'
                                     },
                                     'backgroundColor': '#0010ff4d'
                                 },
