@@ -207,3 +207,9 @@ div.section-card {
 .dash-spreadsheet-container {
   overflow: scroll;
 }
+
+.predictor-selector {
+  cursor: pointer;
+  width: 250px;
+  margin-left: 1.5rem;
+}

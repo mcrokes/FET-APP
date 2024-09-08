@@ -3,7 +3,7 @@ from pyclbr import Function
 
 import numpy as np
 from dash import dcc, html, dash_table
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
@@ -117,6 +117,15 @@ def generate_regression_metrics(y, y_pred):
 def setBottomLegend(fig):
     fig.update_layout(
         legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1)
+    )
+    return fig
+
+
+def addAxisNames(fig):
+    fig = setBottomLegend(fig)
+    fig.update_layout(
+        yaxis_title="Predicción",
+        xaxis_title="Variable",
     )
     return fig
 
@@ -684,16 +693,38 @@ metricsRegressorLayout = html.Div(
                 dbc.Row(
                     [
                         html.Plaintext(
-                            "Dependencia Parcial de Variables Numéricas",
+                            "Dependencia Parcial de Variables",
                             className="rules-title",
                         ),
-                        dbc.Row(id="numeric-dependence-plot", style={'row-gap': '1rem'}),
-                        html.Plaintext(
-                            "Dependencia Parcial de Variables Objeto",
-                            className="rules-title",
+                        dbc.Col([
+                            html.Plaintext(
+                                "Variables Cuantitativas",
+                                className="rules-title",
+                            ),
+                            html.Div(id="numeric-dependence-plot")
+                        ],
+                            xs=12,
+                            sm=12,
+                            md=6,
+                            lg=6,
+                            xl=6,
+                            xxl=6,
                         ),
-                        dbc.Row(id="object-dependence-plot"),
-                    ],
+                        dbc.Col([
+                            html.Plaintext(
+                                "Variables Cualitativas",
+                                className="rules-title",
+                            ),
+                            html.Div(id="object-dependence-plot"),
+                        ],
+                            xs=12,
+                            sm=12,
+                            md=6,
+                            lg=6,
+                            xl=6,
+                            xxl=6,
+                        ),
+                    ]
                 ),
             ], className="container"
         )
@@ -702,61 +733,97 @@ metricsRegressorLayout = html.Div(
 )
 
 
-def generateDependencePlots(X: pd.DataFrame, qualitative_dict, random_forest_model):
-    qualitative_graphs_array = []
-    numeric_graphs_array = []
+def generateDependencePlots(X: pd.DataFrame, qualitative_dict,
+                            random_forest_model: RandomForestClassifier | RandomForestRegressor, feature):
+    graph = {"predictor": feature, "graph_data": []}
     print('qualitative_dict: ', qualitative_dict)
-    index = 0
-    feature_idx = 0
-    for feature in X:
-        isObject = False
-        variableNames = []
-        for q_var in qualitative_dict:
-            if q_var['column_name'] == feature:
-                isObject = True
-                variableNames = q_var['variables']
-        dependence = partial_dependence(random_forest_model, X, [feature_idx])
-        feature_idx += 1
-        partial_dependence_values = dependence['average'][0]
-        axes = dependence['grid_values'][0]
-        if isObject:
-            qualitative_graphs_array.append({"predictor": feature, "graph_data": []})
-            for value, ax in zip(partial_dependence_values, axes):
-                name = ax
-                for var in variableNames:
-                    if var['old_value'] == ax:
-                        name = var['new_value']
-                        break
-                qualitative_graphs_array[index]["graph_data"].append(
-                    go.Bar(name=name, x=[name], y=[value])
-                )
-            index += 1
-        else:
-            x = []
-            y = []
-            # for value, ax in sorted(zip(partial_dependence_values, axes), key=lambda x: x):
-            for value, ax in zip(partial_dependence_values, axes):
-                x.append(ax)
-                y.append(value)
-            numeric_graphs_array.append(
-                {
-                    "predictor": feature,
-                    "graph_data": [
-                        go.Scatter(
-                            x=x,
-                            y=y,
-                            name="Line",
-                            line=dict(color="royalblue", width=1, dash="dot"),
-                        ),
-                        go.Bar(name="Bar", x=x, y=y, width=0.5),
-                    ],
-                }
+    feature_idx = list(random_forest_model.feature_names_in_).index(feature)
+    isObject = False
+    variableNames = []
+    for q_var in qualitative_dict:
+        if q_var['column_name'] == feature:
+            isObject = True
+            variableNames = q_var['variables']
+    dependence = partial_dependence(random_forest_model, X, [feature_idx])
+    partial_dependence_values = dependence['average'][0]
+    axes = dependence['grid_values'][0]
+    if isObject:
+        for value, ax in zip(partial_dependence_values, axes):
+            name = ax
+            for var in variableNames:
+                if var['old_value'] == ax:
+                    name = var['new_value']
+                    break
+            graph["graph_data"].append(
+                go.Bar(name=name, x=[name], y=[value])
             )
-    return qualitative_graphs_array, numeric_graphs_array
+    else:
+        x = []
+        y = []
+        # for value, ax in sorted(zip(partial_dependence_values, axes), key=lambda x: x):
+        for value, ax in zip(partial_dependence_values, axes):
+            x.append(ax)
+            y.append(value)
+        graph['graph_data'].append(go.Scatter(
+            x=x,
+            y=y,
+            name="Line",
+            line=dict(color="royalblue", width=1, dash="dot"),
+        ))
+        graph['graph_data'].append(go.Bar(name="Bar", x=x, y=y, width=0.5))
+
+    return graph
 
 
 def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
     if isRegressor:
+        @app.callback(
+            Output("n-dependence-graph", "children"),
+            Output("q-dependence-graph", "children"),
+            State("path", "href"),
+            Input("q-dependence-vars-dropdown", "value"),
+            Input("n-dependence-vars-dropdown", "value"),
+        )
+        def graph_explainers(cl, q_var, n_var):
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+                model_x: ExplainedModel = ExplainedModel.query.filter(
+                    ExplainedModel.id == model_id
+                ).first()
+
+                df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
+
+                qualitative_graph = generateDependencePlots(df.drop(columns=model_x.getElement('target_row')),
+                                                            model_x.getElement('q_variables_dict'),
+                                                            model_x.getElement('model'),
+                                                            q_var)
+                numeric_graph = generateDependencePlots(df.drop(columns=model_x.getElement('target_row')),
+                                                        model_x.getElement('q_variables_dict'),
+                                                        model_x.getElement('model'),
+                                                        n_var)
+                return (
+                    dcc.Graph(
+                        figure=addAxisNames(
+                            go.Figure(
+                                data=numeric_graph["graph_data"],
+                                layout=dict(title=numeric_graph["predictor"]),
+                            )
+                        )
+                    ),
+                    dcc.Graph(
+                        figure=addAxisNames(
+                            go.Figure(
+                                data=qualitative_graph["graph_data"],
+                                layout=dict(title=qualitative_graph["predictor"], ),
+                            )
+                        )
+                    ),
+                )
+            except Exception as e:
+                print(e)
+            raise PreventUpdate
+
         @app.callback(
             Output("numeric-dependence-plot", "children"),
             Output("object-dependence-plot", "children"),
@@ -770,56 +837,67 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                     ExplainedModel.id == model_id
                 ).first()
                 original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
-                df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
-                print('Entering into Graph Dependency Creation')
-                qualitative_graphs_array, numeric_graphs_array = (
-                    generateDependencePlots(original_df.drop(columns=model_x.getElement('target_row')),
-                                            model_x.getElement('q_variables_dict'),
-                                            model_x.getElement('model'))
-                )
+                q_vars_names = [variable['column_name'] for variable in model_x.getElement('q_variables_dict')]
+                n_vars_names = list(model_x.getElement('model').feature_names_in_)
+
+                print('n_vars_names: ', n_vars_names)
+                print('q_vars_names: ', q_vars_names)
+
+                for elm in q_vars_names:
+                    n_vars_names.remove(elm)
+
+                qualitative_graph = generateDependencePlots(original_df.drop(columns=model_x.getElement('target_row')),
+                                                            model_x.getElement('q_variables_dict'),
+                                                            model_x.getElement('model'),
+                                                            q_vars_names[0]) if q_vars_names else None
+                numeric_graph = generateDependencePlots(original_df.drop(columns=model_x.getElement('target_row')),
+                                                        model_x.getElement('q_variables_dict'),
+                                                        model_x.getElement('model'),
+                                                        n_vars_names[0]) if n_vars_names else None
+
                 print('Running out from Graph Dependency Creation')
 
                 return (
                     [
+                        dcc.Dropdown(
+                            id="n-dependence-vars-dropdown",
+                            value=n_vars_names[0],
+                            options=[{'label': name, 'value': name} for name in n_vars_names],
+                            clearable=False,
+                            className='predictor-selector',
+                        ),
                         dbc.Col(
-                            id=f"contribution_graph_{data['predictor']}",
+                            id=f"n-dependence-graph",
                             children=dcc.Graph(
-                                figure=setBottomLegend(
+                                figure=addAxisNames(
                                     go.Figure(
-                                        data=data["graph_data"],
-                                        layout=dict(title=data["predictor"]),
+                                        data=numeric_graph["graph_data"],
+                                        layout=dict(title=numeric_graph["predictor"]),
                                     )
                                 )
                             ),
-                            xs=12,
-                            sm=12,
-                            md=6,
-                            lg=6,
-                            xl=6,
-                            xxl=6,
                         )
-                        for data in numeric_graphs_array
-                    ],
+                    ] if numeric_graph else 'No Hay Datos',
                     [
+                        dcc.Dropdown(
+                            id="q-dependence-vars-dropdown",
+                            value=q_vars_names[0],
+                            options=[{'label': name, 'value': name} for name in q_vars_names],
+                            clearable=False,
+                            className='predictor-selector',
+                        ),
                         dbc.Col(
-                            id=f"contribution_graph_{data['predictor']}",
+                            id=f"q-dependence-graph",
                             children=dcc.Graph(
-                                figure=setBottomLegend(
+                                figure=addAxisNames(
                                     go.Figure(
-                                        data=data["graph_data"],
-                                        layout=dict(title=data["predictor"]),
+                                        data=qualitative_graph["graph_data"],
+                                        layout=dict(title=qualitative_graph["predictor"]),
                                     )
                                 )
                             ),
-                            xs=12,
-                            sm=12,
-                            md=12,
-                            lg=6,
-                            xl=6,
-                            xxl=6,
                         )
-                        for data in qualitative_graphs_array
-                    ],
+                    ] if qualitative_graph else 'No Hay Datos',
                 )
             except Exception as e:
                 print(e)

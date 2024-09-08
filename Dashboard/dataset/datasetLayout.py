@@ -6,44 +6,32 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objects as go
-from app.proccessor.models import ExplainedClassifierModel, ExplainedModel
+from app.proccessor.models import ExplainedModel
 
 
-def generateDataSetDistributions(df: pd.DataFrame):
-    qualitative_graphs_array = []
-    numeric_graphs_array = []
-    index = 0
-    for feature in df:
-        values = list(set(df[feature]))
-        counts = df[feature].value_counts()
-        if len(values) < 5:
-            qualitative_graphs_array.append({"predictor": feature, "graph_data": []})
-            for value in values:
-                qualitative_graphs_array[index]["graph_data"].append(
-                    go.Bar(name=value, x=[value], y=[counts[value]])
-                )
-            index += 1
-        else:
-            x = []
-            y = []
-            for value, count in sorted(zip(values, counts), key=lambda x: x):
-                x.append(value)
-                y.append(count)
-            numeric_graphs_array.append(
-                {
-                    "predictor": feature,
-                    "graph_data": [
-                        go.Scatter(
-                            x=x,
-                            y=y,
-                            name="Line",
-                            line=dict(color="royalblue", width=1, dash="dot"),
-                        ),
-                        go.Bar(name="Bar", x=x, y=y, width=0.5),
-                    ],
-                }
+def generateDataSetDistributions(df: pd.DataFrame, feature):
+    graph = {"predictor": feature, "graph_data": []}
+    values = list(set(df[feature]))
+    counts = df[feature].value_counts()
+    if len(values) < 5:
+        for value in values:
+            graph["graph_data"].append(
+                go.Bar(name=value, x=[value], y=[counts[value]])
             )
-    return qualitative_graphs_array, numeric_graphs_array
+    else:
+        x = []
+        y = []
+        for value, count in sorted(zip(values, counts), key=lambda x: x):
+            x.append(value)
+            y.append(count)
+        graph['graph_data'].append(go.Scatter(
+            x=x,
+            y=y,
+            name="Line",
+            line=dict(color="royalblue", width=1, dash="dot"),
+        ))
+        graph['graph_data'].append(go.Bar(name="Bar", x=x, y=y, width=0.5))
+    return graph
 
 
 datasetLayout = html.Div(
@@ -126,15 +114,35 @@ datasetLayout = html.Div(
                     dbc.Row(
                         [
                             html.Plaintext(
-                                "Variables Numéricas",
+                                "Distribución Por Variables",
                                 className="rules-title",
                             ),
-                            dbc.Row(id="numeric-plot", style={'row-gap': '1rem'}),
-                            html.Plaintext(
-                                "Variables Objeto",
-                                className="rules-title",
-                            ),
-                            dbc.Row(id="object-plot"),
+                            dbc.Col([
+                                html.Plaintext(
+                                    "Variables Cuantitativas",
+                                    className="rules-title",
+                                ),
+                                html.Div(id="numeric-plot")],
+                                xs=12,
+                                sm=12,
+                                md=6,
+                                lg=6,
+                                xl=6,
+                                xxl=6, ),
+
+                            dbc.Col([
+                                html.Plaintext(
+                                    "Variables Cualitativas",
+                                    className="rules-title",
+                                ),
+                                html.Div(id="object-plot"),
+                            ],
+                                xs=12,
+                                sm=12,
+                                md=6,
+                                lg=6,
+                                xl=6,
+                                xxl=6, ),
                             html.Div(
                                 [
                                     html.Plaintext(
@@ -179,6 +187,62 @@ datasetLayout = html.Div(
 
 
 def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
+    def setBottomLegend(fig):
+        fig.update_layout(
+            legend=dict(
+                orientation="h", yanchor="top", y=-0.4, xanchor="right", x=1
+            ),
+        )
+        return fig
+
+    def addAxisNames(fig):
+        fig = setBottomLegend(fig)
+        fig.update_layout(
+            yaxis_title="Ocurrencias",
+            xaxis_title="Variable",
+        )
+        return fig
+
+    @app.callback(
+        Output("n-graph", "children"),
+        Output("q-graph", "children"),
+        State("path", "href"),
+        Input("q-vars-dropdown", "value"),
+        Input("n-vars-dropdown", "value"),
+    )
+    def graph_explainers(cl, q_var, n_var):
+        f = furl(cl)
+        model_id = f.args["model_id"]
+        try:
+            model_x: ExplainedModel = ExplainedModel.query.filter(
+                ExplainedModel.id == model_id
+            ).first()
+
+            df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
+            qualitative_graph = generateDataSetDistributions(df, q_var)
+            numeric_graph = generateDataSetDistributions(df, n_var)
+            return (
+                dcc.Graph(
+                    figure=addAxisNames(
+                        go.Figure(
+                            data=numeric_graph["graph_data"],
+                            layout=dict(title=numeric_graph["predictor"]),
+                        )
+                    )
+                ),
+                dcc.Graph(
+                    figure=addAxisNames(
+                        go.Figure(
+                            data=qualitative_graph["graph_data"],
+                            layout=dict(title=qualitative_graph["predictor"], ),
+                        )
+                    )
+                ),
+            )
+        except Exception as e:
+            print(e)
+        raise PreventUpdate
+
     @app.callback(
         Output("dataset-title", "children"),
         Output("modified-dataset-view", "children"),
@@ -186,10 +250,9 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
         Output("numeric-plot", "children"),
         Output("object-plot", "children"),
         Output("correlation-plot", "children"),
-        State("path", "pathname"),
         Input("path", "href"),
     )
-    def graph_explainers(name, cl):
+    def graph_explainers(cl):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
@@ -208,20 +271,20 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
 
             dtt = model_x.explainer_regressor.getElement(
                 "name") if isRegressor else model_x.explainer_classifier.getElement("name")
-            qualitative_graphs_array, numeric_graphs_array = (
-                generateDataSetDistributions(df)
-            )
+
+            q_vars_names = [variable['column_name'] for variable in model_x.getElement('q_variables_dict')]
+            n_vars_names = list(df.columns)
+            if not isRegressor:
+                q_vars_names.append(model_x.getElement('target_row'))
+
+            for elm in q_vars_names:
+                n_vars_names.remove(elm)
+
+            qualitative_graph = generateDataSetDistributions(df, q_vars_names[0]) if q_vars_names else None
+            numeric_graph = generateDataSetDistributions(df, n_vars_names[0]) if n_vars_names else None
             corr_matrix = original_df.drop(
                 columns=model_x.getElement("target_row")
             ).corr(method="pearson")
-
-            def setBottomLegend(fig):
-                fig.update_layout(
-                    legend=dict(
-                        orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1
-                    )
-                )
-                return fig
 
             return (
                 dtt,
@@ -261,45 +324,45 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
                     className="rules-table",
                 ),
                 [
+                    dcc.Dropdown(
+                        id="n-vars-dropdown",
+                        value=n_vars_names[0],
+                        options=[{'label': name, 'value': name} for name in n_vars_names],
+                        clearable=False,
+                        className='predictor-selector',
+                    ),
                     dbc.Col(
-                        id=f"contribution_graph_{data['predictor']}",
+                        id=f"n-graph",
                         children=dcc.Graph(
-                            figure=setBottomLegend(
+                            figure=addAxisNames(
                                 go.Figure(
-                                    data=data["graph_data"],
-                                    layout=dict(title=data["predictor"]),
+                                    data=numeric_graph["graph_data"],
+                                    layout=dict(title=numeric_graph["predictor"]),
                                 )
                             )
                         ),
-                        xs=12,
-                        sm=12,
-                        md=6,
-                        lg=6,
-                        xl=6,
-                        xxl=6,
                     )
-                    for data in numeric_graphs_array
-                ],
+                ] if numeric_graph else 'No Hay Datos',
                 [
+                    dcc.Dropdown(
+                        id="q-vars-dropdown",
+                        value=q_vars_names[0],
+                        options=[{'label': name, 'value': name} for name in q_vars_names],
+                        clearable=False,
+                        className='predictor-selector',
+                    ),
                     dbc.Col(
-                        id=f"contribution_graph_{data['predictor']}",
+                        id=f"q-graph",
                         children=dcc.Graph(
-                            figure=setBottomLegend(
+                            figure=addAxisNames(
                                 go.Figure(
-                                    data=data["graph_data"],
-                                    layout=dict(title=data["predictor"]),
+                                    data=qualitative_graph["graph_data"],
+                                    layout=dict(title=qualitative_graph["predictor"]),
                                 )
                             )
                         ),
-                        xs=12,
-                        sm=12,
-                        md=12,
-                        lg=6,
-                        xl=6,
-                        xxl=6,
                     )
-                    for data in qualitative_graphs_array
-                ],
+                ] if qualitative_graph else 'No Hay Datos',
                 dcc.Graph(
                     figure=setBottomLegend(
                         go.Figure(
