@@ -83,6 +83,14 @@
                             {% endfor %}
                           </select>
                         </div>
+                        <div class="col custom-col">
+                          {% if form|length > 1 %}
+                            <div class="form-check form-switch" style="margin: 1rem; margin-bottom: 3rem;">
+                              <input class="form-check-input" type="checkbox" role="switch" id="index-selector" name="index">
+                              <label class="form-check-label" for="index-selector">Columna sobrante como índice</label>
+                            </div>
+                          {% endif %}
+                        </div>
                       {% elif status == 'Add' %}
                         <h5 class="q-vars-header">Descripción de variables.</h5>
                         {% for var in variables %}

@@ -146,3 +146,7 @@ label.custom-file-input > p:first-child {
 .select2-container {
     width: 10rem !important;
 }
+
+.form-check-input:checked {
+    background-color: #095e49;
+}

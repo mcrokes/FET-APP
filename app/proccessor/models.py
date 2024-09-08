@@ -12,7 +12,7 @@ from app import db
 
 ENCODED_FIELDS = [
     "model",
-    "indexesDict",
+    "indexesList",
     "dataset",
     "dataset_modified",
     "features_description",
@@ -71,6 +71,8 @@ class ModelForProccess(db.Model, dbInteractionMethods):
     unit = Column(String, default="")
     model = Column(String)  # Encoded
     dataset = Column(String)  # Encoded
+    indexesList = Column(String)  # Encoded
+    indexColumnName = Column(String)
     description = Column(String)
     target_row = Column(String)
     percent_processed = Column(Integer, default=0)
@@ -101,6 +103,8 @@ class ModelForProccess(db.Model, dbInteractionMethods):
                 "model",
                 "dataset",
                 "description",
+                "indexesList",
+                "indexColumnName",
                 "target_row",
                 "percent_processed",
                 "process_message",
@@ -120,7 +124,7 @@ class ExplainedModel(db.Model, dbInteractionMethods):
 
     id = Column(Integer, primary_key=True)
     model = Column(String)  # Encoded
-    indexesDict = Column(String)  # Encoded
+    indexesList = Column(String)  # Encoded
     indexColumnName = Column(String)
     model_description = Column(String)
     features_description = Column(String)  # Encoded
@@ -166,7 +170,7 @@ class ExplainedModel(db.Model, dbInteractionMethods):
             name: Literal[
                 "id",
                 "model",
-                "indexesDict",
+                "indexesList",
                 "indexColumnName",
                 "model_description",
                 "features_description",

@@ -72,8 +72,7 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
             model_data.setElements(
                 **{
                     "model": db_model_model,
-                    "indexesDict": "dict of indexes",
-                    "indexColumnName": "column name for indexes",
+                    "indexColumnName": db_model.getElement("indexColumnName"),
                     "model_description": db_model.description,
                     "features_description": db_model.getElement("features_description"),
                     "target_row": db_model.target_row,
@@ -86,8 +85,7 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
             model_data = ExplainedModel(
                 **{
                     "model": db_model_model,
-                    "indexesDict": "dict of indexes",
-                    "indexColumnName": "column name for indexes",
+                    "indexColumnName": db_model.getElement("indexColumnName"),
                     "model_description": db_model.description,
                     "features_description": db_model.getElement("features_description"),
                     "target_row": db_model.target_row,
@@ -96,6 +94,7 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
                     "random_state": 123,
                 }
             )
+        model_data.indexesList = db_model.indexesList
 
         db_model.percent_processed = 30
         db_model.process_message = "Cargando metricas del conjunto de datos..."
@@ -402,6 +401,14 @@ def save_classifier(modelId: int = 0):
                 )
                 possible_not_needed_variables.remove(request.form["target"])
                 print('possible_not_needed_variables:', possible_not_needed_variables)
+                if request.form.get('index') == 'on':
+                    db_model.indexColumnName = possible_not_needed_variables[0]
+                    print('index: ', db_model.getElement("dataset")[possible_not_needed_variables[0]])
+                    db_model.setElements(
+                        **{
+                            'indexesList': db_model.getElement("dataset")[possible_not_needed_variables[0]]
+                        }
+                    )
                 db_model.target_row = request.form["target"]
                 db_model.setElements(
                     **{
@@ -662,6 +669,14 @@ def save_regressor(modelId: int = 0):
                 )
                 possible_not_needed_variables.remove(request.form["target"])
                 print("possible_not_needed_variables: ", possible_not_needed_variables)
+                if request.form.get('index') == 'on':
+                    db_model.indexColumnName = possible_not_needed_variables[0]
+                    print('index: ', db_model.getElement("dataset")[possible_not_needed_variables[0]])
+                    db_model.setElements(
+                        **{
+                            'indexesList': db_model.getElement("dataset")[possible_not_needed_variables[0]]
+                        }
+                    )
                 db_model.target_row = request.form["target"]
                 db_model.setElements(
                     **{
