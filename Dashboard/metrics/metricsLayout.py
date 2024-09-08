@@ -436,7 +436,8 @@ metricsClassifierLayout = html.Div(
                                     [
                                         html.Plaintext(
                                             [
-                                                "Punto porcentual en el que el modelo decide clasificar una clase como verdadera.",
+                                                "Punto porcentual en el que el modelo decide clasificar una clase "
+                                                "como verdadera.",
                                             ]
                                         ),
                                     ],
@@ -468,7 +469,8 @@ metricsClassifierLayout = html.Div(
                                             [
                                                 html.Plaintext(
                                                     [
-                                                        "Matriz de Confusión: Evalúa la precisión del modelo en la clasificación de ejemplos.",
+                                                        "Matriz de Confusión: Evalúa la precisión del modelo en la "
+                                                        "clasificación de ejemplos.",
                                                     ]
                                                 ),
                                                 html.Plaintext(
@@ -486,13 +488,15 @@ metricsClassifierLayout = html.Div(
                                                 html.Plaintext(
                                                     [
                                                         html.Strong("FP: "),
-                                                        "ejemplos negativos incorrectamente clasificados como positivos.",
+                                                        "ejemplos negativos incorrectamente clasificados como "
+                                                        "positivos.",
                                                     ]
                                                 ),
                                                 html.Plaintext(
                                                     [
                                                         html.Strong("FN: "),
-                                                        "ejemplos positivos incorrectamente clasificados como negativos.",
+                                                        "ejemplos positivos incorrectamente clasificados como "
+                                                        "negativos.",
                                                     ]
                                                 ),
                                             ],
@@ -539,7 +543,7 @@ metricsClassifierLayout = html.Div(
                                     [
                                         """
                                         * El área bajo la curva (AUC) es una métrica que resume 
-                                        la performance del modelo. Un AUC cercano a 1 indica un modelo 
+                                        el comportamiento del modelo. Un AUC cercano a 1 indica un modelo 
                                         que puede distinguir perfectamente entre positivos y negativos, mientras que un 
                                         AUC cercano a 0.5 indica un modelo que no es mejor que una elección aleatoria.
                                         """,
