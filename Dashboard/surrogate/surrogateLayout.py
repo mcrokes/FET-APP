@@ -42,39 +42,40 @@ surrogateLayout = html.Div(
                     ],
                     className="tree-creator",
                 ),
-                html.Div(
-                    [
-                        html.I(
-                            id=f"{id_sufix[0]}-info",
-                            className="fa fa-info-circle info-icon",
-                        ),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        """
-                                        Árbol Subrogado: Un árbol de decisión que se entrena 
-                                        con las predicciones del modelo de Random Forest original, 
-                                        permitiendo simplificar el bosque para interpretar la 
-                                        salida del modelo de manera más fácil y comprensible.
-                                        """,
-                                    ]
-                                ),
-                            ],
-                            className="personalized-tooltip",
-                            target=f"{id_sufix[0]}-info",
-                        ),
-                    ],
-                    style={"display": "flex", "justify-content": "end"},
-                ),
                 dbc.Row(
                     [
                         dbc.Col(
                             [
                                 html.Div(
                                     [
-                                        html.Plaintext(
-                                            "REGLAS DEL MODELO", className="rules-title"
+
+                                        html.Div(
+                                            [
+                                                html.Plaintext(
+                                                    "REGLAS DEL MODELO", className="rules-title"
+                                                ),
+                                                html.I(
+                                                    id=f"{id_sufix[0]}-info",
+                                                    className="fa fa-info-circle info-icon",
+                                                ),
+                                                dbc.Tooltip(
+                                                    [
+                                                        html.Plaintext(
+                                                            [
+                                                                """
+                                                                Árbol Subrogado: Un árbol de decisión que se entrena 
+                                                                con las predicciones del modelo de Random Forest original, 
+                                                                permitiendo simplificar el bosque para interpretar la 
+                                                                salida del modelo de manera más fácil y comprensible.
+                                                                """,
+                                                            ]
+                                                        ),
+                                                    ],
+                                                    className="personalized-tooltip",
+                                                    target=f"{id_sufix[0]}-info",
+                                                ),
+                                            ],
+                                            className="title-hint-container",
                                         ),
                                         html.Div(
                                             id="rules-output-upload",
