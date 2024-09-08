@@ -32,6 +32,23 @@
       <!-- Custom Theme Style -->
       <link href="{{ url_for('static', filename='build/css/custom.css') }}" rel="stylesheet">
       <link href="{{ url_for('static', filename='build/css/base_site.css') }}" rel="stylesheet">
+      <script>
+        const t = async (keys) => {
+          // get
+          response = await fetch(`http://127.0.0.1:5000/INTERNAL_API/getTranslation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: keys,
+          })
+
+          text = await response.json().then((value) => {
+            console.log(value)
+            return value.text;
+          })
+
+          return text
+        }
+      </script>
     {% endblock head %}
   </head>
 

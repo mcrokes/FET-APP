@@ -13,6 +13,7 @@ class User(db.Model, UserMixin):
     username = Column(String, unique=True)
     email = Column(String, unique=True)
     password = Column(BINARY)
+    langSelection = Column(String, default='es')
     is_admin = Column(Boolean, default=False)
 
     model_for_proccess = relationship(

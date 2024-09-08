@@ -5,7 +5,22 @@
     </div>
     <img src="/static/images/logo-cujae.png" alt="" style="width: 3rem; margin-top: 0.7rem; float: left;">
     <div id="logo-tob-bar" style="margin-left: 1rem; padding-top: 1.5rem; float: left; display: none;"><i class="fa fa-tree"></i> FORESTAL <i class="fa fa-tree"></i></div>
-    <ul class="nav navbar-nav navbar-right" style="width: 40%;">
+    <ul class="nav navbar-nav navbar-right" style="width: 8px; margin: 5px; float: left; margin-left: 2rem;">
+      <li class="my-3" style="text-align: end; margin-right: 2rem;">
+          <div class="dropdown" id="language">
+            <a id="lang-selector-text" href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false" onclick="show_toggle_lang()">
+              en
+            </a>
+            <div style="position: absolute; margin-top: 15px; width: 100%; display: flex;  justify-content: flex-end;">
+              <ul class="pull-right" style="width: min-content; line-height: 14px; display: none; background-color: white; border-radius: 3px; padding: 0.5rem;" id="dropdown-language-on-top-bar">
+                <li onclick="changeLanguage('es')" style="padding: 6px; cursor: pointer;">es</li>
+                <li onclick="changeLanguage('en')" style="padding: 6px; cursor: pointer;">en</li>
+            </ul>
+            </div>
+          </div>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right" style="width: 30%;">
       <li class="my-3" style="text-align: end; margin-right: 2rem;">
           <div class="dropdown" id="configuration">
             <a href="#" class="user-profile dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false" onclick="show_toggle()">
@@ -25,15 +40,34 @@
       </li>
     </ul>
   </nav>
+
   <script>
     let opened = false;
+    let openedLang = false;
     window.addEventListener('click', () => {
       if (content.style.display === 'unset' && !opened) {
         content.style.display = 'none';
       }
       opened = false;
+
+      if (langageDrop.style.display === 'unset' && !openedLang) {
+        langageDrop.style.display = 'none';
+      }
+      openedLang = false;
     })
     const content = document.getElementById('dropdown-content-on-top-bar')
+    const langageDrop = document.getElementById('dropdown-language-on-top-bar')
+
+    const show_toggle_lang = () => {
+      if (langageDrop.style.display === 'none' || langageDrop.style.display === '') {
+        langageDrop.style.display = 'unset';
+        openedLang = true;
+      } else {
+        langageDrop.style.display = 'none';
+        openedLang = false;
+      }
+    }
+
     const show_toggle = () => {
       if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'unset';
@@ -43,5 +77,25 @@
         opened = false;
       }
     }
+
+    const changeLanguage = async (lang) => {
+      // get
+      response = await fetch(`http://127.0.0.1:5000/INTERNAL_API/changeLanguage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: lang,
+      })
+
+      await response.json().then((value) => {
+        console.log(value)
+        window.location.reload()
+        return
+      })
+    }
+
+    (async() => {
+      const langSelector = window.document.getElementById('lang-selector-text');
+      langSelector.innerHTML = await t(["lang"]);
+    })();
   </script>
 </div>

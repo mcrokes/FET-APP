@@ -18,7 +18,7 @@
       </div>
     </div>
     <div id="home-info">
-      <h1>Modelos de Clasificación y Regresión con Random Forest</h1>
+      <h1 id="home-title"></h1>
       <hr>
       <div  id="home-tree_img">
         <img src="{{ url_for('static', filename='images/home-tree-1.png') }}" />
@@ -89,4 +89,11 @@
 
 {% block javascripts %}
   {{ super()}}
+
+  <script>
+    (async() => {
+      const homeTitle = window.document.getElementById('home-title');
+      homeTitle.innerHTML = await t(["home", "info-title"]);
+    })();
+  </script>
 {% endblock javascripts %}
