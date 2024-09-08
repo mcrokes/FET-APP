@@ -161,7 +161,7 @@ div.section-card {
 
 .personalized-tooltip {
   width: 300px;
-  background-color: rgb(210, 205, 255);
+  background-color: rgba(255, 255, 255, 0.67);
   border-radius: 10px;
   padding: 1rem;
   border: dashed black 1pt;
@@ -175,7 +175,6 @@ div.section-card {
 
 .personalized-tooltip div plaintext {
   white-space: initial;
-  text-transform: uppercase;
 }
 
 .tree-img-container {
@@ -195,13 +194,13 @@ div.section-card {
 }
 
 .info-icon {
-  color: #213584;
+  color: #1b4e2b;
   margin-right: 2rem;
   font-size: 25px;
 }
 
 .info-icon:hover {
-  color: rgb(89, 161, 189);
+  color: rgb(99, 189, 89);
   cursor: pointer;
 }
 

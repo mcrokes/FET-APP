@@ -69,7 +69,7 @@ datasetLayout = html.Div(
                                                     html.Strong(">"),
                                                     ") - (",
                                                     html.Strong("<"),
-                                                    ") antes del número.",
+                                                    ") antes del número. Ej: >56",
                                                 ]
                                             ),
                                         ],

@@ -3,13 +3,14 @@ from unicodedata import numeric
 import numpy as np
 from sklearn.calibration import LabelEncoder
 
+
 def get_y_transformed(y):
-        for value in y:
-            if value is not int:
-                y = LabelEncoder().fit_transform(y)
-                break
-        print('y: ', y)
-        return y
+    for value in y:
+        if value is not int:
+            y = LabelEncoder().fit_transform(y)
+            break
+    print('y: ', y)
+    return y
 
 
 def creating_qualitative_dict(variables):
@@ -61,16 +62,16 @@ def get_modified_dataframe(df, target_description, qualitative_columns):
         for value in target_description['variables']:
             # noinspection PyTypeChecker
             new_df.replace({f'{target}': value['old_value']},
-                    {f'{target}': value['new_value']},
-                    inplace=True)
+                           {f'{target}': value['new_value']},
+                           inplace=True)
 
     for q_variables_modified in qualitative_columns:
         print(q_variables_modified)
         for q_variable_modified in q_variables_modified['variables']:
             new_df.replace({f'{q_variables_modified["column_name"]}': q_variable_modified['old_value']},
-                       {f'{q_variables_modified["column_name"]}': q_variable_modified['new_value']},
-                       inplace=True)
-            
+                           {f'{q_variables_modified["column_name"]}': q_variable_modified['new_value']},
+                           inplace=True)
+
         print(new_df.head(3))
     return new_df
 

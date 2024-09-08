@@ -89,7 +89,7 @@ tabs = dbc.Tabs(
         dbc.Tab(
             [
                 tab1_content,
-                setTooltip("IMportancias de los predictores", "importance-tooltip-id"),
+                setTooltip("Importancias de los predictores", "importance-tooltip-id"),
             ],
             id="importance-tooltip-id",
             label="Importancias",
@@ -107,7 +107,7 @@ tabs = dbc.Tabs(
         dbc.Tab(
             [
                 tab3_content,
-                setTooltip("árbol subrogado del modelo", "surrogate-tooltip-id"),
+                setTooltip("Árbol subrogado del modelo", "surrogate-tooltip-id"),
             ],
             id="surrogate-tooltip-id",
             label="Subrogado",
@@ -116,16 +116,16 @@ tabs = dbc.Tabs(
         dbc.Tab(
             [
                 tab4_content,
-                setTooltip("árboles individuales del modelo", "trees-tooltip-id"),
+                setTooltip("Árboles individuales del modelo", "trees-tooltip-id"),
             ],
             id="trees-tooltip-id",
-            label="árboles",
+            label="Árboles",
             className="classifier-tab",
         ),
         dbc.Tab(
             [
                 tab5_content,
-                setTooltip("interpretación de predicciones", "predictions-tooltip-id"),
+                setTooltip("Interpretación de predicciones", "predictions-tooltip-id"),
             ],
             id="predictions-tooltip-id",
             label="Predicciones",

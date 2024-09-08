@@ -1,9 +1,11 @@
+import json
 from pyclbr import Function
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
 import dash_bootstrap_components as dbc
 import pandas as pd
+from dash.exceptions import PreventUpdate
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from app.proccessor.model.explainers.decision_tree_surrogate import (
@@ -42,39 +44,40 @@ surrogateLayout = html.Div(
                     ],
                     className="tree-creator",
                 ),
-                html.Div(
-                    [
-                        html.I(
-                            id=f"{id_sufix[0]}-info",
-                            className="fa fa-info-circle info-icon",
-                        ),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        """
-                                        Árbol Subrogado: Un árbol de decisión que se entrena 
-                                        con las predicciones del modelo de Random Forest original, 
-                                        permitiendo simplificar el bosque para interpretar la 
-                                        salida del modelo de manera más fácil y comprensible.
-                                        """,
-                                    ]
-                                ),
-                            ],
-                            className="personalized-tooltip",
-                            target=f"{id_sufix[0]}-info",
-                        ),
-                    ],
-                    style={"display": "flex", "justify-content": "end"},
-                ),
                 dbc.Row(
                     [
                         dbc.Col(
                             [
                                 html.Div(
                                     [
-                                        html.Plaintext(
-                                            "REGLAS DEL MODELO", className="rules-title"
+
+                                        html.Div(
+                                            [
+                                                html.Plaintext(
+                                                    "REGLAS DEL MODELO", className="rules-title"
+                                                ),
+                                                html.I(
+                                                    id=f"{id_sufix[0]}-info",
+                                                    className="fa fa-info-circle info-icon",
+                                                ),
+                                                dbc.Tooltip(
+                                                    [
+                                                        html.Plaintext(
+                                                            [
+                                                                """
+                                                                Árbol Subrogado: Un árbol de decisión que se entrena 
+                                                                con las predicciones del modelo de Random Forest original, 
+                                                                permitiendo simplificar el bosque para interpretar la 
+                                                                salida del modelo de manera más fácil y comprensible.
+                                                                """,
+                                                            ]
+                                                        ),
+                                                    ],
+                                                    className="personalized-tooltip",
+                                                    target=f"{id_sufix[0]}-info",
+                                                ),
+                                            ],
+                                            className="title-hint-container",
                                         ),
                                         html.Div(
                                             id="rules-output-upload",
@@ -97,6 +100,14 @@ surrogateLayout = html.Div(
                             "MOSTRAR",
                             id="build-tree-btn",
                             n_clicks=0,
+                            className="tree-btn tree-creator-btn",
+                            style={"margin-left": "3rem"},
+                        ),
+                        html.Button(
+                            "DESCARGAR",
+                            id="download-tree-btn",
+                            n_clicks=0,
+                            hidden=True,
                             className="tree-btn tree-creator-btn",
                             style={"margin-left": "3rem"},
                         ),
@@ -126,10 +137,12 @@ surrogateLayout = html.Div(
                     className="tree-creator container",
                     style={"padding-top": "20px", "justify-content": "flex-start"},
                 ),
+                dcc.Store(id="svg-holder", data={}),
                 html.Div(
                     [html.Img(id="tree-visual-output-upload")],
                     className="tree-img-container",
                 ),
+                dcc.Download(id='download-svg')
             ]
         )
     ],
@@ -142,6 +155,7 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
         Output("rules-output-upload", "children"),
         Output("max-depth-input-row", "max"),
         Output("tree-visual-output-upload", "src"),
+        Output("download-tree-btn", "hidden"),
         State("max-depth-input-row", "value"),
         Input("surrogate-tree-reconstruction-btn", "n_clicks"),
         Input("path", "href"),
@@ -277,10 +291,12 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
             table_header + table_body, bordered=True, className="rules-table"
         )
 
-        return rg, lenght + 2, ""
+        return rg, lenght + 2, "", True
 
     @app.callback(
         Output("tree-visual-output-upload", "src", allow_duplicate=True),
+        Output("svg-holder", "data"),
+        Output("download-tree-btn", "hidden", allow_duplicate=True),
         State("max-depth-input-row", "value"),
         State("path", "href"),
         Input("build-tree-btn", "n_clicks"),
@@ -318,11 +334,29 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
             ]
         except:
             class_names = None
-        tg = ExplainSingleTree.graph_tree(
+
+        tg, viz = ExplainSingleTree.graph_tree(
             x_train=dataset.drop(columns=target_row),
             y_train=model_x.getElement("model").predict(dataset.drop(columns=target_row)),
             tree=model,
             class_names=class_names,
             feature_names=model.feature_names_in_,
         )
-        return tg
+        # Convertir el árbol en un archivo SVG
+
+        svg_str = viz.view().svg()
+
+        # Devolver el archivo SVG como respuesta
+        return tg, json.dumps(svg_str), False
+
+    @app.callback(
+        Output("download-svg", "data"),
+        State("svg-holder", "data"),
+        Input("download-tree-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def download_img_tree(data, download):
+        if download:
+            svg_str = json.loads(data)
+            return dict(content=svg_str, filename='arbol.svg', type='text/svg+xml')
+        raise PreventUpdate
