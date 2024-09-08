@@ -169,7 +169,7 @@ class ExplainSingleTree:
             print("HERE")
             encoded = base64.b64encode(svg)
             svg_encoded = "data:image/svg+xml;base64,{}".format(encoded.decode())
-            return svg_encoded
+            return svg_encoded, viz
         except Exception as e:
             print(e)
             return ""

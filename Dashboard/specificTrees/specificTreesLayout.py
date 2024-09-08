@@ -1,9 +1,11 @@
+import json
 from pyclbr import Function
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
 import dash_bootstrap_components as dbc
 import pandas as pd
+from dash.exceptions import PreventUpdate
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
@@ -100,6 +102,14 @@ specificTreesLayout = html.Div(
                             className="tree-btn tree-creator-btn",
                             style={"margin-left": "3rem"},
                         ),
+                        html.Button(
+                            "DESCARGAR",
+                            id="s-download-tree-btn",
+                            n_clicks=0,
+                            hidden=True,
+                            className="tree-btn tree-creator-btn",
+                            style={"margin-left": "3rem"},
+                        ),
                         dbc.Tooltip(
                             [
                                 html.Plaintext(
@@ -126,10 +136,12 @@ specificTreesLayout = html.Div(
                     className="tree-creator container",
                     style={"padding-top": "20px", "justify-content": "flex-start"},
                 ),
+                dcc.Store(id="s-svg-holder", data={}),
                 html.Div(
                     [html.Img(id="s-tree-visual-output-upload")],
                     className="tree-img-container",
                 ),
+                dcc.Download(id='s-download-svg')
             ]
         )
     ],
@@ -142,6 +154,7 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
         Output("s-rules-output-upload", "children"),
         Output("s-max-depth-input-row", "max"),
         Output("s-tree-visual-output-upload", "src"),
+        Output("s-download-tree-btn", "hidden"),
         Input("s-surrogate-tree-reconstruction-btn", "n_clicks"),
         State("s-max-depth-input-row", "value"),
         Input("path", "href"),
@@ -256,10 +269,12 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
         rg = dbc.Table(
             table_header + table_body, bordered=True, className="rules-table"
         )
-        return rg, lenght, ""
+        return rg, lenght, "", True
 
     @app.callback(
         Output("s-tree-visual-output-upload", "src", allow_duplicate=True),
+        Output("s-svg-holder", "data"),
+        Output("s-download-tree-btn", "hidden", allow_duplicate=True),
         State("s-max-depth-input-row", "value"),
         State("path", "href"),
         Input("s-build-tree-btn", "n_clicks"),
@@ -286,7 +301,7 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
         else:
             class_names = None
         x_train = dataset.drop(columns=target_row)
-        tg = ExplainSingleTree.graph_tree(
+        tg, viz = ExplainSingleTree.graph_tree(
             x_train=x_train,
             y_train=dataset[target_row],
             tree=model,
@@ -294,4 +309,20 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
             feature_names=x_train.columns,
         )
 
-        return tg
+        # Convertir el árbol en un archivo SVG
+
+        svg_str = viz.view().svg()
+        # Devolver el archivo SVG como respuesta
+        return tg, json.dumps(svg_str), False
+
+    @app.callback(
+        Output("s-download-svg", "data"),
+        State("s-svg-holder", "data"),
+        Input("s-download-tree-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def download_img_tree(data, download):
+        if download:
+            svg_str = json.loads(data)
+            return dict(content=svg_str, filename='arbol.svg', type='text/svg+xml')
+        raise PreventUpdate
