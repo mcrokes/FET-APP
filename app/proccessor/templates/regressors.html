@@ -97,22 +97,22 @@
   <script>
     (async()=>{
       const regressorTranslations = await t(["regressors"]);
-      window.document.getElementById('regressors-title').innerHTML = regressorTranslations['title'];
-      window.document.getElementById('regressors-add-btn').innerHTML = regressorTranslations['add-btn'];
-      window.document.getElementById('regressors-compare-btn').innerHTML = regressorTranslations['compare-btn'];
+      window.document.getElementById('regressors-title').innerHTML = regressorTranslations['title'] ?? 'regressors.title';
+      window.document.getElementById('regressors-add-btn').innerHTML = regressorTranslations['add-btn'] ?? 'regressors.add-btn';
+      window.document.getElementById('regressors-compare-btn').innerHTML = regressorTranslations['compare-btn'] ?? 'regressors.compare-btn';
 
-      const tableRgsTranslations = regressorTranslations['table'];
-      window.document.getElementById('regressors-table-id').innerHTML = tableRgsTranslations['id'];
-      window.document.getElementById('regressors-table-name').innerHTML = tableRgsTranslations['name'];
-      window.document.getElementById('regressors-table-description').innerHTML = tableRgsTranslations['description'];
-      window.document.getElementById('regressors-table-target').innerHTML = tableRgsTranslations['target'];
-      window.document.getElementById('regressors-table-options').innerHTML = tableRgsTranslations['options'];
+      const tableRgsTranslations = regressorTranslations['table'] ?? {};
+      window.document.getElementById('regressors-table-id').innerHTML = tableRgsTranslations['id'] ?? 'regressors.table.id';
+      window.document.getElementById('regressors-table-name').innerHTML = tableRgsTranslations['name'] ?? 'regressors.table.name';
+      window.document.getElementById('regressors-table-description').innerHTML = tableRgsTranslations['description'] ?? 'regressors.table.description';
+      window.document.getElementById('regressors-table-target').innerHTML = tableRgsTranslations['target'] ?? 'regressors.table.target';
+      window.document.getElementById('regressors-table-options').innerHTML = tableRgsTranslations['options'] ?? 'regressors.table.options';
 
-      const modalRgsTranslations = regressorTranslations['modal'];
-      window.document.getElementById('regressors-modal-title').innerHTML = modalRgsTranslations['title'];
-      window.document.getElementById('regressors-modal-description').innerHTML = modalRgsTranslations['description'];
-      window.document.getElementById('regressors-modal-cancel-btn').innerHTML = modalRgsTranslations['cancel-btn'];
-      window.document.getElementById('regressors-modal-delete-btn').innerHTML = modalRgsTranslations['delete-btn'];
+      const modalRgsTranslations = regressorTranslations['modal'] ?? {};
+      window.document.getElementById('regressors-modal-title').innerHTML = modalRgsTranslations['title'] ?? 'regressors.modal.title';
+      window.document.getElementById('regressors-modal-description').innerHTML = modalRgsTranslations['description'] ?? 'regressors.modal.description';
+      window.document.getElementById('regressors-modal-cancel-btn').innerHTML = modalRgsTranslations['cancel-btn'] ?? 'regressors.modal.cancel-btn';
+      window.document.getElementById('regressors-modal-delete-btn').innerHTML = modalRgsTranslations['delete-btn'] ?? 'regressors.modal.delete-btn';
 
     })();
   </script>

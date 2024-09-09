@@ -87,11 +87,12 @@
         body: lang,
       })
 
-      await response.json().then((value) => {
+      const text = response.json().then((value) => {
         console.log(value)
-        window.location.reload()
         return
-      })
+      }).then(() => window.location.reload())
+
+
     }
 
     (async() => {
@@ -99,10 +100,10 @@
       window.document.getElementById('app-name').innerHTML = await t(["app-name"]);
       const topBarTranslations = await t(["top-bar"]);
       const admConfig = window.document.getElementById('top-bar-config-adm');
-      if (admConfig) admConfig.innerHTML = topBarTranslations["config"];
+      if (admConfig) admConfig.innerHTML = topBarTranslations["config"] ?? 'top-bar.config';
       const usrConfig = window.document.getElementById('top-bar-config-usr');
-      if (usrConfig) usrConfig.innerHTML = topBarTranslations["config"];
-      window.document.getElementById('top-bar-exit').innerHTML = topBarTranslations["exit"];
+      if (usrConfig) usrConfig.innerHTML = topBarTranslations["config"] ?? 'top-bar.config';
+      window.document.getElementById('top-bar-exit').innerHTML = topBarTranslations["exit"] ?? 'top-bar.exit';
     })();
   </script>
 </div>

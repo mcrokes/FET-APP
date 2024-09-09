@@ -98,22 +98,22 @@
   <script>
     (async()=>{
       const classifierTranslations = await t(["classifiers"]);
-      window.document.getElementById('classifiers-title').innerHTML = classifierTranslations['title'];
-      window.document.getElementById('classifiers-add-btn').innerHTML = classifierTranslations['add-btn'];
-      window.document.getElementById('classifiers-compare-btn').innerHTML = classifierTranslations['compare-btn'];
+      window.document.getElementById('classifiers-title').innerHTML = classifierTranslations['title'] ?? 'classifiers.title';
+      window.document.getElementById('classifiers-add-btn').innerHTML = classifierTranslations['add-btn'] ?? 'classifiers.add-btn';
+      window.document.getElementById('classifiers-compare-btn').innerHTML = classifierTranslations['compare-btn'] ?? 'classifiers.compare-btn';
 
-      const tableClsTranslations = classifierTranslations['table'];
-      window.document.getElementById('classifiers-table-id').innerHTML = tableClsTranslations['id'];
-      window.document.getElementById('classifiers-table-name').innerHTML = tableClsTranslations['name'];
-      window.document.getElementById('classifiers-table-description').innerHTML = tableClsTranslations['description'];
-      window.document.getElementById('classifiers-table-target').innerHTML = tableClsTranslations['target'];
-      window.document.getElementById('classifiers-table-options').innerHTML = tableClsTranslations['options'];
+      const tableClsTranslations = classifierTranslations['table'] ?? {};
+      window.document.getElementById('classifiers-table-id').innerHTML = tableClsTranslations['id'] ?? 'classifiers.table.id';
+      window.document.getElementById('classifiers-table-name').innerHTML = tableClsTranslations['name'] ?? 'classifiers.table.name';
+      window.document.getElementById('classifiers-table-description').innerHTML = tableClsTranslations['description'] ?? 'classifiers.table.description';
+      window.document.getElementById('classifiers-table-target').innerHTML = tableClsTranslations['target'] ?? 'classifiers.table.target';
+      window.document.getElementById('classifiers-table-options').innerHTML = tableClsTranslations['options'] ?? 'classifiers.table.options';
 
-      const modalClsTranslations = classifierTranslations['modal'];
-      window.document.getElementById('classifiers-modal-title').innerHTML = modalClsTranslations['title'];
-      window.document.getElementById('classifiers-modal-description').innerHTML = modalClsTranslations['description'];
-      window.document.getElementById('classifiers-modal-cancel-btn').innerHTML = modalClsTranslations['cancel-btn'];
-      window.document.getElementById('classifiers-modal-delete-btn').innerHTML = modalClsTranslations['delete-btn'];
+      const modalClsTranslations = classifierTranslations['modal'] ?? {};
+      window.document.getElementById('classifiers-modal-title').innerHTML = modalClsTranslations['title'] ?? 'classifiers.modal.title';
+      window.document.getElementById('classifiers-modal-description').innerHTML = modalClsTranslations['description'] ?? 'classifiers.modal.description';
+      window.document.getElementById('classifiers-modal-cancel-btn').innerHTML = modalClsTranslations['cancel-btn'] ?? 'classifiers.modal.cancel-btn';
+      window.document.getElementById('classifiers-modal-delete-btn').innerHTML = modalClsTranslations['delete-btn'] ?? 'classifiers.modal.delete-btn';
 
     })();
   </script>

@@ -1,9 +1,37 @@
 {
   "lang": "es",
-  "app-name": "Forestal",
+  "app-name": "FET",
   "login": {
     "title": "Bienvenido",
     "btn": "Acceder"
+  },
+  "add-user": {
+    "title": "Crear Usuario",
+    "btn": "Crear"
+  },
+  "delete-user": {
+    "title": "Eliminar Usuario",
+    "back-btn": "Atrás",
+    "delete-btn": "Eliminar"
+  },
+  "edit-user": {
+    "title": "Nueva Contraseña",
+    "back-btn": "Atrás",
+    "check-btn": "Confirmar"
+  },
+  "change-pwd": {
+    "title": "Cambiar Contraseña",
+    "btn": "Cambiar"
+  },
+  "users": {
+    "title": "USUARIOS",
+    "add-btn": "Nuevo Usuario",
+    "table": {
+      "id": "ID",
+      "name": "Nombre",
+      "email": "Email",
+      "options": "Opciones"
+    }
   },
   "top-bar": {
     "config": "Configuración",
@@ -12,13 +40,20 @@
   "sidebar": {
     "home-btn": "Inicio",
     "classifier-btn": "Clasificación",
+    "classifier-btn-link": "Modelos de Clasificación",
     "regressor-btn": "Regresión",
+    "regressor-btn-link": "Modelos de Regresión",
     "config-btn": "Configuración",
+    "config-btn-link": "Configuración",
     "config": "Configurar usuarios",
+    "config-sidebar-link": "Configurar usuarios",
     "add-user": "Añadir usuario",
+    "add-user-sidebar-link": "Añadir usuario",
     "password": "Cambiar contraseña",
-    "config-adm-btn": "Configuración de administrador",
-    "full-screen-btn": "Pantalla completa"
+    "password-sidebar-link": "Cambiar contraseña",
+    "config-bottom-btn": "Configuración de administrador",
+    "full-screen-btn": "Pantalla completa",
+    "exit": "Salir"
   },
   "footer": {
     "text": "FET-APP - Basado en las plantillas",
@@ -110,6 +145,113 @@
       "description": "¿Está seguro que desea eliminar el modelo? <br> Esta acción es irreversible",
       "cancel-btn": "Cancelar",
       "delete-btn": "Eliminar"
+    }
+  },
+  "add-classifier": {
+    "title": "Cargar Modelo de Clasificación",
+    "accept-btn": "Aceptar",
+    "next-btn": "Siguiente",
+    "modify-btn": "Modificar",
+    "create-btn": "Crear",
+    "cancel-btn": "Cancelar",
+    "back-btn": "Atrás",
+    "progress": {
+      "message-1": "Creating Dataset Distributions",
+      "message-2": "Creating Dataset Distributions",
+      "message-3": "Creating Dataset Distributions",
+      "message-4": "Creating Dataset Distributions"
+    },
+    "required": "*Requerido",
+    "optional": "Opcional",
+    "target-selector": "Columna de Clasificación",
+    "index-selector": "Columna sobrante como índice",
+    "descriptions": {
+      "title": "Descripción de variables",
+      "placeholder": "Descripción..."
+    },
+    "q-vars": {
+      "title": "Valores de las posibles variables cualitativas.",
+      "placeholder": "Original Value: "
+    }
+  },
+  "add-regressor": {
+    "title": "Cargar Modelo de Regresión",
+    "accept-btn": "Aceptar",
+    "next-btn": "Siguiente",
+    "modify-btn": "Modificar",
+    "create-btn": "Crear",
+    "cancel-btn": "Cancelar",
+    "back-btn": "Atrás",
+    "progress": {
+      "message-1": "Creating Dataset Distributions",
+      "message-2": "Creating Dataset Distributions",
+      "message-3": "Creating Dataset Distributions",
+      "message-4": "Creating Dataset Distributions"
+    },
+    "required": "*Requerido",
+    "optional": "Opcional",
+    "unit": "Unidad de Medida",
+    "target-selector": "Columna Objetivo",
+    "index-selector": "Columna sobrante como índice",
+    "descriptions": {
+      "title": "Descripción de variables",
+      "placeholder": "Descripción..."
+    },
+    "q-vars": {
+      "title": "Valores de las posibles variables cualitativas.",
+      "placeholder": "Original Value: "
+    }
+  },
+  "dashboard": {
+    "data": {
+      "common": {
+        "tab": "DATOS"
+      },
+      "classifier": {
+      },
+      "regressor": {
+      }
+    },
+    "importance": {
+      "common": {
+        "tab": "IMPORTANCIAS"
+      },
+      "classifier": {
+      },
+      "regressor": {
+      }
+    },
+    "metrics": {
+      "common": {
+        "tab": "MÉTRICAS"
+      }
+    },
+    "surrogate": {
+      "common": {
+        "tab": "SUBROGADO"
+      },
+      "classifier": {
+      },
+      "regressor": {
+      }
+    },
+    "trees": {
+      "common": {
+        "tab": "ÁRBOLES"
+      },
+      "classifier": {
+      },
+      "regressor": {
+      }
+    },
+    "predictions": {
+      "common": {
+        "tab": "PREDICCIONES"
+      },
+      "classifier": {
+      },
+      "regressor": {
+      }
     }
   }
 }

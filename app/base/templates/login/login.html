@@ -47,8 +47,8 @@
     <script>
       (async()=>{
         const loginTranslations = await t(["login"]);
-        window.document.getElementById('login-title').innerHTML = loginTranslations['title'];
-        window.document.getElementById('login-btn').innerHTML = loginTranslations['btn'];
+        window.document.getElementById('login-title').innerHTML = loginTranslations['title'] ?? 'login.title';
+        window.document.getElementById('login-btn').innerHTML = loginTranslations['btn'] ?? 'login.btn';
       })();
     </script>
   {% endblock javascripts %}

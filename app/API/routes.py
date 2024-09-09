@@ -120,13 +120,16 @@ def get_translation():
     ruta_archivo = os.path.join(ruta_actual, f'app/base/static/languages/{user.langSelection if isLogged else user["langSelection"]}.json')
 
     text = ''
-    with open(ruta_archivo) as archivo:
-        # Cargar el contenido del archivo en una variable
-        datos = json.load(archivo)
-        print(datos)
-        text = datos
-        for key in keys:
-            text = text[key]
+    try:
+        with open(ruta_archivo) as archivo:
+            # Cargar el contenido del archivo en una variable
+            datos = json.load(archivo)
+            print(datos)
+            text = datos
+            for key in keys:
+                text = text[key]
+    except Exception as e:
+        print('Translation key error: ', e)
 
     return {"text": text}
 

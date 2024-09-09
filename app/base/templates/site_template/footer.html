@@ -5,7 +5,7 @@
 <script>
   (async() => {
     const footerTranslations = await t(["footer"]);
-    window.document.getElementById('footer-text').innerHTML = footerTranslations["text"];
-    window.document.getElementById('footer-link').innerHTML = footerTranslations["link"];
+    window.document.getElementById('footer-text').innerHTML = footerTranslations["text"] ?? 'footer.text';
+    window.document.getElementById('footer-link').innerHTML = footerTranslations["link"] ?? 'footer.link';
   })();
 </script>

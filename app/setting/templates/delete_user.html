@@ -23,14 +23,14 @@
               <div class="animate form login_form">
                 <section class="login_content">
                   <form data-parsley-validate method="post">
-                    <h1>Eliminar Usuario</h1>
+                    <h1 id="delete-user-title"></h1>
                     <div>
                       <input id="username_delete" value="{{ user.username }}" name="username" readonly type="text" class="form-control required" />
                       <input id="useremail_delete" value="{{ user.email }}" name="username" readonly type="text" class="form-control required" />
                     </div>
                     <div>
-                      <a href="/setting/manage_users" type="reset" class="btn btn-default" name="Delete">Atrás</a>
-                      <button type="submit" class="btn btn-danger submit" name="Delete">Eliminar</button>
+                      <a href="/setting/manage_users" type="reset" class="btn btn-default" name="Delete" id="delete-user-back-btn"></a>
+                      <button type="submit" class="btn btn-danger submit" name="Delete" id="delete-user-delete-btn"></button>
                     </div>
                     <div class="clearfix"></div>
                   </form>
@@ -47,4 +47,12 @@
 
 {% block javascripts %}
   {{ super() }}
+  <script>
+    (async()=>{
+      const deleteUserTranslations = await t(["delete-user"]);
+      window.document.getElementById('delete-user-title').innerHTML = deleteUserTranslations['title'] ?? 'delete-user.title';
+      window.document.getElementById('delete-user-back-btn').innerHTML = deleteUserTranslations['back-btn'] ?? 'delete-user.back-btn';
+      window.document.getElementById('delete-user-delete-btn').innerHTML = deleteUserTranslations['delete-btn'] ?? 'delete-user.delete-btn';
+    })();
+  </script>
 {% endblock %}
