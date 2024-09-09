@@ -1,4 +1,11 @@
 <div class="pull-right" style="color: white;">
-  FET-APP - Basado en las plantillas <a style="color: blue;" href="https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/">Colorlib</a>
+  <span id="footer-text"></span> <a style="color: blue;" href="https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/" id="footer-link"></a>
 </div>
 <div class="clearfix"></div>
+<script>
+  (async() => {
+    const footerTranslations = await t(["footer"]);
+    window.document.getElementById('footer-text').innerHTML = footerTranslations["text"];
+    window.document.getElementById('footer-link').innerHTML = footerTranslations["link"];
+  })();
+</script>

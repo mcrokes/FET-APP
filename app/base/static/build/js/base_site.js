@@ -123,4 +123,5 @@ const checkPosition = ()=> {
 }
 
 window.addEventListener('resize', checkPosition);
+window.addEventListener('load', checkPosition);
 sidebarCollapseList.addEventListener('transitionend', checkPosition);

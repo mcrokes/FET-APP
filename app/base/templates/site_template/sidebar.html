@@ -1,7 +1,7 @@
 <div class="left_col scroll-view" style="height: 100%; width: 100%;">
   <div class="profile clearfix" id="sidebar-site-logo">
     <h3 style="color: white; font-weight: bold; padding: 0 1rem; line-height: unset; text-transform: uppercase; margin-top: 1.5rem; text-align: center;">
-      <i class="fa fa-tree"></i> FORESTAL <i class="fa fa-tree"></i>
+      <i class="fa fa-tree" ></i> <span id="app-name-sidebar"></span> <i class="fa fa-tree"></i>
     </h3>
     <br />
   </div>
@@ -11,35 +11,35 @@
     <div class="menu_section">
       <ul class="nav side-menu">
         <li style="width: 100%">
-          <a data-toggle="tooltip" title="Inicio"  href="/home" class="sidebar-link"><i class="fa fa-home sidebar-icon"></i> <span class="sidebar-item">Inicio</span> </a>
+          <a data-toggle="tooltip" title="Inicio"  href="/home" class="sidebar-link"><i class="fa fa-home sidebar-icon"></i> <span class="sidebar-item" id="home-btn"></span> </a>
         </li>
 
         <li style="width: 100%">
-          <a data-toggle="tooltip" title="Modelos de Clasificación"  class="sidebar-link" style="overflow: hidden; text-overflow: ellipsis;" href="/processor/manage_classifiers"><i class="fa fa-pie-chart sidebar-icon"></i> <span class="sidebar-item">Clasificación</span></a>
+          <a data-toggle="tooltip" title="Modelos de Clasificación"  class="sidebar-link" style="overflow: hidden; text-overflow: ellipsis;" href="/processor/manage_classifiers"><i class="fa fa-pie-chart sidebar-icon"></i> <span class="sidebar-item" id="classifier-btn"></span></a>
         </li>
 
         <li style="width: 100%">
-          <a data-toggle="tooltip" title="Modelos de Regresión"  href="/processor/manage_regressors" class="sidebar-link"><i class="fa fa-line-chart sidebar-icon"></i> <span class="sidebar-item">Regresión</span></a>
+          <a data-toggle="tooltip" title="Modelos de Regresión"  href="/processor/manage_regressors" class="sidebar-link"><i class="fa fa-line-chart sidebar-icon"></i> <span class="sidebar-item" id="regressor-btn"></span></a>
         </li>
         <li style="width: 100%">
           <div class="accordion accordion-flush" id="configuration-collapse">
             <div class="accordion-item" style="background-color: transparent; border: none;">
               <a class="accordion-header collapsed sidebar-link" style="background-color: transparent; border: none; color: white;" data-toggle="tooltip" title="Configuración" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                <i class="fa fa-cogs sidebar-icon"></i> <span class="sidebar-item" style="margin-right: 2rem; font-size: 13px">Configuración</span> <i id="chevron-icon-sidebar" class="fa fa-chevron-down ml-2" style="font-size: 12px;"></i>
+                <i class="fa fa-cogs sidebar-icon"></i> <span class="sidebar-item" style="margin-right: 2rem; font-size: 13px" id="config-btn"></span> <i id="chevron-icon-sidebar" class="fa fa-chevron-down ml-2" style="font-size: 12px;"></i>
               </a>
               <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#configuration-collapse">
                 <div class="accordion-body">
                   <ul class="nav dropdown-config">
                     {% if Is_admin %}
                       <li>
-                        <a class="sidebar-link" data-toggle="tooltip" title="Configurar Usuarios"  href="/setting/manage_users" style="color: white;"><i class="fa fa-cog sidebar-icon"></i> <span class="sidebar-item">Configurar Usuarios</span></a>
+                        <a class="sidebar-link" data-toggle="tooltip" title="Configurar Usuarios"  href="/setting/manage_users" style="color: white;"><i class="fa fa-cog sidebar-icon"></i> <span class="sidebar-item" id="config-sidebar"></span></a>
                       </li>
                       <li>
-                        <a class="sidebar-link" data-toggle="tooltip" title="Añadir Usuario" href="/setting/add_user" style="color: white;"><i class="fa fa-user-plus sidebar-icon"></i> <span class="sidebar-item">Añadir Usuario</span></a>
+                        <a class="sidebar-link" data-toggle="tooltip" title="Añadir Usuario" href="/setting/add_user" style="color: white;"><i class="fa fa-user-plus sidebar-icon"></i> <span class="sidebar-item" id="add-user-sidebar"></span></a>
                       </li>
                     {% endif %}
                     <li>
-                      <a class="sidebar-link" data-toggle="tooltip" title="Cambiar Contraseña"  href="/setting/change_password" style="color: white;"><i class="fa fa-key sidebar-icon"></i> <span class="sidebar-item">Cambiar Contraseña</span></a>
+                      <a class="sidebar-link" data-toggle="tooltip" title="Cambiar Contraseña"  href="/setting/change_password" style="color: white;"><i class="fa fa-key sidebar-icon"></i> <span class="sidebar-item" id="password-sidebar"></span></a>
                     </li>
                   </ul>
                 </div>
@@ -55,25 +55,42 @@
   <!-- /menu footer buttons -->
   <div id="sidebar-footer" class="sidebar-footer">
     {% if Is_admin %}
-      <a data-toggle="tooltip" data-placement="top" title="Configuración de Administrador" href="/setting/manage_users"><span class="fa fa-cog" aria-hidden="true"></span></a>
+      <a data-toggle="tooltip" data-placement="top" title="Configuración de Administrador" id="config-adm-btn" href="/setting/manage_users"><span class="fa fa-cog" aria-hidden="true"></span></a>
     {% else %}
-      <a data-toggle="tooltip" data-placement="top" title="Configuración" href="/setting/change_password"><span class="fa fa-cogs" aria-hidden="true"></span></a>
+      <a data-toggle="tooltip" data-placement="top" title="Configuración" id="configa-usr-btn" href="/setting/change_password"><span class="fa fa-cogs" aria-hidden="true"></span></a>
     {% endif %}
-    <a data-toggle="tooltip" onclick="hide_sidebar()" data-placement="top" title="Pantalla Completa"><span class="fa fa-desktop" aria-hidden="true"></span></a>
-    <a data-toggle="tooltip" data-placement="top" title="Salir" href="/logout"><span class="fa fa-sign-out" aria-hidden="true"></span></a>
+    <a data-toggle="tooltip" onclick="hide_sidebar()" data-placement="top" id="full-screen-btn" title="Pantalla Completa"><span class="fa fa-desktop" aria-hidden="true"></span></a>
+    <a data-toggle="tooltip" data-placement="top" title="Salir" id="exit-btn" href="/logout"><span class="fa fa-sign-out" aria-hidden="true"></span></a>
   </div>
   <!-- /menu footer buttons -->
 
   <script>
+
+    (async() => {
+      const sidebarTranslations = await t(["sidebar"]);
+      window.document.getElementById('app-name-sidebar').innerHTML = await t(["app-name"]);
+      window.document.getElementById('home-btn').innerHTML = sidebarTranslations["home-btn"];
+      window.document.getElementById('classifier-btn').innerHTML = sidebarTranslations["classifier-btn"];
+      window.document.getElementById('regressor-btn').innerHTML = sidebarTranslations["regressor-btn"];
+      window.document.getElementById('config-btn').innerHTML = sidebarTranslations["config-btn"];
+
+      window.document.getElementById('config-sidebar').innerHTML = sidebarTranslations["config"];
+      window.document.getElementById('add-user-sidebar').innerHTML = sidebarTranslations["add-user"];
+      window.document.getElementById('password-sidebar').innerHTML = sidebarTranslations["password"];
+
+    })();
+
     const myCollapsible = document.getElementById('configuration-collapse')
     const chevronIcon = document.getElementById('chevron-icon-sidebar')
-    myCollapsible.addEventListener('hidden.bs.collapse', event => {
+    myCollapsible?.addEventListener('hidden.bs.collapse', event => {
       chevronIcon.classList.remove('fa-chevron-up');
       chevronIcon.classList.add('fa-chevron-down');
     })
-    myCollapsible.addEventListener('shown.bs.collapse', event => {
+    myCollapsible?.addEventListener('shown.bs.collapse', event => {
       chevronIcon.classList.remove('fa-chevron-down');
       chevronIcon.classList.add('fa-chevron-up');
     })
+
+
   </script>
 </div>

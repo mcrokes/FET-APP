@@ -1,6 +1,75 @@
 {
   "lang": "es",
+  "app-name": "Forestal",
+  "top-bar": {
+    "config": "Configuración",
+    "exit": "Salir"
+  },
+  "sidebar": {
+    "home-btn": "Inicio",
+    "classifier-btn": "Clasificación",
+    "regressor-btn": "Regresión",
+    "config-btn": "Configuración",
+    "config": "Configurar usuarios",
+    "add-user": "Añadir usuario",
+    "password": "Cambiar contraseña",
+    "config-adm-btn": "Configuración de administrador",
+    "full-screen-btn": "Pantalla completa"
+  },
+  "footer": {
+    "text": "FET-APP - Basado en las plantillas",
+    "link": "Colorlib"
+  },
   "home": {
-    "info-title": "Modelos de Clasificación y Regresión con Random Forest"
+    "info-title": "Modelos de Clasificación y Regresión con Random Forest",
+    "classifier-btn": "Modelos de clasificación",
+    "regressor-btn": "Modelos de regresión",
+    "index": "Índice",
+    "index-intro": "Introducción",
+    "intro": {
+      "text": "Random Forest es un algoritmo de aprendizaje automático que combina múltiples árboles de decisión para mejorar la precisión y robustez de los modelos de clasificación y regresión."
+    },
+    "index-classifier": "Clasificación con Random Forest",
+    "classifier": {
+      "title-1": "¿Cómo funciona?",
+      "subtitle-1": "El algoritmo de Random Forest para clasificación funciona de la siguiente manera:",
+      "text-1-1": "Se crea un conjunto de árboles de decisión, cada uno con una muestra aleatoria de características y observaciones.",
+      "text-1-2": "Cada árbol de decisión se entrena con una parte del conjunto de datos y se utiliza para predecir la clase de las observaciones.",
+      "text-1-3":"Las predicciones de cada árbol se combinan para obtener una predicción final.",
+      "title-2":"Ventajas",
+      "text-2-1":"Robustez: Random Forest es resistente a la sobreajuste y puede manejar grandes conjuntos de datos.",
+      "text-2-2":"Flexibilidad: Puede manejar diferentes tipos de características, incluyendo numéricas y categóricas.",
+      "text-2-3":"Interpretabilidad: Los árboles de decisión individuales pueden ser interpretados para entender las relaciones entre las características y la clase.",
+      "title-3": "Desventajas",
+      "text-3-1":"Computacionalmente costoso: El entrenamiento de un modelo de Random Forest puede ser lento para grandes conjuntos de datos.",
+      "text-3-2":"Sensibilidad a la elección de hiperparámetros: La elección de los hiperparámetros, como el número de árboles y la profundidad máxima, puede afectar la precisión del modelo."
+    }, 
+    "index-regressor": "Regresión con Random Forest",
+    "regressor": {
+      "title-1": "¿Cómo funciona?",
+      "subtitle-1": "El algoritmo de Random Forest para regresión funciona de la siguiente manera:",
+      "text-1-1": "Se crea un conjunto de árboles de decisión, cada uno con una muestra aleatoria de características y observaciones.",
+      "text-1-2": "Cada árbol de decisión se entrena con una parte del conjunto de datos y se utiliza para predecir el valor continuo.",
+      "text-1-3":"Las predicciones de cada árbol se combinan para obtener una predicción final.",
+      "title-2":"Ventajas",
+      "text-2-1":"Robustez: Random Forest es resistente a la sobreajuste y puede manejar grandes conjuntos de datos.",
+      "text-2-2":"Flexibilidad: Puede manejar diferentes tipos de características, incluyendo numéricas y categóricas.",
+      "text-2-3":"Interpretabilidad: Los árboles de decisión individuales pueden ser interpretados para entender las relaciones entre las características y la variable objetivo.",
+      "title-3": "Desventajas",
+      "text-3-1":"Computacionalmente costoso: El entrenamiento de un modelo de Random Forest puede ser lento para grandes conjuntos de datos.",
+      "text-3-2":"Sensibilidad a la elección de hiperparámetros: La elección de los hiperparámetros, como el número de árboles y la profundidad máxima, puede afectar la precisión del modelo."
+    },
+    "index-example": "Ejemplos de aplicación",    
+    "example": {
+      "text-1": "Clasificación de imágenes: Random Forest se puede utilizar para clasificar imágenes en diferentes categorías, como objetos, personas o lugares.",
+      "text-2":"Predicción de precios de viviendas: Utilizar características como número de habitaciones, superficie, ubicación, etc. para predecir el precio de una vivienda.",
+      "text-3":"Predicción de demanda de productos: Utilizar características como temporada, día de la semana, festividades, etc. para predecir la demanda de un producto.",
+      "text-4":"Predicción de resultados deportivos: Utilizar características como estadísticas de equipo, lesiones, condiciones climáticas, etc. para predecir el resultado de un partido."
+    },
+    "index-conclusion": "Conclusión",    
+    "conclusion": {
+      "text-1": "En resumen, los modelos de clasificación y regresión con Random Forest son herramientas poderosas para analizar y predecir resultados en una variedad de campos. Su capacidad para manejar grandes conjuntos de datos y su robustez frente a la sobreajuste los hacen ideales para aplicaciones en la vida real.",
+      "text-2":"Para más información <a href='https://cienciadedatos.net/documentos/py08_random_forest_python' target='_blank'>haga click aquí</a>"
+    }
   }
 }
