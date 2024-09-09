@@ -14,32 +14,43 @@
 {% block body_class %}login{% endblock body_class %}
 
 {% block body %}
-    <div style="height: 100%; background-color: #f3f3f3a8; display: flex; justify-content: center;">
-      <div style="width: fit-content;">
-        <div class="dashboard_graph">
-          <div style="width: 100%; min-height: fit-content; margin-top: 8rem;" >
-            <div class="login_wrapper">
-                <div class="animate form login_form">
-                  <section class="login_content">
-                    <form data-parsley-validate method="post">
-                      <h1 style="font-weight: bold;"> Bienvenido </h1>
-                      {% for field in login_form if field.widget.input_type != 'hidden'  %}
-                        <div>
-                          {{ field(class="form-control required", placeholder=field.label.text) }}
-                        </div>
-                      {% endfor %}
-                      <div>
-                      <button type="submit" class="btn btn-outline-success submit" name="login"> Log in </button>
-                      </div>
-                      <div class="clearfix"></div>
-                    </form>
-                    <h4>{{ status }}</h4>
-                  </section>
-                </div>
+  <div style="height: 100%; background-color: #f3f3f3a8; display: flex; justify-content: center;">
+    <div style="width: fit-content;">
+      <div class="dashboard_graph">
+        <div style="width: 100%; min-height: fit-content; margin-top: 8rem;">
+          <div class="login_wrapper">
+            <div class="animate form login_form">
+              <section class="login_content">
+                <form data-parsley-validate method="post">
+                  <h1 style="font-weight: bold;" id="login-title"></h1>
+                  {% for field in login_form if field.widget.input_type != 'hidden' %}
+                  <div>
+                    {{ field(class="form-control required", placeholder=field.label.text) }}
+                  </div>
+                  {% endfor %}
+                  <div>
+                    <button type="submit" class="btn btn-outline-success submit" name="login" id="login-btn"></button>
+                  </div>
+                  <div class="clearfix"></div>
+                </form>
+                <h4>{{ status }}</h4>
+              </section>
             </div>
           </div>
-          <div class="clearfix"></div>
         </div>
+        <div class="clearfix"></div>
       </div>
     </div>
+  </div>
+  {% block javascripts %}
+    super()
+    <script>
+      (async()=>{
+        const loginTranslations = await t(["login"]);
+        window.document.getElementById('login-title').innerHTML = loginTranslations['title'];
+        window.document.getElementById('login-btn').innerHTML = loginTranslations['btn'];
+      })();
+    </script>
+  {% endblock javascripts %}
 {% endblock body %}
+

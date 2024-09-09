@@ -6,7 +6,7 @@ from app.proccessor.models import ExplainedClassifierModel, ExplainedRegressorMo
 from app.proccessor.models import ModelForProccess
 from . import blueprint
 from flask import current_app, make_response, render_template, request
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, AnonymousUserMixin
 
 from ..base.models import User
 
@@ -105,16 +105,19 @@ def get_regressor_namelist():
 
 
 @blueprint.route("/getTranslation", methods=["GET", "POST"])
-@login_required
 def get_translation():
     keys = request.data.decode().split(',')
-    user: User = User.query.filter(User.id == current_user.id).first()
+    isLogged = not isinstance(current_user, AnonymousUserMixin)
+    if isLogged:
+        user: User = User.query.filter(User.id == current_user.id).first()
+    else:
+        user: dict = {'langSelection': 'es'}
     print('keys: ', keys)
     # Obtener la ruta actual de trabajo
     ruta_actual = os.getcwd()
     # Construir la ruta del archivo
 
-    ruta_archivo = os.path.join(ruta_actual, f'app/base/static/languages/{user.langSelection}.json')
+    ruta_archivo = os.path.join(ruta_actual, f'app/base/static/languages/{user.langSelection if isLogged else user["langSelection"]}.json')
 
     text = ''
     with open(ruta_archivo) as archivo:
