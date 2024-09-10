@@ -6,6 +6,9 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objects as go
+from flask_login import current_user
+
+from app.API.routes import find_translations
 from app.proccessor.models import ExplainedModel
 
 
@@ -38,6 +41,7 @@ datasetLayout = html.Div(
     [
         dcc.Loading(
             [
+                html.Div(id='dummy', style={'display': 'none'}),
                 html.Div([
                     html.Plaintext(
                         [
@@ -186,197 +190,212 @@ datasetLayout = html.Div(
 )
 
 
-def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
-    def setBottomLegend(fig):
-        fig.update_layout(
-            legend=dict(
-                orientation="h", yanchor="top", y=-0.4, xanchor="right", x=1
-            ),
-        )
-        return fig
-
-    def addAxisNames(fig):
-        fig = setBottomLegend(fig)
-        fig.update_layout(
-            yaxis_title="Ocurrencias",
-            xaxis_title="Variable",
-        )
-        return fig
-
-    @app.callback(
-        Output("n-graph", "children"),
-        Output("q-graph", "children"),
-        State("path", "href"),
-        Input("q-vars-dropdown", "value"),
-        Input("n-vars-dropdown", "value"),
-    )
-    def graph_explainers(cl, q_var, n_var):
-        f = furl(cl)
-        model_id = f.args["model_id"]
-        try:
-            model_x: ExplainedModel = ExplainedModel.query.filter(
-                ExplainedModel.id == model_id
-            ).first()
-
-            df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
-            qualitative_graph = generateDataSetDistributions(df, q_var)
-            numeric_graph = generateDataSetDistributions(df, n_var)
-            return (
-                dcc.Graph(
-                    figure=addAxisNames(
-                        go.Figure(
-                            data=numeric_graph["graph_data"],
-                            layout=dict(title=numeric_graph["predictor"]),
-                        )
-                    )
-                ),
-                dcc.Graph(
-                    figure=addAxisNames(
-                        go.Figure(
-                            data=qualitative_graph["graph_data"],
-                            layout=dict(title=qualitative_graph["predictor"], ),
-                        )
-                    )
+def datasetCallbacks(app, furl, isRegressor: bool = False):
+    def runDatasetCallbacks():
+        def setBottomLegend(fig):
+            fig.update_layout(
+                legend=dict(
+                    orientation="h", yanchor="top", y=-0.4, xanchor="right", x=1
                 ),
             )
-        except Exception as e:
-            print(e)
-        raise PreventUpdate
+            return fig
 
-    @app.callback(
-        Output("dataset-title", "children"),
-        Output("modified-dataset-view", "children"),
-        Output("dataset-view", "children"),
-        Output("numeric-plot", "children"),
-        Output("object-plot", "children"),
-        Output("correlation-plot", "children"),
-        Input("path", "href"),
-    )
-    def graph_explainers(cl):
-        f = furl(cl)
-        model_id = f.args["model_id"]
-        try:
-            model_x: ExplainedModel = ExplainedModel.query.filter(
-                ExplainedModel.id == model_id
-            ).first()
+        def addAxisNames(fig):
+            fig = setBottomLegend(fig)
+            fig.update_layout(
+                yaxis_title="Ocurrencias",
+                xaxis_title="Variable",
+            )
+            return fig
 
-            original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
-            original_df_with_index = original_df.rename_axis("Índice").reset_index()
-            df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
-            df_with_index = df.copy()
-            if model_x.indexColumnName:
-                df_with_index.insert(0, model_x.indexColumnName, model_x.getElement('indexesList'))
-            else:
-                df_with_index = df_with_index.rename_axis("Índice").reset_index()
+        def getTranslations(lang, section, t_type):
+            return find_translations(lang, ['dashboard', section, t_type])['text']
 
-            dtt = model_x.explainer_regressor.getElement(
-                "name") if isRegressor else model_x.explainer_classifier.getElement("name")
+        @app.callback(
+            Output("n-graph", "children", allow_duplicate=True),
+            Output("q-graph", "children"),
+            State("path", "href"),
+            Input("q-vars-dropdown", "value"),
+            Input("n-vars-dropdown", "value"),
+            prevent_initial_call=True
+        )
+        def graph_explainers(cl, q_var, n_var):
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+                translationsCommon = getTranslations(current_user.langSelection, 'data', 'common')
+                translationsClassifier = getTranslations(current_user.langSelection, 'data', 'classifier')
+                translationsRegressor = getTranslations(current_user.langSelection, 'data', 'regressor')
+                print('translationsCommon: ', translationsCommon)
+                print('translationsClassifier: ', translationsClassifier)
+                print('translationsRegressor: ', translationsRegressor)
+                model_x: ExplainedModel = ExplainedModel.query.filter(
+                    ExplainedModel.id == model_id
+                ).first()
 
-            q_vars_names = [variable['column_name'] for variable in model_x.getElement('q_variables_dict')]
-            n_vars_names = list(df.columns)
-            if not isRegressor:
-                q_vars_names.append(model_x.getElement('target_row'))
-
-            for elm in q_vars_names:
-                n_vars_names.remove(elm)
-
-            qualitative_graph = generateDataSetDistributions(df, q_vars_names[0]) if q_vars_names else None
-            numeric_graph = generateDataSetDistributions(df, n_vars_names[0]) if n_vars_names else None
-            corr_matrix = original_df.drop(
-                columns=model_x.getElement("target_row")
-            ).corr(method="pearson")
-
-            return (
-                dtt,
-                html.Div(
-                    [
-                        dash_table.DataTable(
-                            data=df_with_index.to_dict("records"),
-                            columns=[
-                                {"name": i, "id": i} for i in df_with_index.columns
-                            ],
-                            page_size=10,
-                            filter_action="native",
-                            filter_options={"placeholder_text": "Filtrar..."},
-                            sort_action="native",
-                            sort_mode="multi",
-                            row_selectable="single",
-                        )
-                    ],
-                    className="rules-table",
-                ),
-                html.Div(
-                    [
-                        dash_table.DataTable(
-                            data=original_df_with_index.to_dict("records"),
-                            columns=[
-                                {"name": i, "id": i}
-                                for i in original_df_with_index.columns
-                            ],
-                            page_size=10,
-                            filter_action="native",
-                            filter_options={"placeholder_text": "Filtrar..."},
-                            sort_action="native",
-                            sort_mode="multi",
-                            row_selectable="single",
-                        )
-                    ],
-                    className="rules-table",
-                ),
-                [
-                    dcc.Dropdown(
-                        id="n-vars-dropdown",
-                        value=n_vars_names[0],
-                        options=[{'label': name, 'value': name} for name in n_vars_names],
-                        clearable=False,
-                        className='predictor-selector',
-                    ),
-                    dbc.Col(
-                        id=f"n-graph",
-                        children=dcc.Graph(
-                            figure=addAxisNames(
-                                go.Figure(
-                                    data=numeric_graph["graph_data"],
-                                    layout=dict(title=numeric_graph["predictor"]),
-                                )
+                df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
+                qualitative_graph = generateDataSetDistributions(df, q_var)
+                numeric_graph = generateDataSetDistributions(df, n_var)
+                return (
+                    dcc.Graph(
+                        figure=addAxisNames(
+                            go.Figure(
+                                data=numeric_graph["graph_data"],
+                                layout=dict(title=numeric_graph["predictor"]),
                             )
-                        ),
-                    )
-                ] if numeric_graph else 'No Hay Datos',
-                [
-                    dcc.Dropdown(
-                        id="q-vars-dropdown",
-                        value=q_vars_names[0],
-                        options=[{'label': name, 'value': name} for name in q_vars_names],
-                        clearable=False,
-                        className='predictor-selector',
+                        )
                     ),
-                    dbc.Col(
-                        id=f"q-graph",
-                        children=dcc.Graph(
-                            figure=addAxisNames(
-                                go.Figure(
-                                    data=qualitative_graph["graph_data"],
-                                    layout=dict(title=qualitative_graph["predictor"]),
-                                )
+                    dcc.Graph(
+                        figure=addAxisNames(
+                            go.Figure(
+                                data=qualitative_graph["graph_data"],
+                                layout=dict(title=qualitative_graph["predictor"], ),
                             )
+                        )
+                    ),
+                )
+            except Exception as e:
+                print(e)
+            raise PreventUpdate
+
+        @app.callback(
+            Output("dataset-title", "children", allow_duplicate=True),
+            Output("modified-dataset-view", "children"),
+            Output("dataset-view", "children"),
+            Output("numeric-plot", "children"),
+            Output("object-plot", "children"),
+            Output("correlation-plot", "children"),
+            Input("path", "href"),
+            prevent_initial_call=True
+        )
+        def graph_explainers(cl):
+            f = furl(cl)
+            model_id = f.args["model_id"]
+            try:
+                model_x: ExplainedModel = ExplainedModel.query.filter(
+                    ExplainedModel.id == model_id
+                ).first()
+
+                original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
+                original_df_with_index = original_df.rename_axis("Índice").reset_index()
+                df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
+                df_with_index = df.copy()
+                if model_x.indexColumnName:
+                    df_with_index.insert(0, model_x.indexColumnName, model_x.getElement('indexesList'))
+                else:
+                    df_with_index = df_with_index.rename_axis("Índice").reset_index()
+
+                dtt = model_x.explainer_regressor.getElement(
+                    "name") if isRegressor else model_x.explainer_classifier.getElement("name")
+
+                q_vars_names = [variable['column_name'] for variable in model_x.getElement('q_variables_dict')]
+                n_vars_names = list(df.columns)
+                if not isRegressor:
+                    q_vars_names.append(model_x.getElement('target_row'))
+
+                for elm in q_vars_names:
+                    n_vars_names.remove(elm)
+
+                qualitative_graph = generateDataSetDistributions(df, q_vars_names[0]) if q_vars_names else None
+                numeric_graph = generateDataSetDistributions(df, n_vars_names[0]) if n_vars_names else None
+                corr_matrix = original_df.drop(
+                    columns=model_x.getElement("target_row")
+                ).corr(method="pearson")
+
+                return (
+                    dtt,
+                    html.Div(
+                        [
+                            dash_table.DataTable(
+                                data=df_with_index.to_dict("records"),
+                                columns=[
+                                    {"name": i, "id": i} for i in df_with_index.columns
+                                ],
+                                page_size=10,
+                                filter_action="native",
+                                filter_options={"placeholder_text": "Filtrar..."},
+                                sort_action="native",
+                                sort_mode="multi",
+                                row_selectable="single",
+                            )
+                        ],
+                        className="rules-table",
+                    ),
+                    html.Div(
+                        [
+                            dash_table.DataTable(
+                                data=original_df_with_index.to_dict("records"),
+                                columns=[
+                                    {"name": i, "id": i}
+                                    for i in original_df_with_index.columns
+                                ],
+                                page_size=10,
+                                filter_action="native",
+                                filter_options={"placeholder_text": "Filtrar..."},
+                                sort_action="native",
+                                sort_mode="multi",
+                                row_selectable="single",
+                            )
+                        ],
+                        className="rules-table",
+                    ),
+                    [
+                        dcc.Dropdown(
+                            id="n-vars-dropdown",
+                            value=n_vars_names[0],
+                            options=[{'label': name, 'value': name} for name in n_vars_names],
+                            clearable=False,
+                            className='predictor-selector',
                         ),
-                    )
-                ] if qualitative_graph else 'No Hay Datos',
-                dcc.Graph(
-                    figure=setBottomLegend(
-                        go.Figure(
-                            data=go.Heatmap(
-                                z=corr_matrix,
-                                x=corr_matrix.columns,
-                                y=corr_matrix.columns,
-                                text=round(corr_matrix, 2),
-                                texttemplate="%{text}",
+                        dbc.Col(
+                            id=f"n-graph",
+                            children=dcc.Graph(
+                                figure=addAxisNames(
+                                    go.Figure(
+                                        data=numeric_graph["graph_data"],
+                                        layout=dict(title=numeric_graph["predictor"]),
+                                    )
+                                )
                             ),
                         )
-                    )
-                ),
-            )
-        except Exception as e:
-            print(e)
-            raise PreventUpdate
+                    ] if numeric_graph else 'No Hay Datos',
+                    [
+                        dcc.Dropdown(
+                            id="q-vars-dropdown",
+                            value=q_vars_names[0],
+                            options=[{'label': name, 'value': name} for name in q_vars_names],
+                            clearable=False,
+                            className='predictor-selector',
+                        ),
+                        dbc.Col(
+                            id=f"q-graph",
+                            children=dcc.Graph(
+                                figure=addAxisNames(
+                                    go.Figure(
+                                        data=qualitative_graph["graph_data"],
+                                        layout=dict(title=qualitative_graph["predictor"]),
+                                    )
+                                )
+                            ),
+                        )
+                    ] if qualitative_graph else 'No Hay Datos',
+                    dcc.Graph(
+                        figure=setBottomLegend(
+                            go.Figure(
+                                data=go.Heatmap(
+                                    z=corr_matrix,
+                                    x=corr_matrix.columns,
+                                    y=corr_matrix.columns,
+                                    text=round(corr_matrix, 2),
+                                    texttemplate="%{text}",
+                                ),
+                            )
+                        )
+                    ),
+                )
+            except Exception as e:
+                print(e)
+                raise PreventUpdate
+
+    runDatasetCallbacks()
+#

@@ -55,11 +55,9 @@ def get_regressor_list():
 @login_required
 def delete_classifier():
     modelId = request.data.decode()
-    print('modelId: ', modelId)
     classifier: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
         ExplainedClassifierModel.explainer_model_id == modelId
     ).first()
-    print(classifier.name)
     try:
         classifier.delete_from_db()
         return {'status': 200, 'statusText': 'OK'}
@@ -104,27 +102,16 @@ def get_regressor_namelist():
     return {"data": nameList, "idPath": idPath}
 
 
-@blueprint.route("/getTranslation", methods=["GET", "POST"])
-def get_translation():
-    keys = request.data.decode().split(',')
-    isLogged = not isinstance(current_user, AnonymousUserMixin)
-    if isLogged:
-        user: User = User.query.filter(User.id == current_user.id).first()
-    else:
-        user: dict = {'langSelection': 'es'}
-    print('keys: ', keys)
+def find_translations(current_language, keys):
     # Obtener la ruta actual de trabajo
     ruta_actual = os.getcwd()
-    # Construir la ruta del archivo
-
-    ruta_archivo = os.path.join(ruta_actual, f'app/base/static/languages/{user.langSelection if isLogged else user["langSelection"]}.json')
-
+    ruta_archivo = os.path.join(ruta_actual, f'app/base/static/languages/{current_language}.json')
     text = ''
     try:
         with open(ruta_archivo) as archivo:
             # Cargar el contenido del archivo en una variable
             datos = json.load(archivo)
-            print(datos)
+            # print(datos)
             text = datos
             for key in keys:
                 text = text[key]
@@ -133,13 +120,29 @@ def get_translation():
 
     return {"text": text}
 
+@blueprint.route("/getTranslation", methods=["GET", "POST"])
+def get_translation():
+    keys = request.data.decode().split(',')
+    isLogged = not isinstance(current_user, AnonymousUserMixin)
+    if isLogged:
+        user: User = User.query.filter(User.id == current_user.id).first()
+    else:
+        user: dict = {'langSelection': 'es'}
+    # print('keys: ', keys)
+    # Construir la ruta del archivo
+
+    current_language = user.langSelection if isLogged else user["langSelection"]
+
+    return find_translations(current_language, keys)
+
+
+
 
 @blueprint.route("/changeLanguage", methods=["GET", "POST"])
 @login_required
 def change_language():
     lang = request.data.decode()
     user: User = User.query.filter(User.id == current_user.id).first()
-    print('lang: ', lang)
     try:
         user.langSelection = lang
         user.db_commit()

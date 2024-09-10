@@ -9,7 +9,6 @@ def get_y_transformed(y):
         if value is not int:
             y = LabelEncoder().fit_transform(y)
             break
-    print('y: ', y)
     return y
 
 

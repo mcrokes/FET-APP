@@ -6,6 +6,7 @@ Created on Fri Jan 25 22:34:51 2019
 """
 
 from datetime import datetime, timedelta
+
 from flask_login import current_user
 from dash import html, dcc
 import pandas as pd
@@ -37,13 +38,16 @@ def clean_Dir_Store():
             os.remove(i)
 
 
-def apply_layout_with_auth(app, layout):
+def apply_layout_with_auth(app, createLayout, addCallbacks):
+    addCallbacks(app)
+
     def serve_layout():
         if current_user and current_user.is_authenticated:
             session_id = str(uuid.uuid4())
             clean_Dir_Store()
+            layout = createLayout(current_user.langSelection)
             return html.Div(
-                [                    
+                [
                     dcc.Location(id='path'),
                     html.Div(session_id, id="session_id", style={"display": "none"}),
                     layout,
@@ -53,3 +57,5 @@ def apply_layout_with_auth(app, layout):
 
     app.config.suppress_callback_exceptions = True
     app.layout = serve_layout
+
+    print('App Layout: ', app.layout)

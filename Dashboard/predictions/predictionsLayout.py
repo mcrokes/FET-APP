@@ -591,12 +591,13 @@ def predictionsCallbacks(app, furl: Function, isRegressor: bool = False):
         return options
 
     @app.callback(
-        Output("instances-dropdown", "children"),
+        Output("instances-dropdown", "children", allow_duplicate=True),
         Output("trees-cutoff-slider", "value"),
         Output("prediction-positive-class-selector", "options"),
         Output("prediction-positive-class-selector", "value"),
         Output("trees-tooltip", "children"),
         Input("path", "href"),
+        prevent_initial_call=True
     )
     def load_init_data(cl):
         f = furl(cl)

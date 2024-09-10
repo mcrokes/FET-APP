@@ -21,6 +21,7 @@ from Dashboard.specificTrees.specificTreesLayout import (
     specificTreesCallbacks,
     specificTreesLayout,
 )
+from app.API.routes import find_translations
 
 from .Dash_fun import apply_layout_with_auth, load_object, save_object
 import dash_bootstrap_components as dbc
@@ -135,11 +136,24 @@ tabs = dbc.Tabs(
     id="classifier-tabs",
 )
 
-layout = html.Div(
-    [tabs],
-    id="classifier-tabs-container",
-    style={"width": "100%"},
-)
+
+def createLayout(currentLanguage):
+    return html.Div(
+        [tabs],
+        id="classifier-tabs-container",
+        style={"width": "100%"},
+    )
+
+
+def addCallbacks(app):
+    # print('currentLanguage: ', currentLanguage)
+    # translations = find_translations(currentLanguage, ['dashboard'])['text']
+    datasetCallbacks(app, furl, True)
+    importancesCallbacks(app, furl, True)
+    metricsCallbacks(app, furl, True)
+    surrogateCallbacks(app, furl, True)
+    specificTreesCallbacks(app, furl, True)
+    predictionsCallbacks(app, furl, True)
 
 
 def Add_Dash(server):
@@ -152,12 +166,6 @@ def Add_Dash(server):
             "/static/assets/styles.css",
         ],
     )
-    apply_layout_with_auth(app, layout)
-    datasetCallbacks(app, furl, True)
-    importancesCallbacks(app, furl, True)
-    metricsCallbacks(app, furl, True)
-    surrogateCallbacks(app, furl, True)
-    specificTreesCallbacks(app, furl, True)
-    predictionsCallbacks(app, furl, True)
+    apply_layout_with_auth(app, createLayout, addCallbacks)
 
     return app.server

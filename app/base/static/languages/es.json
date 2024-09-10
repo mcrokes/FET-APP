@@ -203,9 +203,34 @@
     }
   },
   "dashboard": {
+    "tabs": {
+      "data": {
+        "title": "DATOS",
+        "tooltip": "Estudio del Conjunto de Datos"
+      },
+      "importance": {
+        "title": "IMPORTANCIAS",
+        "tooltip": "Importancias de los predictores"
+      },
+      "metrics": {
+        "title": "MÉTRICAS",
+        "tooltip": "Métricas del Modelo"
+      },
+      "surrogate": {
+        "title": "SUBROGADO",
+        "tooltip": "Árbol subrogado del modelo"
+      },
+      "trees": {
+        "title": "ÁRBOLES",
+        "tooltip": "Árboles individuales del modelo"
+      },
+      "predictions": {
+        "title": "PREDICCIONES",
+        "tooltip": "Interpretación de predicciones"
+      }
+},
     "data": {
       "common": {
-        "tab": "DATOS"
       },
       "classifier": {
       },
@@ -214,7 +239,6 @@
     },
     "importance": {
       "common": {
-        "tab": "IMPORTANCIAS"
       },
       "classifier": {
       },
@@ -223,12 +247,10 @@
     },
     "metrics": {
       "common": {
-        "tab": "MÉTRICAS"
       }
     },
     "surrogate": {
       "common": {
-        "tab": "SUBROGADO"
       },
       "classifier": {
       },
@@ -237,7 +259,6 @@
     },
     "trees": {
       "common": {
-        "tab": "ÁRBOLES"
       },
       "classifier": {
       },
@@ -246,7 +267,6 @@
     },
     "predictions": {
       "common": {
-        "tab": "PREDICCIONES"
       },
       "classifier": {
       },
