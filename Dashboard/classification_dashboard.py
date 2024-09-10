@@ -4,7 +4,6 @@ Created on Sun Jul  8 10:39:33 2018
 
 @author: mcrokes
 """
-import requests
 from dash import Dash, html
 
 from Dashboard.dataset.datasetLayout import datasetCallbacks, datasetLayout
@@ -28,7 +27,6 @@ import dash_bootstrap_components as dbc
 from furl import furl
 
 from app.API.routes import find_translations
-from flask_login import current_user
 
 url_base = "/dash/classification_dashboard/"
 
@@ -49,7 +47,8 @@ def createLayout(currentLanguage):
     print('currentLanguage: ', currentLanguage)
     translations = find_translations(currentLanguage, ['dashboard'])['text']
     tab0_content = dbc.Card(
-        dbc.CardBody([html.Div([datasetLayout], id="dataset-layout-output-upload")]),
+        dbc.CardBody([html.Div([datasetLayout(translations.get('data') if translations.get('data') else {})],
+                               id="dataset-layout-output-upload")]),
         className="mt-3 section-card",
     )
 

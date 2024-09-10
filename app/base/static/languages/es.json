@@ -228,13 +228,52 @@
         "title": "PREDICCIONES",
         "tooltip": "Interpretación de predicciones"
       }
-},
+    },
     "data": {
       "common": {
-      },
-      "classifier": {
-      },
-      "regressor": {
+        "filter": "Filtrar...",
+        "distributions": {
+          "labels": {
+            "x": "Variable",
+            "y": "Ocurrencias"
+          },
+          "legend": {
+            "bars": "Barras",
+            "line": "Lineal"
+          },
+          "no-data": "No hay datos",
+          "title": "Distribución Por Variables",
+          "numeric-title": "Variables Cuantitativas",
+          "q-title": "Variables Cualitativas"
+        },
+        "title": "Métricas del Conjunto de Datos: ",
+        "dataset": {
+          "title": "Conjunto de Datos Original",
+          "modified-title": "Métricas del Conjunto de Datos: ",
+          "tooltip": {
+            "text-1": "* Si desea filtrar las columnas ",
+            "text-2": "Numéricas",
+            "text-3": " deberá ingresar los símbolos (",
+            "text-4": ">",
+            "text-5": ") - (",
+            "text-6": "<",
+            "text-7": ") antes del número. Ej: >56"
+          }
+        },
+        "correlation": {
+          "title": "Correlación de Variables",
+          "tooltip": {
+            "text-1": "Correlación: Medida de la relación entre dos variables, que varía de ",
+            "text-2": "-1 (correlación negativa) a 1 (correlación positiva). ",
+            "text-3": "Valores positivos",
+            "text-4": " indican que las variables aumentan o disminuyen juntas, mientras que ",
+            "text-5": "valores negativos",
+            "text-6": " indican que una variable aumenta cuando la otra disminuye. Valores ",
+            "text-7": "cercanos a 0",
+            "text-8": " indican poca o ninguna correlación."
+          }
+        },
+        "description-title": "Descripción de Predictores"
       }
     },
     "importance": {

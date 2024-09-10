@@ -117,6 +117,7 @@ def find_translations(current_language, keys):
                 text = text[key]
     except Exception as e:
         print('Translation key error: ', e)
+        return {"text": {}}
 
     return {"text": text}
 

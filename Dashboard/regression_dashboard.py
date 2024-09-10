@@ -43,7 +43,7 @@ def setTooltip(innerText, id):
 
 
 tab0_content = dbc.Card(
-    dbc.CardBody([html.Div([datasetLayout], id="dataset-layout-output-upload")]),
+    dbc.CardBody([html.Div([datasetLayout({})], id="dataset-layout-output-upload")]),
     className="mt-3 section-card",
 )
 
