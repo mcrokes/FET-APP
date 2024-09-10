@@ -278,10 +278,31 @@
     },
     "importance": {
       "common": {
+        "gini": {
+          "title": "IMPORTANCIAS GINI",
+          "label-y": "Predictor",
+          "label-x": "Importancia",
+          "tooltip": {
+            "text-1": "Importancia GINI: Indica la capacidad de cada característica para reducir la impureza en la clase objetivo. ",
+            "text-2": "Valores altos",
+            "text-3": " significan que la característica es más importante para la predicción."
+          }
+        },
+        "permutation": {
+          "title": "IMPORTANCIAS POR PERMUTACION",
+          "label-y": "Predictor",
+          "label-x": "Importancia +- error: ",
+          "tooltip": {
+            "text-1": "Importancia por Permutación: Evalúa la importancia de cada característica al ",
+            "text-2": "medir la pérdida de precisión del modelo al aleatorizar sus valores. ",
+            "text-3": "Valores altos",
+            "text-4": " indican características clave."
+          }
+        }
       },
       "classifier": {
-      },
-      "regressor": {
+        "hint": "Cada clase respuesta puede tener valores divergentes",
+        "selector-placeholder": "Seleccione como positiva la clase que desea analizar"
       }
     },
     "metrics": {

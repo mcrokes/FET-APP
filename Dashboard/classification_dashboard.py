@@ -53,7 +53,7 @@ def createLayout(currentLanguage):
     )
 
     tab1_content = dbc.Card(
-        dbc.CardBody([html.Div([importancesLayout], id="importance-layout-output-upload")]),
+        dbc.CardBody([html.Div([importancesLayout(translations.get('importance') if translations.get('data') else {})], id="importance-layout-output-upload")]),
         className="mt-3 section-card",
     )
 

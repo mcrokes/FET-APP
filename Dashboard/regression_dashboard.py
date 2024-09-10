@@ -48,7 +48,7 @@ tab0_content = dbc.Card(
 )
 
 tab1_content = dbc.Card(
-    dbc.CardBody([html.Div([importancesLayout], id="importance-layout-output-upload")]),
+    dbc.CardBody([html.Div([importancesLayout({})], id="importance-layout-output-upload")]),
     className="mt-3 section-card",
 )
 

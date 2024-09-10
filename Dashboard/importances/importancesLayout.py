@@ -1,6 +1,5 @@
 from logging import exception
 import multiprocessing
-from pyclbr import Function
 from dash import dcc, html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
@@ -9,88 +8,108 @@ import dash_bootstrap_components as dbc
 
 import pandas as pd
 import plotly.express as px
+from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import permutation_importance
 
+from Dashboard.utils import getTranslations, setText, findTranslationsParent
 from app.proccessor.model.values import get_target_dropdown
 from app.proccessor.models import ExplainedModel
 
-class_selector = dcc.Dropdown(
-    id="importances-permut-positive-class-selector",
-    placeholder="Seleccione como positiva la clase que desea analizar",
-)
-
 id_sufix = ["importances", "permutation-importances"]
 
-importancesLayout = html.Div(
-    dcc.Loading(
-        [
-            html.Div([
-                html.Div(
-                    [
-                        html.I(
-                            id=f"{id_sufix[0]}-info",
-                            className="fa fa-info-circle info-icon",
-                        ),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        "Importancia GINI: Indica la capacidad de cada característica para reducir la impureza en la clase objetivo. ",
-                                        html.Strong("Valores altos"),
-                                        " significan que la característica es más importante para la predicción.",
-                                    ]
-                                ),
-                            ],
-                            className="personalized-tooltip",
-                            target=f"{id_sufix[0]}-info",
-                        ),
-                    ],
-                    style={"display": "flex", "justify-content": "end"},
-                ),
-                dbc.Row(
-                    html.Div(id="importance-output-upload"),
-                    style={"padding-top": "20px"},
-                ),
-                html.Div(
-                    [
-                        html.I(
-                            id=f"{id_sufix[1]}-info",
-                            className="fa fa-info-circle info-icon",
-                        ),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        "Importancia por Permutación: Evalúa la importancia de cada característica al "
-                                        "medir la pérdida de precisión del modelo al aleatorizar sus valores. ",
-                                        html.Strong("Valores altos"),
-                                        " indican características clave.",
-                                    ]
-                                ),
-                                html.Plaintext(id="extra-hint"),
-                            ],
-                            className="personalized-tooltip",
-                            target=f"{id_sufix[1]}-info",
-                        ),
-                    ],
-                    style={"display": "flex", "justify-content": "end"},
-                ),
-                dbc.Row(
-                    html.Div(id="permutation-importance-output-upload"),
-                    style={"padding-top": "20px"},
-                ),
-                dbc.Row(html.Div([class_selector], id='selector-container', hidden=True)),
-            ], className="container")
-        ],
-    ),
-    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
-)
 
-classifier_hint = html.Strong("Cada clase respuesta puede tener valores divergentes")
+def importancesLayout(importanceTranslations):
+    commonTranslations = findTranslationsParent(importanceTranslations, 'common')
+    classifierTranslations = findTranslationsParent(importanceTranslations, 'classifier')
+    giniTranslations = findTranslationsParent(commonTranslations, 'gini')
+    giniTooltipTranslations = findTranslationsParent(giniTranslations, 'tooltip')
+    permutationTranslations = findTranslationsParent(commonTranslations, 'permutation')
+    permutationTooltipTranslations = findTranslationsParent(permutationTranslations, 'tooltip')
+
+    layout = html.Div(
+        dcc.Loading(
+            [
+                html.Div([
+                    html.Div(
+                        [
+                            html.I(
+                                id=f"{id_sufix[0]}-info",
+                                className="fa fa-info-circle info-icon",
+                            ),
+                            dbc.Tooltip(
+                                [
+                                    html.Plaintext(
+                                        [
+                                            setText(giniTooltipTranslations, 'text-1',
+                                                    'dashboard.importance.common.gini.tooltip'),
+                                            html.Strong(setText(giniTooltipTranslations, 'text-2',
+                                                                'dashboard.importance.common.gini.tooltip')),
+                                            setText(giniTooltipTranslations, 'text-3',
+                                                    'dashboard.importance.common.gini.tooltip'),
+                                        ]
+                                    ),
+                                ],
+                                className="personalized-tooltip",
+                                target=f"{id_sufix[0]}-info",
+                            ),
+                        ],
+                        style={"display": "flex", "justify-content": "end"},
+                    ),
+                    dbc.Row(
+                        html.Div(id="importance-output-upload"),
+                        style={"padding-top": "20px"},
+                    ),
+                    html.Div(
+                        [
+                            html.I(
+                                id=f"{id_sufix[1]}-info",
+                                className="fa fa-info-circle info-icon",
+                            ),
+                            dbc.Tooltip(
+                                [
+                                    html.Plaintext(
+                                        [
+                                            setText(permutationTooltipTranslations, 'text-1',
+                                                    'dashboard.importance.common.permutation.tooltip'),
+                                            setText(permutationTooltipTranslations, 'text-2',
+                                                    'dashboard.importance.common.permutation.tooltip'),
+                                            html.Strong(
+                                                setText(permutationTooltipTranslations, 'text-3',
+                                                        'dashboard.importance.common.permutation.tooltip')),
+                                            setText(permutationTooltipTranslations, 'text-4',
+                                                    'dashboard.importance.common.permutation.tooltip'),
+                                        ]
+                                    ),
+                                    html.Plaintext(id="extra-hint"),
+                                ],
+                                className="personalized-tooltip",
+                                target=f"{id_sufix[1]}-info",
+                            ),
+                        ],
+                        style={"display": "flex", "justify-content": "end"},
+                    ),
+                    dbc.Row(
+                        html.Div(id="permutation-importance-output-upload"),
+                        style={"padding-top": "20px"},
+                    ),
+                    dbc.Row(html.Div([
+                        dcc.Dropdown(
+                            id="importances-permut-positive-class-selector",
+                            placeholder=setText(classifierTranslations, 'selector-placeholder',
+                                                'dashboard.importance.classifier'),
+                        )
+                    ], id='selector-container', hidden=True)),
+                ], className="container")
+            ],
+        ),
+        style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
+    )
+
+    return layout
 
 
-def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
+def importancesCallbacks(app, furl, isRegressor: bool = False):
     @app.callback(
         Output("importance-output-upload", "children"),
         Output("permutation-importance-output-upload", "children"),
@@ -104,28 +123,37 @@ def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
+            # TRANSLATIONS
+            translationsCommon = getTranslations(current_user.langSelection, 'importance', 'common')
+            translationsClassifier = getTranslations(current_user.langSelection, 'importance', 'classifier')
+            translationsGini = findTranslationsParent(translationsCommon, 'gini')
+            translationsPermutation = findTranslationsParent(translationsCommon, 'permutation')
+
+            # NORMAL FLOW
             model_x: ExplainedModel = ExplainedModel.query.filter(
                 ExplainedModel.id == model_id
             ).first()
 
+            # NORMAL FLOW
             model: RandomForestClassifier | RandomForestRegressor = model_x.getElement("model")
-            dataset: pd.DataFrame = model_x.data_set_data.getElement(
-                "dataset"
-            )
+            dataset: pd.DataFrame = model_x.data_set_data.getElement("dataset")
 
             df_feature_importance: pd.DataFrame = pd.DataFrame(
                 {
-                    "Predictor": model.feature_names_in_,
-                    "Importancia": model.feature_importances_,
+                    setText(translationsGini, 'label-y', 'dashboard.importance.common.gini'): model.feature_names_in_,
+                    setText(translationsGini, 'label-x',
+                            'dashboard.importance.common.gini'): model.feature_importances_,
                 }
             )
+            print(df_feature_importance)
             importances_fig = px.bar(
                 data_frame=df_feature_importance.sort_values(
-                    "Importancia", ascending=False
+                    setText(translationsGini, 'label-x',
+                            'dashboard.importance.common.gini'), ascending=False
                 ),
-                x="Importancia",
-                y="Predictor",
-                title="IMPORTANCIAS GINI",
+                x=setText(translationsGini, 'label-x', 'dashboard.importance.common.gini'),
+                y=setText(translationsGini, 'label-y', 'dashboard.importance.common.gini'),
+                title=setText(translationsGini, 'title', 'dashboard.importance.common.gini'),
             )
 
             if not isRegressor:
@@ -163,7 +191,10 @@ def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
                     for k in ["importances_mean", "importances_std"]
                 }
             )
-            df_permutation_importance["Predictor"] = model.feature_names_in_
+            df_permutation_importance[
+                setText(translationsPermutation, 'label-y', 'dashboard.importance.common.permutation')
+            ] = (
+                model.feature_names_in_)
             df_ordered_importance = df_permutation_importance.sort_values(
                 "importances_mean", ascending=True
             )
@@ -171,10 +202,14 @@ def importancesCallbacks(app, furl: Function, isRegressor: bool = False):
                 data_frame=df_ordered_importance,
                 error_x=df_ordered_importance["importances_std"],
                 x="importances_mean",
-                y="Predictor",
-                title="IMPORTANCIAS POR PERMUTACION",
-                labels={"importances_mean": "Importancia +- error: "},
+                y=setText(translationsPermutation, 'label-y', 'dashboard.importance.common.permutation'),
+                title=setText(translationsPermutation, 'title', 'dashboard.importance.common.permutation'),
+                labels={
+                    "importances_mean":
+                        setText(translationsPermutation, 'label-x', 'dashboard.importance.common.permutation')
+                },
             )
+            classifier_hint = html.Strong(setText(translationsClassifier, 'hint', 'dashboard.importance.classifier'))
             return (
                 dcc.Graph(figure=importances_fig),
                 dcc.Graph(figure=permutation_fig),

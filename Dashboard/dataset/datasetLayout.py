@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask_login import current_user
 
-from Dashboard.utils import setText
+from Dashboard.utils import setText, getTranslations, findTranslationsParent
 from app.API.routes import find_translations
 from app.proccessor.models import ExplainedModel
 
@@ -41,14 +41,12 @@ def generateDataSetDistributions(df: pd.DataFrame, feature, legendTranslations):
 
 
 def datasetLayout(dataTranslations):
-    commonTranslations = dataTranslations.get('common') if dataTranslations.get('common') else {}
-    distributionTranslations = commonTranslations.get('distributions') if commonTranslations.get(
-        'distributions') else {}
-    datasetTranslations = commonTranslations.get('dataset') if commonTranslations.get('dataset') else {}
-    datasetTooltipTranslations = datasetTranslations.get('tooltip') if datasetTranslations.get('tooltip') else {}
-    correlationTranslations = commonTranslations.get('correlation') if commonTranslations.get('correlation') else {}
-    correlationTooltipTranslations = correlationTranslations.get('tooltip') if correlationTranslations.get(
-        'tooltip') else {}
+    commonTranslations = findTranslationsParent(dataTranslations, 'common')
+    distributionTranslations = findTranslationsParent(commonTranslations, 'distributions')
+    datasetTranslations = findTranslationsParent(commonTranslations, 'dataset')
+    datasetTooltipTranslations = findTranslationsParent(datasetTranslations, 'tooltip')
+    correlationTranslations = findTranslationsParent(commonTranslations, 'correlation')
+    correlationTooltipTranslations = findTranslationsParent(correlationTranslations, 'tooltip')
 
     layout = html.Div(
         [
@@ -248,9 +246,6 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
         )
         return fig
 
-    def getTranslations(lang, section, t_type):
-        return find_translations(lang, ['dashboard', section, t_type])['text']
-
     @app.callback(
         Output("n-graph", "children", allow_duplicate=True),
         Output("q-graph", "children"),
@@ -265,11 +260,9 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
         try:
             # TRANSLATIONS
             translationsCommon = getTranslations(current_user.langSelection, 'data', 'common')
-            translationsDistributions = translationsCommon.get('distributions') if translationsCommon.get(
-                'distributions') else {}
-            legendTranslations = translationsDistributions.get('legend') if translationsDistributions.get(
-                'legend') else {}
-            axisTranslations = translationsDistributions.get('labels') if translationsDistributions else {}
+            translationsDistributions = findTranslationsParent(translationsCommon, 'distributions')
+            legendTranslations = findTranslationsParent(translationsDistributions, 'legend')
+            axisTranslations = findTranslationsParent(translationsDistributions, 'labels')
 
             # NORMAL FLOW
             model_x: ExplainedModel = ExplainedModel.query.filter(
@@ -317,13 +310,13 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
+            # TRANSLATIONS
             translationsCommon = getTranslations(current_user.langSelection, 'data', 'common')
-            translationsDistributions = translationsCommon.get('distributions') if translationsCommon.get(
-                'distributions') else {}
-            legendTranslations = translationsDistributions.get('legend') if translationsDistributions.get(
-                'legend') else {}
-            axisTranslations = translationsDistributions.get('labels') if translationsDistributions else {}
+            translationsDistributions = findTranslationsParent(translationsCommon, 'distributions')
+            legendTranslations = findTranslationsParent(translationsDistributions, 'legend')
+            axisTranslations = findTranslationsParent(translationsDistributions, 'labels')
 
+            # NORMAL FLOW
             model_x: ExplainedModel = ExplainedModel.query.filter(
                 ExplainedModel.id == model_id
             ).first()
