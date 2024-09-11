@@ -206,7 +206,7 @@ def specificTreesCallbacks(app, furl, isRegressor: bool = False):
         model_id = f.args["model_id"]
 
         # TRANSLATIONS
-        commonTranslations = getTranslations(current_user.langSelection, 'surrogate', 'common')
+        commonTranslations = getTranslations(current_user.langSelection, 'trees', 'common')
         tableTranslations = findTranslationsParent(commonTranslations, 'table')
         tableHeadersTranslations = findTranslationsParent(tableTranslations, 'headers')
 

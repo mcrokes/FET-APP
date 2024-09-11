@@ -511,10 +511,83 @@
     },
     "predictions": {
       "common": {
+        "instance-selector-placeholder": "Seleccione la Instancia a Analizar",
+        "prediction": "Predicción",
+        "contribution": {
+          "tooltip": {
+            "text-1": "Se examina la ",
+            "text-2": "contribución individual ",
+            "text-3": "de cada característica a la predicción, lo que permite identificar qué características son más relevantes para el modelo."
+          },
+          "prediction-upper": "PREDICCIÓN",
+          "actual-upper": "ACTUAL",
+          "accumulated": "Acumulado",
+          "final-prediction": "Predicción Final",
+          "actual": "Actual",
+          "media": "Media",
+          "population-media": "Media Poblacional",
+          "title": "Contribución de Cada Predictor",
+          "individual-title": "Cotribucion individual por predictor",
+          "label-x": "Influyentes",
+          "headers": {
+            "contribution": "Contribución",
+            "instance": "Instancia",
+            "predictor": "Predictor",
+            "value": "Valor"
+          }
+        }
       },
       "classifier": {
+        "class-selector": {
+          "title": "Seleccione la Clase a Analizar",
+          "placeholder": "Seleccione una clase",
+          "tooltip": "Limita la instancias a elegir a elementos que son prototipos respuesta de la clase seleccionada en el conjunto original de datos."
+        },
+        "contribution": {
+          "sub-title": " por Clase",
+          "individual-sub-title": " para ",
+          "label-y": "Certeza en la Predicción de 0 a 1"
+        },
+        "trees": {
+          "tooltip": {
+            "text-1": "Cada árbol",
+            "text-2": " del modelo hace una predicción. La predicción final se basa en la ",
+            "text-3": "combinación de las predicciones",
+            "text-4": " de todos los árboles.",
+            "text-5": "* El azul",
+            "text-6": " representa los árboles que predicen la clase seleccionada como positiva.",
+            "text-7": "* El rojo",
+            "text-8": " representa los árboles que predicen la(s) clases restantes."
+          },
+          "bar-title": "Árboles",
+          "line-title": "Corte",
+          "title": "Predicción individual por árboles para la clase:",
+          "labels": {
+            "x": "Número del Árbol",
+            "y": "Certeza de la Predicción %"
+          }
+        }
       },
       "regressor": {
+        "contribution": {
+          "label-y": "Acumulado en la predicción"
+        },
+        "trees": {
+          "tooltip": {
+            "text-1": "Cada árbol",
+            "text-2": " del modelo hace una predicción. La predicción final se basa en la ",
+            "text-3": "combinación de las predicciones",
+            "text-4": " de todos los árboles.",
+            "text-5": "La línea roja representa la predicción promedio o final."
+          },
+          "bar-title": "Árboles",
+          "line-title": "Predicción Final",
+          "title": "Predicción individual por árboles",
+          "labels": {
+            "x": "Número del Árbol",
+            "y": "Certeza de la Predicción %"
+          }
+        }
       }
     }
   }
