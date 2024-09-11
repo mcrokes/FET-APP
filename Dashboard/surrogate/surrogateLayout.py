@@ -1,13 +1,14 @@
 import json
-from pyclbr import Function
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash.exceptions import PreventUpdate
+from flask_login import current_user
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+from Dashboard.utils import findTranslationsParent, setText, getTranslations
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
@@ -18,139 +19,163 @@ from app.proccessor.models import (
 )
 
 id_sufix = ["surrogate"]
-surrogateLayout = html.Div(
-    [
-        dcc.Loading(
-            [
-                html.Div(
-                    [
-                        html.Plaintext(
-                            "Profundidad",
-                            className="tree-creator-label",
-                        ),
-                        dbc.Input(
-                            type="number",
-                            id="max-depth-input-row",
-                            min=3,
-                            value=3,
-                            className="tree-creator-input",
-                        ),
-                        html.Button(
-                            "Reconstruir Árbol",
-                            id="surrogate-tree-reconstruction-btn",
-                            n_clicks=0,
-                            className="tree-btn tree-creator-btn",
-                        ),
-                    ],
-                    className="tree-creator",
-                ),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                html.Div(
-                                    [
-
-                                        html.Div(
-                                            [
-                                                html.Plaintext(
-                                                    "REGLAS DEL MODELO", className="rules-title"
-                                                ),
-                                                html.I(
-                                                    id=f"{id_sufix[0]}-info",
-                                                    className="fa fa-info-circle info-icon",
-                                                ),
-                                                dbc.Tooltip(
-                                                    [
-                                                        html.Plaintext(
-                                                            [
-                                                                """
-                                                                Árbol Subrogado: Un árbol de decisión que se entrena 
-                                                                con las predicciones del modelo de Random Forest original, 
-                                                                permitiendo simplificar el bosque para interpretar la 
-                                                                salida del modelo de manera más fácil y comprensible.
-                                                                """,
-                                                            ]
-                                                        ),
-                                                    ],
-                                                    className="personalized-tooltip",
-                                                    target=f"{id_sufix[0]}-info",
-                                                ),
-                                            ],
-                                            className="title-hint-container",
-                                        ),
-                                        html.Div(
-                                            id="rules-output-upload",
-                                            className="rules-table-container",
-                                        ),
-                                    ],
-                                    className="container"
-                                )
-                            ]
-                        )
-                    ],
-                    style={"padding-top": "20px"},
-                ),
-                html.Div(
-                    [
-                        html.Plaintext(
-                            "VISUALIZACION DEL ARBOL", className="rules-title"
-                        ),
-                        html.Button(
-                            "MOSTRAR",
-                            id="build-tree-btn",
-                            n_clicks=0,
-                            className="tree-btn tree-creator-btn",
-                            style={"margin-left": "3rem"},
-                        ),
-                        html.Button(
-                            "DESCARGAR",
-                            id="download-tree-btn",
-                            n_clicks=0,
-                            hidden=True,
-                            className="tree-btn tree-creator-btn",
-                            style={"margin-left": "3rem"},
-                        ),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        "* Para visualizar el árbol deberá instalar el software ",
-                                        html.Strong(
-                                            html.A("Graphviz", href="https://graphviz.org/download/", target='_blank')),
-                                        " en su ordenador.",
-                                    ]
-                                ),
-                                html.Plaintext(
-                                    [
-                                        "* Las muestras con las que se hace la visualización ",
-                                        html.Strong("no son las mismas"),
-                                        " que las de las reglas de modelo.",
-                                    ]
-                                ),
-                            ],
-                            autohide=False,
-                            className="personalized-tooltip",
-                            target="build-tree-btn",
-                        ),
-                    ],
-                    className="tree-creator container",
-                    style={"padding-top": "20px", "justify-content": "flex-start"},
-                ),
-                dcc.Store(id="svg-holder", data={}),
-                html.Div(
-                    [html.Img(id="tree-visual-output-upload")],
-                    className="tree-img-container",
-                ),
-                dcc.Download(id='download-svg')
-            ]
-        )
-    ],
-    style={"margin": "auto"},
-)
 
 
-def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
+def surrogateLayout(surrogateTranslations):
+    commonTranslations = findTranslationsParent(surrogateTranslations, 'common')
+    tableTranslations = findTranslationsParent(commonTranslations, 'table')
+    tableTooltipTranslations = findTranslationsParent(tableTranslations, 'tooltip')
+    treeTranslations = findTranslationsParent(commonTranslations, 'tree')
+    treeTooltipTranslations = findTranslationsParent(treeTranslations, 'tooltip')
+
+    layout = html.Div(
+        [
+            dcc.Loading(
+                [
+                    html.Div(
+                        [
+                            html.Plaintext(
+                                setText(commonTranslations, 'depth', 'dashboard.surrogate.common'),
+                                className="tree-creator-label",
+                            ),
+                            dbc.Input(
+                                type="number",
+                                id="max-depth-input-row",
+                                min=3,
+                                value=3,
+                                className="tree-creator-input",
+                            ),
+                            html.Button(
+                                setText(commonTranslations, 'build-btn', 'dashboard.surrogate.common'),
+                                id="surrogate-tree-reconstruction-btn",
+                                n_clicks=0,
+                                className="tree-btn tree-creator-btn",
+                            ),
+                        ],
+                        className="tree-creator",
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                [
+                                    html.Div(
+                                        [
+                                            html.Div(
+                                                [
+                                                    html.Plaintext(
+                                                        setText(tableTranslations, 'title',
+                                                                'dashboard.surrogate.common.table'),
+                                                        className="rules-title"
+                                                    ),
+                                                    html.I(
+                                                        id=f"{id_sufix[0]}-info",
+                                                        className="fa fa-info-circle info-icon",
+                                                    ),
+                                                    dbc.Tooltip(
+                                                        [
+                                                            html.Plaintext(
+                                                                [
+                                                                    setText(tableTooltipTranslations, 'text-1',
+                                                                            'dashboard.surrogate.common.table.tooltip'),
+                                                                ]
+                                                            ),
+                                                        ],
+                                                        className="personalized-tooltip",
+                                                        target=f"{id_sufix[0]}-info",
+                                                    ),
+                                                ],
+                                                className="title-hint-container",
+                                            ),
+                                            html.Div(
+                                                id="rules-output-upload",
+                                                className="rules-table-container",
+                                            ),
+                                        ],
+                                        className="container"
+                                    )
+                                ]
+                            )
+                        ],
+                        style={"padding-top": "20px"},
+                    ),
+                    html.Div(
+                        [
+                            html.Plaintext(
+                                setText(treeTranslations, 'title',
+                                        'dashboard.surrogate.common.tree'), className="rules-title"
+                            ),
+                            html.Button(
+                                setText(treeTranslations, 'show-btn',
+                                        'dashboard.surrogate.common.tree'),
+                                id="build-tree-btn",
+                                n_clicks=0,
+                                className="tree-btn tree-creator-btn",
+                                style={"margin-left": "3rem"},
+                            ),
+                            html.Button(
+                                setText(treeTranslations, 'download-btn',
+                                        'dashboard.surrogate.common.tree'),
+                                id="download-tree-btn",
+                                n_clicks=0,
+                                hidden=True,
+                                className="tree-btn tree-creator-btn",
+                                style={"margin-left": "3rem"},
+                            ),
+                            dbc.Tooltip(
+                                [
+                                    html.Plaintext(
+                                        [
+                                            setText(treeTooltipTranslations, 'text-1',
+                                                    'dashboard.surrogate.common.tree.tooltip'),
+                                            html.Strong(
+                                                html.A(
+                                                    setText(treeTooltipTranslations, 'text-2',
+                                                            'dashboard.surrogate.common.tree.tooltip')
+                                                    ,
+                                                    href=setText(treeTooltipTranslations, 'text-3',
+                                                                 'dashboard.surrogate.common.tree.tooltip'),
+                                                    target='_blank')),
+                                            setText(treeTooltipTranslations, 'text-4',
+                                                    'dashboard.surrogate.common.tree.tooltip'),
+                                        ]
+                                    ),
+                                    html.Plaintext(
+                                        [
+                                            setText(treeTooltipTranslations, 'text-5',
+                                                    'dashboard.surrogate.common.tree.tooltip'),
+                                            html.Strong(
+                                                setText(treeTooltipTranslations, 'text-6',
+                                                        'dashboard.surrogate.common.tree.tooltip')
+                                            ),
+                                            setText(treeTooltipTranslations, 'text-7',
+                                                    'dashboard.surrogate.common.tree.tooltip'),
+                                        ]
+                                    ),
+                                ],
+                                autohide=False,
+                                className="personalized-tooltip",
+                                target="build-tree-btn",
+                            ),
+                        ],
+                        className="tree-creator container",
+                        style={"padding-top": "20px", "justify-content": "flex-start"},
+                    ),
+                    dcc.Store(id="svg-holder", data={}),
+                    html.Div(
+                        [html.Img(id="tree-visual-output-upload")],
+                        className="tree-img-container",
+                    ),
+                    dcc.Download(id='download-svg')
+                ]
+            )
+        ],
+        style={"margin": "auto"},
+    )
+
+    return layout
+
+
+def surrogateCallbacks(app, furl, isRegressor: bool = False):
     @app.callback(
         Output("rules-output-upload", "children"),
         Output("max-depth-input-row", "max"),
@@ -164,6 +189,13 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
         f = furl(cl)
         model_id = f.args["model_id"]
 
+        # TRANSLATIONS
+        commonTranslations = getTranslations(current_user.langSelection, 'surrogate', 'common')
+        tableTranslations = findTranslationsParent(commonTranslations, 'table')
+        tableHeadersTranslations = findTranslationsParent(tableTranslations, 'headers')
+
+        # NORMAL FLOW
+
         surrogate_model: SurrogateTreeData = (
             SurrogateTreeData.query.filter(
                 SurrogateTreeData.explained_model_id == model_id
@@ -173,7 +205,7 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
             .first()
         )
 
-        lenght = len(
+        length = len(
             SurrogateTreeData.query.filter(
                 SurrogateTreeData.explained_model_id == model_id
             ).all()
@@ -252,9 +284,15 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
             html.Thead(
                 html.Tr(
                     [
-                        html.Th("PREDICTOR", style={"width": "40%"}),
-                        html.Th("CONDICIÓN", style={"width": "20%"}),
-                        html.Th("VALOR", style={"width": "40%"}),
+                        html.Th(
+                            setText(tableHeadersTranslations, 'predictor', 'dashboard.surrogate.common.table.headers'),
+                            style={"width": "40%"}),
+                        html.Th(
+                            setText(tableHeadersTranslations, 'condition', 'dashboard.surrogate.common.table.headers'),
+                            style={"width": "20%"}),
+                        html.Th(
+                            setText(tableHeadersTranslations, 'value', 'dashboard.surrogate.common.table.headers'),
+                            style={"width": "40%"}),
                     ]
                 )
             )
@@ -268,17 +306,25 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
                 [
                     html.Tr(
                         [
-                            html.Th("REGLA", rowSpan=2),
-                            html.Th("CAUSAS"),
-                            html.Th("REULTADO", colSpan=3),
+                            html.Th(
+                                setText(tableHeadersTranslations, 'rule', 'dashboard.surrogate.common.table.headers'),
+                                rowSpan=2),
+                            html.Th(setText(tableHeadersTranslations, 'causes',
+                                            'dashboard.surrogate.common.table.headers')),
+                            html.Th(
+                                setText(tableHeadersTranslations, 'result', 'dashboard.surrogate.common.table.headers'),
+                                colSpan=3),
                         ]
                     ),
                     html.Tr(
                         [
                             html.Th(sub_header_table, style={"padding": "0"}),
-                            html.Th("VALOR OBJETIVO"),
-                            html.Th("PROBABILIDAD"),
-                            html.Th("MUESTRAS"),
+                            html.Th(setText(tableHeadersTranslations, 'target',
+                                            'dashboard.surrogate.common.table.headers')),
+                            html.Th(
+                                setText(tableHeadersTranslations, 'proba', 'dashboard.surrogate.common.table.headers')),
+                            html.Th(setText(tableHeadersTranslations, 'samples',
+                                            'dashboard.surrogate.common.table.headers')),
                         ]
                     ),
                 ], style={"position": "sticky", "top": "0"}
@@ -291,7 +337,7 @@ def surrogateCallbacks(app, furl: Function, isRegressor: bool = False):
             table_header + table_body, bordered=True, className="rules-table"
         )
 
-        return rg, lenght + 2, "", True
+        return rg, length + 2, "", True
 
     @app.callback(
         Output("tree-visual-output-upload", "src", allow_duplicate=True),

@@ -89,6 +89,62 @@ def generate_regression_metrics(y, y_pred, keys, parametersTranslations):
     return regression_metrics_table
 
 
+def addAxisNames(fig, axisTranslations):
+    fig = setBottomLegend(fig)
+    fig.update_layout(
+        yaxis_title=setText(axisTranslations, 'y', 'dashboard.metrics.regressor.partial-dependence.labels'),
+        xaxis_title=setText(axisTranslations, 'x', 'dashboard.metrics.regressor.partial-dependence.labels'),
+    )
+    return fig
+
+
+def generateDependencePlots(X: pd.DataFrame, qualitative_dict,
+                            random_forest_model: RandomForestClassifier | RandomForestRegressor, feature,
+                            legendTranslations):
+    graph = {"predictor": feature, "graph_data": []}
+    feature_idx = list(random_forest_model.feature_names_in_).index(feature)
+    isObject = False
+    variableNames = []
+    for q_var in qualitative_dict:
+        if q_var['column_name'] == feature:
+            isObject = True
+            variableNames = q_var['variables']
+    dependence = partial_dependence(random_forest_model, X, [feature_idx])
+    partial_dependence_values = dependence['average'][0]
+    axes = dependence['grid_values'][0]
+    if isObject:
+        for value, ax in zip(partial_dependence_values, axes):
+            name = ax
+            for var in variableNames:
+                if var['old_value'] == ax:
+                    name = var['new_value']
+                    break
+            graph["graph_data"].append(
+                go.Bar(name=name, x=[name], y=[value])
+            )
+    else:
+        x = []
+        y = []
+        # for value, ax in sorted(zip(partial_dependence_values, axes), key=lambda x: x):
+        for value, ax in zip(partial_dependence_values, axes):
+            x.append(ax)
+            y.append(value)
+        graph['graph_data'].append(go.Scatter(
+            x=x,
+            y=y,
+            name=setText(legendTranslations, 'line', 'dashboard.metrics.regressor.partial-dependence.legend'),
+            line=dict(color="royalblue", width=1, dash="dot"),
+        ))
+        graph['graph_data'].append(
+            go.Bar(
+                name=setText(legendTranslations, 'bars', 'dashboard.metrics.regressor.partial-dependence.legend'),
+                x=x, y=y, width=0.5
+            )
+        )
+
+    return graph
+
+
 def metricsRegressorLayout(metricsTranslations):
     regressorTranslations = findTranslationsParent(metricsTranslations, 'regressor')
     regressorPredRealTranslations = findTranslationsParent(regressorTranslations, 'prediction-real')
@@ -768,62 +824,6 @@ def setBottomLegend(fig):
         legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1)
     )
     return fig
-
-
-def addAxisNames(fig, axisTranslations):
-    fig = setBottomLegend(fig)
-    fig.update_layout(
-        yaxis_title=setText(axisTranslations, 'y', 'dashboard.metrics.regressor.partial-dependence.labels'),
-        xaxis_title=setText(axisTranslations, 'x', 'dashboard.metrics.regressor.partial-dependence.labels'),
-    )
-    return fig
-
-
-def generateDependencePlots(X: pd.DataFrame, qualitative_dict,
-                            random_forest_model: RandomForestClassifier | RandomForestRegressor, feature,
-                            legendTranslations):
-    graph = {"predictor": feature, "graph_data": []}
-    feature_idx = list(random_forest_model.feature_names_in_).index(feature)
-    isObject = False
-    variableNames = []
-    for q_var in qualitative_dict:
-        if q_var['column_name'] == feature:
-            isObject = True
-            variableNames = q_var['variables']
-    dependence = partial_dependence(random_forest_model, X, [feature_idx])
-    partial_dependence_values = dependence['average'][0]
-    axes = dependence['grid_values'][0]
-    if isObject:
-        for value, ax in zip(partial_dependence_values, axes):
-            name = ax
-            for var in variableNames:
-                if var['old_value'] == ax:
-                    name = var['new_value']
-                    break
-            graph["graph_data"].append(
-                go.Bar(name=name, x=[name], y=[value])
-            )
-    else:
-        x = []
-        y = []
-        # for value, ax in sorted(zip(partial_dependence_values, axes), key=lambda x: x):
-        for value, ax in zip(partial_dependence_values, axes):
-            x.append(ax)
-            y.append(value)
-        graph['graph_data'].append(go.Scatter(
-            x=x,
-            y=y,
-            name=setText(legendTranslations, 'line', 'dashboard.metrics.regressor.partial-dependence.legend'),
-            line=dict(color="royalblue", width=1, dash="dot"),
-        ))
-        graph['graph_data'].append(
-            go.Bar(
-                name=setText(legendTranslations, 'bars', 'dashboard.metrics.regressor.partial-dependence.legend'),
-                x=x, y=y, width=0.5
-            )
-        )
-
-    return graph
 
 
 def metricsCallbacks(app, furl, isRegressor: bool = False):

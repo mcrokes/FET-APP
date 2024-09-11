@@ -1,14 +1,15 @@
 import json
-from pyclbr import Function
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash.exceptions import PreventUpdate
+from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
+from Dashboard.utils import findTranslationsParent, setText, getTranslations
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
@@ -17,141 +18,180 @@ from app.proccessor.models import (
 )
 
 id_sufix = ["trees"]
-specificTreesLayout = html.Div(
-    [
-        dcc.Loading(
-            [
-                html.Div(
-                    [
-                        html.Plaintext(
-                            "Árbol No.",
-                            className="tree-creator-label",
-                        ),
-                        dbc.Input(
-                            type="number",
-                            id="s-max-depth-input-row",
-                            min=0,
-                            value=0,
-                            className="tree-creator-input",
-                        ),
-                        html.Button(
-                            "Realizar Estudio",
-                            id="s-surrogate-tree-reconstruction-btn",
-                            n_clicks=0,
-                            className="tree-btn tree-creator-btn",
-                        ),
-                    ],
-                    className="tree-creator",
-                ),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.Plaintext(
-                                                    "REGLAS DEL MODELO", className="rules-title"
-                                                ),
-                                                html.I(
-                                                    id=f"{id_sufix[0]}-info",
-                                                    className="fa fa-info-circle info-icon",
-                                                ),
-                                                dbc.Tooltip(
-                                                    [
-                                                        html.Plaintext(
-                                                            [
-                                                                "Árbol de Decisión: Un ",
-                                                                html.Strong("componente independiente "),
-                                                                "del modelo de Random Forest que contribuye a la "
-                                                                "predicción final mediante la ",
-                                                                html.Strong("combinación de sus resultados"),
-                                                                "con los de otros árboles. Cada árbol se entrena con "
-                                                                "una ",
-                                                                html.Strong("muestra aleatoria"),
-                                                                " de características y ejemplos.",
-                                                            ]
-                                                        ),
-                                                    ],
-                                                    className="personalized-tooltip",
-                                                    target=f"{id_sufix[0]}-info",
-                                                ),
-                                            ],
-                                            className="title-hint-container",
-                                        ),
-                                        html.Div(
-                                            id="s-rules-output-upload",
-                                            className="rules-table-container",
-                                        ),
-                                    ],
-                                    className="container"
-                                )
-                            ]
-                        )
-                    ],
-                    style={"padding-top": "20px"},
-                ),
-                html.Div(
-                    [
-                        html.Plaintext(
-                            "VISUALIZACION DEL ARBOL", className="rules-title"
-                        ),
-                        html.Button(
-                            "MOSTRAR",
-                            id="s-build-tree-btn",
-                            n_clicks=0,
-                            className="tree-btn tree-creator-btn",
-                            style={"margin-left": "3rem"},
-                        ),
-                        html.Button(
-                            "DESCARGAR",
-                            id="s-download-tree-btn",
-                            n_clicks=0,
-                            hidden=True,
-                            className="tree-btn tree-creator-btn",
-                            style={"margin-left": "3rem"},
-                        ),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        "* Para visualizar el árbol deberá instalar el software ",
-                                        html.Strong(
-                                            html.A("Graphviz", href="https://graphviz.org/download/", target='_blank')),
-                                        " en su ordenador.",
-                                    ]
-                                ),
-                                html.Plaintext(
-                                    [
-                                        "* Las muestras con las que se hace la visualización ",
-                                        html.Strong("no son las mismas"),
-                                        " que las de las reglas de modelo.",
-                                    ]
-                                ),
-                            ],
-                            autohide=False,
-                            className="personalized-tooltip",
-                            target="s-build-tree-btn",
-                        ),
-                    ],
-                    className="tree-creator container",
-                    style={"padding-top": "20px", "justify-content": "flex-start"},
-                ),
-                dcc.Store(id="s-svg-holder", data={}),
-                html.Div(
-                    [html.Img(id="s-tree-visual-output-upload")],
-                    className="tree-img-container",
-                ),
-                dcc.Download(id='s-download-svg')
-            ]
-        )
-    ],
-    style={"margin": "auto"},
-)
 
 
-def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
+def specificTreesLayout(specificTreesTranslations):
+    commonTranslations = findTranslationsParent(specificTreesTranslations, 'common')
+    tableTranslations = findTranslationsParent(commonTranslations, 'table')
+    tableTooltipTranslations = findTranslationsParent(tableTranslations, 'tooltip')
+    treeTranslations = findTranslationsParent(commonTranslations, 'tree')
+    treeTooltipTranslations = findTranslationsParent(treeTranslations, 'tooltip')
+
+    layout = html.Div(
+        [
+            dcc.Loading(
+                [
+                    html.Div(
+                        [
+                            html.Plaintext(
+                                setText(commonTranslations, 'depth', 'dashboard.trees.common'),
+                                className="tree-creator-label",
+                            ),
+                            dbc.Input(
+                                type="number",
+                                id="s-max-depth-input-row",
+                                min=0,
+                                value=0,
+                                className="tree-creator-input",
+                            ),
+                            html.Button(
+                                setText(commonTranslations, 'build-btn', 'dashboard.trees.common'),
+                                id="s-surrogate-tree-reconstruction-btn",
+                                n_clicks=0,
+                                className="tree-btn tree-creator-btn",
+                            ),
+                        ],
+                        className="tree-creator",
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                [
+                                    html.Div(
+                                        [
+                                            html.Div(
+                                                [
+                                                    html.Plaintext(
+                                                        setText(tableTranslations, 'title',
+                                                                'dashboard.trees.common.table'),
+                                                        className="rules-title"
+                                                    ),
+                                                    html.I(
+                                                        id=f"{id_sufix[0]}-info",
+                                                        className="fa fa-info-circle info-icon",
+                                                    ),
+                                                    dbc.Tooltip(
+                                                        [
+                                                            html.Plaintext(
+                                                                [
+                                                                    setText(tableTooltipTranslations, 'text-1',
+                                                                            'dashboard.trees.common.table.tooltip'),
+                                                                    html.Strong(
+                                                                        setText(tableTooltipTranslations, 'text-2',
+                                                                                'dashboard.trees.common.table.tooltip')
+                                                                    ),
+                                                                    setText(tableTooltipTranslations, 'text-3',
+                                                                            'dashboard.trees.common.table.tooltip'),
+                                                                    html.Strong(
+                                                                        setText(tableTooltipTranslations, 'text-4',
+                                                                                'dashboard.trees.common.table.tooltip')
+                                                                    ),
+                                                                    setText(tableTooltipTranslations, 'text-5',
+                                                                            'dashboard.trees.common.table.tooltip'),
+                                                                    html.Strong(
+                                                                        setText(tableTooltipTranslations, 'text-6',
+                                                                                'dashboard.trees.common.table.tooltip')
+                                                                    ),
+                                                                    setText(tableTooltipTranslations, 'text-7',
+                                                                            'dashboard.trees.common.table.tooltip'),
+                                                                ]
+                                                            ),
+                                                        ],
+                                                        className="personalized-tooltip",
+                                                        target=f"{id_sufix[0]}-info",
+                                                    ),
+                                                ],
+                                                className="title-hint-container",
+                                            ),
+                                            html.Div(
+                                                id="s-rules-output-upload",
+                                                className="rules-table-container",
+                                            ),
+                                        ],
+                                        className="container"
+                                    )
+                                ]
+                            )
+                        ],
+                        style={"padding-top": "20px"},
+                    ),
+                    html.Div(
+                        [
+                            html.Plaintext(
+                                setText(treeTranslations, 'title',
+                                        'dashboard.trees.common.tree'), className="rules-title"
+                            ),
+                            html.Button(
+                                setText(treeTranslations, 'show-btn',
+                                        'dashboard.trees.common.tree'),
+                                id="s-build-tree-btn",
+                                n_clicks=0,
+                                className="tree-btn tree-creator-btn",
+                                style={"margin-left": "3rem"},
+                            ),
+                            html.Button(
+                                setText(treeTranslations, 'download-btn',
+                                        'dashboard.trees.common.tree'),
+                                id="s-download-tree-btn",
+                                n_clicks=0,
+                                hidden=True,
+                                className="tree-btn tree-creator-btn",
+                                style={"margin-left": "3rem"},
+                            ),
+                            dbc.Tooltip(
+                                [
+                                    html.Plaintext(
+                                        [
+                                            setText(treeTooltipTranslations, 'text-1',
+                                                    'dashboard.trees.common.tree.tooltip'),
+                                            html.Strong(
+                                                html.A(
+                                                    setText(treeTooltipTranslations, 'text-2',
+                                                            'dashboard.trees.common.tree.tooltip')
+                                                    ,
+                                                    href=setText(treeTooltipTranslations, 'text-3',
+                                                                 'dashboard.trees.common.tree.tooltip'),
+                                                    target='_blank')),
+                                            setText(treeTooltipTranslations, 'text-4',
+                                                    'dashboard.trees.common.tree.tooltip'),
+                                        ]
+                                    ),
+                                    html.Plaintext(
+                                        [
+                                            setText(treeTooltipTranslations, 'text-5',
+                                                    'dashboard.trees.common.tree.tooltip'),
+                                            html.Strong(
+                                                setText(treeTooltipTranslations, 'text-6',
+                                                        'dashboard.trees.common.tree.tooltip')
+                                            ),
+                                            setText(treeTooltipTranslations, 'text-7',
+                                                    'dashboard.trees.common.tree.tooltip'),
+                                        ]
+                                    ),
+                                ],
+                                autohide=False,
+                                className="personalized-tooltip",
+                                target="s-build-tree-btn",
+                            ),
+                        ],
+                        className="tree-creator container",
+                        style={"padding-top": "20px", "justify-content": "flex-start"},
+                    ),
+                    dcc.Store(id="s-svg-holder", data={}),
+                    html.Div(
+                        [html.Img(id="s-tree-visual-output-upload")],
+                        className="tree-img-container",
+                    ),
+                    dcc.Download(id='s-download-svg')
+                ]
+            )
+        ],
+        style={"margin": "auto"},
+    )
+    return layout
+
+
+def specificTreesCallbacks(app, furl, isRegressor: bool = False):
     @app.callback(
         Output("s-rules-output-upload", "children"),
         Output("s-max-depth-input-row", "max"),
@@ -165,13 +205,20 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
         f = furl(cl)
         model_id = f.args["model_id"]
 
+        # TRANSLATIONS
+        commonTranslations = getTranslations(current_user.langSelection, 'surrogate', 'common')
+        tableTranslations = findTranslationsParent(commonTranslations, 'table')
+        tableHeadersTranslations = findTranslationsParent(tableTranslations, 'headers')
+
+        # NORMAL FLOW
+
         model_x: ExplainedModel = ExplainedModel.query.filter(
             ExplainedModel.id == model_id
         ).first()
 
         model: RandomForestClassifier = model_x.getElement("model")
 
-        lenght = len(model.estimators_)
+        length = len(model.estimators_)
 
         rules = ExplainSingleTree.get_rules(
             tree_model=model.estimators_[tree_number].tree_,
@@ -233,9 +280,15 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
             html.Thead(
                 html.Tr(
                     [
-                        html.Th("PREDICTOR", style={"width": "40%"}),
-                        html.Th("CONDICIÓN", style={"width": "20%"}),
-                        html.Th("VALOR", style={"width": "40%"}),
+                        html.Th(
+                            setText(tableHeadersTranslations, 'predictor', 'dashboard.trees.common.table.headers'),
+                            style={"width": "40%"}),
+                        html.Th(
+                            setText(tableHeadersTranslations, 'condition', 'dashboard.trees.common.table.headers'),
+                            style={"width": "20%"}),
+                        html.Th(
+                            setText(tableHeadersTranslations, 'value', 'dashboard.trees.common.table.headers'),
+                            style={"width": "40%"}),
                     ]
                 )
             )
@@ -249,17 +302,25 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
                 [
                     html.Tr(
                         [
-                            html.Th("REGLA", rowSpan=2),
-                            html.Th("CAUSAS"),
-                            html.Th("REULTADO", colSpan=3),
+                            html.Th(
+                                setText(tableHeadersTranslations, 'rule', 'dashboard.trees.common.table.headers'),
+                                rowSpan=2),
+                            html.Th(setText(tableHeadersTranslations, 'causes',
+                                            'dashboard.trees.common.table.headers')),
+                            html.Th(
+                                setText(tableHeadersTranslations, 'result', 'dashboard.trees.common.table.headers'),
+                                colSpan=3),
                         ]
                     ),
                     html.Tr(
                         [
                             html.Th(sub_header_table, style={"padding": "0"}),
-                            html.Th("VALOR OBJETIVO"),
-                            html.Th("PROBABILIDAD"),
-                            html.Th("MUESTRAS"),
+                            html.Th(setText(tableHeadersTranslations, 'target',
+                                            'dashboard.trees.common.table.headers')),
+                            html.Th(
+                                setText(tableHeadersTranslations, 'proba', 'dashboard.trees.common.table.headers')),
+                            html.Th(setText(tableHeadersTranslations, 'samples',
+                                            'dashboard.trees.common.table.headers')),
                         ]
                     ),
                 ], style={"position": "sticky", "top": "0"}
@@ -271,7 +332,7 @@ def specificTreesCallbacks(app, furl: Function, isRegressor: bool = False):
         rg = dbc.Table(
             table_header + table_body, bordered=True, className="rules-table"
         )
-        return rg, lenght, "", True
+        return rg, length, "", True
 
     @app.callback(
         Output("s-tree-visual-output-upload", "src", allow_duplicate=True),

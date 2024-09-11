@@ -431,18 +431,82 @@
     },
     "surrogate": {
       "common": {
-      },
-      "classifier": {
-      },
-      "regressor": {
+        "depth": "Profundidad",
+        "build-btn": "Reconstruir Árbol",
+        "table": {
+          "title": "REGLAS DEL MODELO",
+          "headers": {
+            "rule": "REGLA",
+            "causes": "CAUSAS",
+            "result": "RESULTADO",
+            "predictor": "PREDICTOR",
+            "condition": "CONDICIÓN",
+            "value": "VALOR",
+            "target": "VALOR OBJETIVO",
+            "proba": "PROBABILIDAD",
+            "samples": "MUESTRAS"
+          },
+          "tooltip": {
+            "text-1": "Árbol Subrogado: Un árbol de decisión que se entrena con las predicciones del modelo de Random Forest original, permitiendo simplificar el bosque para interpretar la salida del modelo de manera más fácil y comprensible."
+          }
+        },
+        "tree": {
+          "title": "VISUALIZACION DEL ARBOL",
+          "show-btn": "MOSTRAR",
+          "download-btn": "DESCARGAR",
+          "tooltip": {
+            "text-1": "* Para visualizar el árbol deberá instalar el software ",
+            "text-2": "Graphviz",
+            "text-3": "https://graphviz.org/download/",
+            "text-4": " en su ordenador.",
+            "text-5": "* Las muestras con las que se hace la visualización ",
+            "text-6": "no son las mismas",
+            "text-7": " que las de las reglas de modelo."
+          }
+        }
       }
     },
     "trees": {
       "common": {
-      },
-      "classifier": {
-      },
-      "regressor": {
+        "depth": "Árbol No.",
+        "build-btn": "Realizar Estudio",
+        "table": {
+          "title": "REGLAS DEL MODELO",
+          "headers": {
+            "rule": "REGLA",
+            "causes": "CAUSAS",
+            "result": "RESULTADO",
+            "predictor": "PREDICTOR",
+            "condition": "CONDICIÓN",
+            "value": "VALOR",
+            "target": "VALOR OBJETIVO",
+            "proba": "PROBABILIDAD",
+            "samples": "MUESTRAS"
+          },
+          "tooltip": {
+            "text-1": "Árbol de Decisión: Un ",
+            "text-2": "componente independiente ",
+            "text-3": "del modelo de Random Forest que contribuye a la predicción final mediante la ",
+            "text-4": "combinación de sus resultados",
+            "text-5": "con los de otros árboles. Cada árbol se entrena con una ",
+            "text-6": "muestra aleatoria",
+            "text-7": " de características y ejemplos."
+          }
+        },
+        "tree": {
+          "title": "VISUALIZACION DEL ARBOL",
+          "show-btn": "MOSTRAR",
+          "download-btn": "DESCARGAR",
+          "tooltip": {
+            "text-1": "* Para visualizar el árbol deberá instalar el software ",
+            "text-2": "Graphviz",
+            "text-3": "https://graphviz.org/download/",
+            "text-4": " en su ordenador.",
+            "text-5": "* Las muestras con las que se hace la visualización ",
+            "text-6": "no son las mismas",
+            "text-7": " que las de las reglas de modelo."
+          }
+        }
       }
     },
     "predictions": {

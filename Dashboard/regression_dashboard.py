@@ -64,13 +64,13 @@ def createLayout(currentLanguage):
     )
 
     tab3_content = dbc.Card(
-        dbc.CardBody([html.Div([surrogateLayout], id="surrogate-layout-output-upload")]),
+        dbc.CardBody([html.Div([surrogateLayout(findTranslationsParent(translations, 'surrogate'))], id="surrogate-layout-output-upload")]),
         className="mt-3 section-card",
     )
 
     tab4_content = dbc.Card(
         dbc.CardBody(
-            [html.Div([specificTreesLayout], id="specificTrees-layout-output-upload")]
+            [html.Div([specificTreesLayout(findTranslationsParent(translations, 'trees'))], id="specificTrees-layout-output-upload")]
         ),
         className="mt-3 section-card",
     )
@@ -84,33 +84,33 @@ def createLayout(currentLanguage):
 
     tabs = dbc.Tabs(
         [
-            dbc.Tab(
-                [
-                    tab0_content,
-                    setTooltip("Estudio del Conjunto de Datos", "data-tooltip-id"),
-                ],
-                id="data-tooltip-id",
-                label="Datos",
-                className="classifier-tab",
-            ),
-            dbc.Tab(
-                [
-                    tab1_content,
-                    setTooltip("Importancias de los predictores", "importance-tooltip-id"),
-                ],
-                id="importance-tooltip-id",
-                label="Importancias",
-                className="classifier-tab",
-            ),
-            dbc.Tab(
-                [
-                    tab2_content,
-                    setTooltip("Métricas del Modelo", "metrics-tooltip-id"),
-                ],
-                id="metrics-tooltip-id",
-                label="Métricas",
-                className="classifier-tab",
-            ),
+            # dbc.Tab(
+            #     [
+            #         tab0_content,
+            #         setTooltip("Estudio del Conjunto de Datos", "data-tooltip-id"),
+            #     ],
+            #     id="data-tooltip-id",
+            #     label="Datos",
+            #     className="classifier-tab",
+            # ),
+            # dbc.Tab(
+            #     [
+            #         tab1_content,
+            #         setTooltip("Importancias de los predictores", "importance-tooltip-id"),
+            #     ],
+            #     id="importance-tooltip-id",
+            #     label="Importancias",
+            #     className="classifier-tab",
+            # ),
+            # dbc.Tab(
+            #     [
+            #         tab2_content,
+            #         setTooltip("Métricas del Modelo", "metrics-tooltip-id"),
+            #     ],
+            #     id="metrics-tooltip-id",
+            #     label="Métricas",
+            #     className="classifier-tab",
+            # ),
             dbc.Tab(
                 [
                     tab3_content,

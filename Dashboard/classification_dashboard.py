@@ -66,13 +66,13 @@ def createLayout(currentLanguage):
     )
 
     tab3_content = dbc.Card(
-        dbc.CardBody([html.Div([surrogateLayout], id="surrogate-layout-output-upload")]),
+        dbc.CardBody([html.Div([surrogateLayout(findTranslationsParent(translations, 'surrogate'))], id="surrogate-layout-output-upload")]),
         className="mt-3 section-card",
     )
 
     tab4_content = dbc.Card(
         dbc.CardBody(
-            [html.Div([specificTreesLayout], id="specificTrees-layout-output-upload")]
+            [html.Div([specificTreesLayout(findTranslationsParent(translations, 'trees'))], id="specificTrees-layout-output-upload")]
         ),
         className="mt-3 section-card",
     )
@@ -96,43 +96,43 @@ def createLayout(currentLanguage):
 
     tabs = dbc.Tabs(
         [
-            dbc.Tab(
-                [
-                    tab0_content,
-                    setTooltip(
-                        translationsDataTab.get('tooltip') if translationsDataTab else 'dashboard.tabs.data'
-                                                                                       '.tooltip',
-                        "data-tooltip-id"),
-                ],
-                id="data-tooltip-id",
-                label=translationsDataTab.get('title') if translationsDataTab else 'dashboard.tabs.data.title',
-                className="classifier-tab",
-            ),
-            dbc.Tab(
-                [
-                    tab1_content,
-                    setTooltip(
-                        translationsImportanceTab.get('tooltip') if translationsImportanceTab else 'dashboard.tabs.data'
-                                                                                                   '.tooltip',
-                        "importance-tooltip-id"),
-                ],
-                id="importance-tooltip-id",
-                label=translationsImportanceTab.get(
-                    'title') if translationsImportanceTab else 'dashboard.tabs.importance.title',
-                className="classifier-tab",
-            ),
-            dbc.Tab(
-                [
-                    tab2_content,
-                    setTooltip(
-                        translationsMetricsTab.get('tooltip') if translationsMetricsTab else 'dashboard.tabs.data'
-                                                                                             '.tooltip',
-                        "metrics-tooltip-id"),
-                ],
-                id="metrics-tooltip-id",
-                label=translationsMetricsTab.get('title') if translationsMetricsTab else 'dashboard.tabs.metrics.title',
-                className="classifier-tab",
-            ),
+            # dbc.Tab(
+            #     [
+            #         tab0_content,
+            #         setTooltip(
+            #             translationsDataTab.get('tooltip') if translationsDataTab else 'dashboard.tabs.data'
+            #                                                                            '.tooltip',
+            #             "data-tooltip-id"),
+            #     ],
+            #     id="data-tooltip-id",
+            #     label=translationsDataTab.get('title') if translationsDataTab else 'dashboard.tabs.data.title',
+            #     className="classifier-tab",
+            # ),
+            # dbc.Tab(
+            #     [
+            #         tab1_content,
+            #         setTooltip(
+            #             translationsImportanceTab.get('tooltip') if translationsImportanceTab else 'dashboard.tabs.data'
+            #                                                                                        '.tooltip',
+            #             "importance-tooltip-id"),
+            #     ],
+            #     id="importance-tooltip-id",
+            #     label=translationsImportanceTab.get(
+            #         'title') if translationsImportanceTab else 'dashboard.tabs.importance.title',
+            #     className="classifier-tab",
+            # ),
+            # dbc.Tab(
+            #     [
+            #         tab2_content,
+            #         setTooltip(
+            #             translationsMetricsTab.get('tooltip') if translationsMetricsTab else 'dashboard.tabs.data'
+            #                                                                                  '.tooltip',
+            #             "metrics-tooltip-id"),
+            #     ],
+            #     id="metrics-tooltip-id",
+            #     label=translationsMetricsTab.get('title') if translationsMetricsTab else 'dashboard.tabs.metrics.title',
+            #     className="classifier-tab",
+            # ),
             dbc.Tab(
                 [
                     tab3_content,
