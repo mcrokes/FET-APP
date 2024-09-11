@@ -241,8 +241,8 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
     def addAxisNames(fig, axisTranslations):
         fig = setBottomLegend(fig)
         fig.update_layout(
-            yaxis_title=setText(axisTranslations, 'y', 'dashboard.data.common.distributions.label'),
-            xaxis_title=setText(axisTranslations, 'x', 'dashboard.data.common.distributions.label'),
+            yaxis_title=setText(axisTranslations, 'y', 'dashboard.data.common.distributions.labels'),
+            xaxis_title=setText(axisTranslations, 'x', 'dashboard.data.common.distributions.labels'),
         )
         return fig
 

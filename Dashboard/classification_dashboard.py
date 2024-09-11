@@ -27,6 +27,7 @@ import dash_bootstrap_components as dbc
 from furl import furl
 
 from app.API.routes import find_translations
+from .utils import findTranslationsParent
 
 url_base = "/dash/classification_dashboard/"
 
@@ -47,18 +48,20 @@ def createLayout(currentLanguage):
     print('currentLanguage: ', currentLanguage)
     translations = find_translations(currentLanguage, ['dashboard'])['text']
     tab0_content = dbc.Card(
-        dbc.CardBody([html.Div([datasetLayout(translations.get('data') if translations.get('data') else {})],
+        dbc.CardBody([html.Div([datasetLayout(findTranslationsParent(translations, 'data'))],
                                id="dataset-layout-output-upload")]),
         className="mt-3 section-card",
     )
 
     tab1_content = dbc.Card(
-        dbc.CardBody([html.Div([importancesLayout(translations.get('importance') if translations.get('data') else {})], id="importance-layout-output-upload")]),
+        dbc.CardBody([html.Div([importancesLayout(findTranslationsParent(translations, 'importance'))],
+                               id="importance-layout-output-upload")]),
         className="mt-3 section-card",
     )
 
     tab2_content = dbc.Card(
-        dbc.CardBody([html.Div([metricsClassifierLayout], id="graph-metrics-layout-output-upload")]),
+        dbc.CardBody([html.Div([metricsClassifierLayout(findTranslationsParent(translations, 'metrics'))],
+                               id="graph-metrics-layout-output-upload")]),
         className="mt-3 section-card",
     )
 
@@ -178,8 +181,6 @@ def createLayout(currentLanguage):
 
 
 def addCallbacks(app):
-    # print('currentLanguage: ', currentLanguage)
-    # translations = find_translations(currentLanguage, ['dashboard'])['text']
     datasetCallbacks(app, furl)
     importancesCallbacks(app, furl)
     metricsCallbacks(app, furl)

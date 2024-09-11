@@ -307,6 +307,126 @@
     },
     "metrics": {
       "common": {
+      },
+      "classifier": {
+        "cutoff": "Punto de Corte",
+        "cutoff-tooltip": "Punto porcentual en el que el modelo decide clasificar una clase como verdadera.",
+        "class-selector": "Seleccione como positiva la clase que desea analizar",
+        "matrix": {
+          "title": "MATRIZ DE CONFUSION",
+          "labels": {
+            "x": "PREDICCIONES",
+            "y": "VALORES REALES",
+            "color": "CANTIDAD"
+          },
+          "tooltip": {
+            "text-1": "Matriz de Confusión: Evalúa la precisión del modelo en la clasificación de ejemplos.",
+            "text-2": "VP: ",
+            "text-3": "ejemplos positivos correctamente clasificados.",
+            "text-4": "VN: ",
+            "text-5": "ejemplos negativos correctamente clasificados.",
+            "text-6": "FP: ",
+            "text-7": "ejemplos negativos incorrectamente clasificados como positivos.",
+            "text-8": "FN: ",
+            "text-9": "ejemplos positivos incorrectamente clasificados como negativos."
+          },
+          "parameters": {
+            "title": "Parámetros Obtenidos",
+            "general-factors": "Factores Generales",
+            "individual": "Parámetros Individuales",
+            "value": "Valor",
+            "precision": "Precisión",
+            "precision-tooltip": "Proporción de verdaderos positivos entre todos los positivos predichos. (Mayor es Mejor)",
+            "sensibility": "Sensibilidad",
+            "sensibility-tooltip": "Proporción de predicciones correctas entre todos los valores reales de la clase. (Mayor es Mejor)",
+            "fp": "Tasa FP",
+            "fp-tooltip": "Proporción de predicciones erroneas entre todos los valores reales de otras clases clase. (Menor es Mejor)",
+            "f1": "Medición F1",
+            "f1-tooltip": "Media armónica de la precisión y la sensibilidad. (Mayor es Mejor)",
+            "tv": "Predicciones Correctas",
+            "fv": "Predicciones Fallidas",
+            "accuracy": "Precisión Global"
+          }
+        },
+        "roc": {
+          "title": "ROC-AUC curva",
+          "tooltip": {
+            "text-1": "Curva ROC: Muestra la relación entre la tasa de Verdaderos Positivos (",
+            "text-2": "Sensibilidad",
+            "text-3": ") y la tasa de Falsos Positivos (",
+            "text-4": "1-Especificidad",
+            "text-5": ") a diferentes umbrales de clasificación.",
+            "text-6": "* El área bajo la curva (AUC) es una métrica que resume el comportamiento del modelo. Un AUC cercano a 1 indica un modelo que puede distinguir perfectamente entre positivos y negativos, mientras que un AUC cercano a 0.5 indica un modelo que no es mejor que una elección aleatoria."
+          },
+          "parameters": {
+            "auc": "ABC[auc]",
+            "marker": "Marcador",
+            "tpr": "TVP[tpr]",
+            "fpr": "TFP[fpr]"
+          },
+          "labels": {
+            "x": "Tasa de Falsos Positivos",
+            "y": "Tasa de Positivos"
+          }
+        }
+      },
+      "regressor": {
+        "prediction-real": {
+          "title": "Predicción vs Valores Reales",
+          "tooltip": {
+            "text-1": "Evalúa la precisión del modelo en la regresión de resultados de modo que un mejor modelo está representado por los ",
+            "text-2": "puntos más cercanos a la linea discontinua ",
+            "text-3": "central.",
+            "text-4": "La línea discontínua representa los ",
+            "text-5": "valores reales"
+          },
+          "labels": {
+            "x": "Valor Real",
+            "y": "Predicción"
+          }
+        },
+        "real-prediction": {
+          "title": "Valores Reales vs Predicción",
+          "tooltip": {
+            "text-1": "Evalúa la precisión del modelo en la regresión de resultados de modo que un mejor modelo está representado por los ",
+            "text-2": "puntos más cercanos a la linea discontinua ",
+            "text-3": "central.",
+            "text-4": "La línea discontínua representa la ",
+            "text-5": "predicción"
+          },
+          "labels": {
+            "x": "Predicción",
+            "y": "Valor Real"
+          }
+        },
+        "parameters": {
+          "metrics": "Métricas",
+          "value": "Valor",
+          "mse": "Error Cuadrático Medio (mean-squared-error)",
+          "mse-tooltip": "El MSE mide la media de los errores cuadrados entre los valores reales y los valores predichos. Un MSE bajo indica que el modelo se ajusta bien a los datos.",
+          "rmse": "Raíz del Error Cuadrático Medio (root-mean-squared-error)",
+          "rmse-tooltip": "El RMSE es la raíz cuadrada del MSE. Es una métrica más fácil de interpretar que el MSE, ya que tiene la misma unidad que los valores reales.",
+          "mae": "Error Absoluto Medio (mean-absolute-error)",
+          "mae-tooltip": "El MAE mide la media de los errores absolutos entre los valores reales y los valores predichos. Un MAE bajo indica que el modelo se ajusta bien a los datos.",
+          "mape": "Error Absoluto Porcentual Medio (mean-absolute-percentage-error)",
+          "mape-tooltip": "El MAPE mide la media de los errores absolutos porcentuales entre los valores reales y los valores predichos. Un MAPE bajo indica que el modelo se ajusta bien a los datos.",
+          "r2": "Coeficiente de Determinación R² (R-squared)",
+          "r2-tooltip": "El R² mide la proporción de la varianza en los valores reales que es explicada por el modelo. Un R² alto indica que el modelo se ajusta bien a los datos."
+        },
+        "partial-dependence": {
+          "labels": {
+            "x": "Variable",
+            "y": "Prediction"
+          },
+          "legend": {
+            "bars": "Barras",
+            "line": "Lineal"
+          },
+          "no-data": "No hay datos",
+          "title": "Dependencia Parcial de Variables",
+          "numeric-title": "Variables Cuantitativas",
+          "q-title": "Variables Cualitativas"
+        }
       }
     },
     "surrogate": {

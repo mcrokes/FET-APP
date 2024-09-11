@@ -1,18 +1,18 @@
 import math
-from pyclbr import Function
 
 import numpy as np
-from dash import dcc, html, dash_table
+from dash import dcc, html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 import pandas as pd
-from sklearn.calibration import LabelEncoder
+from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import partial_dependence
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
+from Dashboard.utils import findTranslationsParent, setText, getTranslations, get_target_dropdown
 from app.proccessor.model.dataset_interaction_methods import (
     get_y_transformed,
     update_y_pred,
@@ -23,23 +23,11 @@ from sklearn import metrics
 import plotly.express as px
 import plotly.graph_objects as go
 
-keys = {
-    "precision": "Precisión",
-    "tpr": "Sensibilidad",
-    "fpr": "Tasa FP",
-    "f1": "Medición F1",
-    "tv": "Predicciones Correctas",
-    "fv": "Predicciones Fallidas",
-    "accuracy": "Precisión Global",
-    "mse": "Error Cuadrático Medio",
-    "rmse": "Raíz del Error Cuadrático Medio",
-    "mae": "Error Absoluto Medio",
-    "mape": "Error Absoluto Porcentual Medio",
-    "r2": "Coeficiente de Determinación R²",
-}
+id_sufix = ["confusion-matrix", "roc-curve", "pred-real", "real-pred"]
 
 
-def generate_regression_metrics(y, y_pred):
+# REGRESSOR FUNCTIONS
+def generate_regression_metrics(y, y_pred, keys, parametersTranslations):
     mse = mean_squared_error(y, y_pred)
     regression_metrics = {
         f"{keys['mse']}": round(mse, 4),
@@ -50,22 +38,18 @@ def generate_regression_metrics(y, y_pred):
     }
 
     descriptions = {
-        f"{keys['mse']}": "El MSE mide la media de los errores cuadrados entre los valores reales y los valores "
-                          "predichos. Un MSE bajo indica que el modelo se ajusta bien a los datos.",
-        f"{keys['rmse']}": "El RMSE es la raíz cuadrada del MSE. Es una métrica más fácil de interpretar que el MSE, "
-                           "ya que tiene la misma unidad que los valores reales.",
-        f"{keys['mae']}": "El MAE mide la media de los errores absolutos entre los valores reales y los valores "
-                          "predichos. Un MAE bajo indica que el modelo se ajusta bien a los datos.",
-        f"{keys['mape']}": "El MAPE mide la media de los errores absolutos porcentuales entre los valores reales y "
-                           "los valores predichos. Un MAPE bajo indica que el modelo se ajusta bien a los datos.",
-        f"{keys['r2']}": "El R² mide la proporción de la varianza en los valores reales que es explicada por el "
-                         "modelo. Un R² alto indica que el modelo se ajusta bien a los datos.",
+        f"{keys['mse']}": setText(parametersTranslations, 'mse-tooltip', 'dashboard.metrics.regressor.parameters'),
+        f"{keys['rmse']}": setText(parametersTranslations, 'rmse-tooltip', 'dashboard.metrics.regressor.parameters'),
+        f"{keys['mae']}": setText(parametersTranslations, 'mae-tooltip', 'dashboard.metrics.regressor.parameters'),
+        f"{keys['mape']}": setText(parametersTranslations, 'mape-tooltip', 'dashboard.metrics.regressor.parameters'),
+        f"{keys['r2']}": setText(parametersTranslations, 'r2-tooltip', 'dashboard.metrics.regressor.parameters'),
     }
 
     regression_metrics_df = (
-        pd.DataFrame(regression_metrics, index=["Valor"])
+        pd.DataFrame(regression_metrics,
+                     index=[setText(parametersTranslations, 'value', 'dashboard.metrics.regressor.parameters')])
         .transpose()[0:]
-        .rename_axis("Métricas")
+        .rename_axis(setText(parametersTranslations, 'metrics', 'dashboard.metrics.regressor.parameters'))
         .reset_index()
     )
 
@@ -102,57 +86,201 @@ def generate_regression_metrics(y, y_pred):
         hover=True,
     )
 
-    print(regression_metrics_df)
-
-    print("Error Cuadrático Medio (mean-squared-error):", round(regression_metrics[keys['mse']], 4))
-    print("Raíz del Error Cuadrático Medio (root-mean-squared-error):", round(regression_metrics[keys['rmse']], 4))
-    print("Error Absoluto Medio (mean-absolute-error):", round(regression_metrics[keys['mae']], 4))
-    print("Error Absoluto Porcentual Medio (mean-absolute-percentage-error):",
-          round(regression_metrics[keys['mape']], 4))
-    print("Coeficiente de Determinación (R-squared):", round(regression_metrics[keys['r2']], 4))
-
     return regression_metrics_table
 
 
-def setBottomLegend(fig):
-    fig.update_layout(
-        legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1)
+def metricsRegressorLayout(metricsTranslations):
+    regressorTranslations = findTranslationsParent(metricsTranslations, 'regressor')
+    regressorPredRealTranslations = findTranslationsParent(regressorTranslations, 'prediction-real')
+    regressorPredRealTooltipTranslations = findTranslationsParent(regressorPredRealTranslations, 'tooltip')
+
+    regressorRealPredTranslations = findTranslationsParent(regressorTranslations, 'real-prediction')
+    regressorRealPredTooltipTranslations = findTranslationsParent(regressorRealPredTranslations, 'tooltip')
+
+    regressorDependenceTranslations = findTranslationsParent(regressorTranslations, 'partial-dependence')
+
+    layout = html.Div(
+        [
+            html.Div(
+                [
+                    dbc.Row(
+                        [
+                            html.Div(id="regression-metrics", style={'width': 'max-content', 'margin': 'auto'}),
+                        ],
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                [
+                                    html.Div(
+                                        [
+                                            html.I(
+                                                id=f"{id_sufix[2]}-info",
+                                                className="fa fa-info-circle info-icon",
+                                            ),
+                                            dbc.Tooltip(
+                                                [
+                                                    html.Plaintext(
+                                                        [
+                                                            setText(regressorPredRealTooltipTranslations, 'text-1',
+                                                                    'dashboard.metrics.regressor.prediction-real'
+                                                                    '.tooltip'),
+                                                            html.Strong(
+                                                                setText(regressorPredRealTooltipTranslations, 'text-2',
+                                                                        'dashboard.metrics.regressor.prediction-real'
+                                                                        '.tooltip')
+                                                            ),
+                                                            setText(regressorPredRealTooltipTranslations, 'text-3',
+                                                                    'dashboard.metrics.regressor.prediction-real'
+                                                                    '.tooltip'),
+                                                        ]
+                                                    ),
+                                                    html.Plaintext(
+                                                        [
+                                                            setText(regressorPredRealTooltipTranslations, 'text-4',
+                                                                    'dashboard.metrics.regressor.prediction-real'
+                                                                    '.tooltip'),
+                                                            html.Strong(
+                                                                setText(regressorPredRealTooltipTranslations, 'text-5',
+                                                                        'dashboard.metrics.regressor.prediction-real'
+                                                                        '.tooltip')
+                                                            ),
+                                                        ]
+                                                    ),
+                                                ],
+                                                className="personalized-tooltip",
+                                                target=f"{id_sufix[2]}-info",
+                                            ),
+                                        ],
+                                        style={"display": "flex", "justify-content": "end"},
+                                    ),
+                                    dbc.Row([html.Div(id="regression-simple-vs-actual")]),
+                                ],
+                                xs=12,
+                                sm=12,
+                                md=6,
+                                lg=6,
+                                xl=6,
+                                xxl=6,
+                            ),
+                            dbc.Col(
+                                [
+                                    html.Div(
+                                        [
+                                            html.I(
+                                                id=f"{id_sufix[3]}-info",
+                                                className="fa fa-info-circle info-icon",
+                                            ),
+                                            dbc.Tooltip(
+                                                [
+                                                    html.Plaintext(
+                                                        [
+                                                            setText(regressorRealPredTooltipTranslations, 'text-1',
+                                                                    'dashboard.metrics.regressor.real-prediction'
+                                                                    '.tooltip'),
+                                                            html.Strong(
+                                                                setText(regressorRealPredTooltipTranslations, 'text-2',
+                                                                        'dashboard.metrics.regressor.real-prediction'
+                                                                        '.tooltip')
+                                                            ),
+                                                            setText(regressorRealPredTooltipTranslations, 'text-3',
+                                                                    'dashboard.metrics.regressor.real-prediction'
+                                                                    '.tooltip'),
+                                                        ]
+                                                    ),
+                                                    html.Plaintext(
+                                                        [
+                                                            setText(regressorRealPredTooltipTranslations, 'text-4',
+                                                                    'dashboard.metrics.regressor.real-prediction'
+                                                                    '.tooltip'),
+                                                            html.Strong(
+                                                                setText(regressorRealPredTooltipTranslations, 'text-5',
+                                                                        'dashboard.metrics.regressor.real-prediction'
+                                                                        '.tooltip')
+                                                            ),
+                                                        ]
+                                                    ),
+                                                ],
+                                                className="personalized-tooltip",
+                                                target=f"{id_sufix[3]}-info",
+                                            ),
+                                        ],
+                                        style={"display": "flex", "justify-content": "end"},
+                                    ),
+                                    html.Div(
+                                        id="regression-simple-vs-pred",
+                                    ),
+                                ],
+                                xs=12,
+                                sm=12,
+                                md=6,
+                                lg=6,
+                                xl=6,
+                                xxl=6,
+                            ),
+                        ],
+                    ),
+                    dbc.Row(
+                        [
+                            html.Plaintext(
+                                setText(regressorDependenceTranslations, 'title',
+                                        'dashboard.metrics.regressor.partial-dependence'),
+                                className="rules-title",
+                            ),
+                            dbc.Col([
+                                html.Plaintext(
+                                    setText(regressorDependenceTranslations, 'numeric-title',
+                                            'dashboard.metrics.regressor.partial-dependence'),
+                                    className="rules-title",
+                                ),
+                                html.Div(id="numeric-dependence-plot")
+                            ],
+                                xs=12,
+                                sm=12,
+                                md=6,
+                                lg=6,
+                                xl=6,
+                                xxl=6,
+                            ),
+                            dbc.Col([
+                                html.Plaintext(
+                                    setText(regressorDependenceTranslations, 'q-title',
+                                            'dashboard.metrics.regressor.partial-dependence'),
+                                    className="rules-title",
+                                ),
+                                html.Div(id="object-dependence-plot"),
+                            ],
+                                xs=12,
+                                sm=12,
+                                md=6,
+                                lg=6,
+                                xl=6,
+                                xxl=6,
+                            ),
+                        ]
+                    ),
+                ], className="container"
+            )
+        ],
+        style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
     )
-    return fig
+
+    return layout
 
 
-def addAxisNames(fig):
-    fig = setBottomLegend(fig)
-    fig.update_layout(
-        yaxis_title="Predicción",
-        xaxis_title="Variable",
-    )
-    return fig
-
-
-def get_target_dropdown(values_dict):
-    return [
-        {"label": value["new_value"], "value": index}
-        for index, value in enumerate(values_dict)
-    ]
-
-
-def get_y_test_transformed(y_test):
-    for value in y_test:
-        if value is not int:
-            y_test = LabelEncoder().fit_transform(y_test)
-            break
-    return y_test
-
-
-def generateMatrixExplanationLayout(matrix_explanation):
+# CLASSIFIER FUNCTIONS
+def generateMatrixExplanationLayout(matrix_explanation, parametersTranslations, keys):
     matrix_generals = matrix_explanation
     matrix_explanation = matrix_generals.pop("matrix_explanation")
 
     generals_df = (
-        pd.DataFrame(matrix_generals, index=["Factores Generales"])
+        pd.DataFrame(matrix_generals, index=[
+            setText(parametersTranslations, 'value', 'dashboard.metrics.classifier.matrix.parameters')
+        ])
         .transpose()[1:]
-        .rename_axis("Valor")
+        .rename_axis(
+            setText(parametersTranslations, 'general-factors', 'dashboard.metrics.classifier.matrix.parameters')
+        )
         .reset_index()
     )
     expl = [
@@ -168,18 +296,21 @@ def generateMatrixExplanationLayout(matrix_explanation):
         return (
             pd.DataFrame(m["explanation"], index=[m["current_class"]])
             .transpose()
-            .rename_axis("Parámetros Individuales")
+            .rename_axis(
+                setText(parametersTranslations, 'individual', 'dashboard.metrics.classifier.matrix.parameters')
+            )
         )
 
     if matrix_explanation != {}:
         descriptions = {
-            f"{keys['tpr']}": "Proporción de predicciones correctas entre todos los valores reales de la clase. ("
-                              "Mayor es Mejor)",
-            f"{keys['fpr']}": "Proporción de predicciones erroneas entre todos los valores reales de otras clases "
-                              "clase. (Menor es Mejor)",
-            f"{keys['f1']}": "Media armónica de la precisión y la sensibilidad. (Mayor es Mejor)",
-            f"{keys['precision']}": "Proporción de verdaderos positivos entre todos los positivos predichos. (Mayor "
-                                    "es Mejor)",
+            f"{keys['tpr']}": setText(parametersTranslations, 'sensibility-tooltip',
+                                      'dashboard.metrics.classifier.matrix.parameters'),
+            f"{keys['fpr']}": setText(parametersTranslations, 'fp-tooltip',
+                                      'dashboard.metrics.classifier.matrix.parameters'),
+            f"{keys['f1']}": setText(parametersTranslations, 'f1-tooltip',
+                                     'dashboard.metrics.classifier.matrix.parameters'),
+            f"{keys['precision']}": setText(parametersTranslations, 'precision-tooltip',
+                                            'dashboard.metrics.classifier.matrix.parameters'),
         }
 
         explanation_df = pd.concat(
@@ -206,9 +337,7 @@ def generateMatrixExplanationLayout(matrix_explanation):
                                         if index == 0
                                         else cell
                                     )
-                                    for index, (col, cell) in enumerate(
-                                    zip(explanation_df.columns, row)
-                                )
+                                    for index, (col, cell) in enumerate(zip(explanation_df.columns, row))
                                 ]
                             )
                             for row in explanation_df.values.tolist()
@@ -223,7 +352,7 @@ def generateMatrixExplanationLayout(matrix_explanation):
     return html.Div(expl)
 
 
-def get_matrix_explanation(cm, class_names):
+def get_matrix_explanation(cm, class_names, keys):
     matrix_explanation = []
     true_values = 0
     false_values = 0
@@ -253,8 +382,7 @@ def get_matrix_explanation(cm, class_names):
                 if true_positive > 0
                 else 0
             ),
-            f"{keys['fpr']}": sum(false_positives)
-                              / (sum(false_positives) + sum(true_negatives)),
+            f"{keys['fpr']}": sum(false_positives) / (sum(false_positives) + sum(true_negatives)),
         }
 
         explanation[keys["f1"]] = (
@@ -289,11 +417,15 @@ def get_matrix_explanation(cm, class_names):
     }
 
 
-def __create_matrix(cm, class_names):
+def __create_matrix(cm, class_names, matrixTranslations):
+    labelsTranslations = findTranslationsParent(matrixTranslations, 'labels')
     fig = px.imshow(
         img=cm,
-        title="MATRIZ DE CONFUSION",
-        labels=dict(x="PREDICCIONES", y="VALORES REALES", color="CANTIDAD"),
+        title=setText(matrixTranslations, 'title', 'dashboard.metrics.classifier.matrix'),
+        labels=dict(
+            x=setText(labelsTranslations, 'x', 'dashboard.metrics.classifier.matrix.labels'),
+            y=setText(labelsTranslations, 'y', 'dashboard.metrics.classifier.matrix.labels'),
+            color=setText(labelsTranslations, 'color', 'dashboard.metrics.classifier.matrix.labels')),
         x=class_names,
         y=class_names,
         text_auto=True,
@@ -310,13 +442,17 @@ def initialize_matrix(
         classifier_model: RandomForestClassifier,
         class_names,
         old_class_names,
+        matrixTranslations,
+        keys
 ):
     y_pred_new = classifier_model.predict(x_test)
 
     if dropdown_value is not None:
+
         try:
             positive_class = int(dropdown_value)
-        except:  # noqa: E722
+        except Exception as e:
+            str(e)
             positive_class = dropdown_value
         probability_predictions = classifier_model.predict_proba(x_test)
 
@@ -333,12 +469,14 @@ def initialize_matrix(
 
     # Generate the confusion matrix
     cm = metrics.confusion_matrix(y_true=y_test, y_pred=y_pred_new)
-    return __create_matrix(cm=cm, class_names=class_names), get_matrix_explanation(
-        cm, class_names
-    )
+    return (__create_matrix(cm=cm, class_names=class_names, matrixTranslations=matrixTranslations),
+            get_matrix_explanation(
+                cm, class_names, keys
+            ))
 
 
-def create_curve(y_scores, y_true, options, pointers, useScatter=False):
+def create_curve(y_scores, y_true, options, pointers, curveTranslations, useScatter=False):
+    parameterTranslations = findTranslationsParent(curveTranslations, 'parameters')
     data = []
     trace1 = go.Scatter(
         x=[0, 1], y=[0, 1], mode="lines", line=dict(dash="dash"), showlegend=False
@@ -354,32 +492,37 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
         auc_score = metrics.auc(fpr, tpr)
 
         if pointer >= 0 or not useScatter:
-            name = f"{options[cont]['label']} (AUC={auc_score * 100:.2f} %)"
+            name = (f"{options[cont]['label']} "
+                    f"({setText(parameterTranslations, 'auc', 'dashboard.metrics.classifier.roc.parameters')}="
+                    f"{auc_score * 100:.2f} %)")
             trace2 = go.Scatter(x=fpr, y=tpr, name=name, mode="lines")
             data.append(trace2)
 
+            markerText = setText(parameterTranslations, 'marker', 'dashboard.metrics.classifier.roc.parameters')
             if useScatter:
                 scatterPointer = int(len(fpr) * pointer)
                 trace3 = go.Scatter(
                     x=[fpr[scatterPointer]],
                     y=[tpr[scatterPointer]],
-                    legendgroup=f"Marker {options[cont]['label']}",
-                    name=f"Marker {options[cont]['label']}",
+                    legendgroup=f"{markerText} {options[cont]['label']}",
+                    name=f"{markerText} {options[cont]['label']}",
                 )
                 trace4 = go.Scatter(
                     x=[0, fpr[scatterPointer]],
                     y=[tpr[scatterPointer], tpr[scatterPointer]],
                     mode="lines",
-                    legendgroup=f"Marker {options[cont]['label']}",
-                    name=f"TPR {round(tpr[scatterPointer] * 100, 2)} %",
+                    legendgroup=f"{markerText} {options[cont]['label']}",
+                    name=f"{setText(parameterTranslations, 'tpr', 'dashboard.metrics.classifier.roc.parameters')}"
+                         f" {round(tpr[scatterPointer] * 100, 2)} %",
                     line=dict(dash="dash"),
                 )
                 trace5 = go.Scatter(
                     x=[fpr[scatterPointer], fpr[scatterPointer]],
                     y=[0, tpr[scatterPointer]],
                     mode="lines",
-                    legendgroup=f"Marker {options[cont]['label']}",
-                    name=f"FPR {round(fpr[scatterPointer] * 100, 2)} %",
+                    legendgroup=f"{markerText} {options[cont]['label']}",
+                    name=f"{setText(parameterTranslations, 'fpr', 'dashboard.metrics.classifier.roc.parameters')}"
+                         f" {round(fpr[scatterPointer] * 100, 2)} %",
                     line=dict(dash="dash"),
                 )
                 data.append(trace3)
@@ -387,10 +530,11 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
                 data.append(trace5)
         cont += 1
 
+    labelsTexts = findTranslationsParent(curveTranslations, 'labels')
     layout = go.Layout(
-        title="ROC-AUC curva",
-        yaxis=dict(title="Tasa de Positivos"),
-        xaxis=dict(title="Tasa de Falsos Positivos"),
+        title=setText(curveTranslations, 'title', 'dashboard.metrics.classifier.roc'),
+        yaxis=dict(title=setText(labelsTexts, 'y', 'dashboard.metrics.classifier.roc.labels')),
+        xaxis=dict(title=setText(labelsTexts, 'x', 'dashboard.metrics.classifier.roc.labels')),
     )
 
     fig = go.Figure(data=data, layout=layout)
@@ -398,345 +542,247 @@ def create_curve(y_scores, y_true, options, pointers, useScatter=False):
     return setBottomLegend(fig)
 
 
-cutoff = dbc.Switch(
-    label="Punto de Corte",
-    value=False,
-    id="check-cutoff",
-    style={"display": "flex", "gap": "1rem"},
-)
+def metricsClassifierLayout(metricsTranslations):
+    classifierTranslations = findTranslationsParent(metricsTranslations, 'classifier')
+    classifierMatrixTranslations = findTranslationsParent(classifierTranslations, 'matrix')
+    classifierMatrixTooltipTranslations = findTranslationsParent(classifierMatrixTranslations, 'tooltip')
+    classifierMatrixParametersTranslations = findTranslationsParent(classifierMatrixTranslations, 'parameters')
 
-class_selector = dcc.Dropdown(
-    value=None,
-    id="positive-class-selector",
-    placeholder="Seleccione como positiva la clase que desea analizar",
-    disabled=True,
-)
+    classifierRocTranslations = findTranslationsParent(classifierTranslations, 'roc')
+    classifierRocTooltipTranslations = findTranslationsParent(classifierRocTranslations, 'tooltip')
 
-slider = dcc.Slider(0.01, 0.99, 0.1, value=0.5, id="cutoff-slider", disabled=True)
+    cutoff = dbc.Switch(
+        label=setText(classifierTranslations, 'cutoff', 'dashboard.metrics.classifier'),
+        value=False,
+        id="check-cutoff",
+        style={"display": "flex", "gap": "1rem"},
+    )
 
-ROCcutoff = dbc.Switch(
-    label="Punto de Corte",
-    value=False,
-    id="ROC-check-cutoff",
-    style={"display": "flex", "gap": "1rem"},
-)
+    class_selector = dcc.Dropdown(
+        value=None,
+        id="positive-class-selector",
+        placeholder=setText(classifierTranslations, 'class-selector', 'dashboard.metrics.classifier'),
+        disabled=True,
+    )
 
-ROCclass_selector = dcc.Dropdown(
-    value=None,
-    id="ROC-positive-class-selector",
-    placeholder="Seleccione como positiva la clase que desea analizar",
-    disabled=True,
-)
+    slider = dcc.Slider(0.01, 0.99, 0.1, value=0.5, id="cutoff-slider", disabled=True)
 
-ROCslider = dcc.Slider(0.01, 0.99, value=0.5, id="ROC-cutoff-slider", disabled=True)
+    ROCcutoff = dbc.Switch(
+        label=setText(classifierTranslations, 'cutoff', 'dashboard.metrics.classifier'),
+        value=False,
+        id="ROC-check-cutoff",
+        style={"display": "flex", "gap": "1rem"},
+    )
 
-id_sufix = ["confusion-matrix", "roc-curve", "pred-real", "real-pred"]
+    ROCclass_selector = dcc.Dropdown(
+        value=None,
+        id="ROC-positive-class-selector",
+        placeholder=setText(classifierTranslations, 'class-selector', 'dashboard.metrics.classifier'),
+        disabled=True,
+    )
 
-metricsClassifierLayout = html.Div(
-    [
-        html.Div(
-            [
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                dbc.Row([html.Div(id="matrix-output-upload")]),
-                                dbc.Tooltip(
-                                    [
-                                        html.Plaintext(
-                                            [
-                                                "Punto porcentual en el que el modelo decide clasificar una clase "
-                                                "como verdadera.",
-                                            ]
-                                        ),
-                                    ],
-                                    className="personalized-tooltip",
-                                    target="check-cutoff",
-                                ),
-                                dbc.Row(
-                                    [html.Div([cutoff], style={"padding-left": "20px"})]
-                                ),
-                                dbc.Row([class_selector]),
-                                dbc.Row([slider], style={"padding-top": "20px"}),
-                            ],
-                            xs=12,
-                            sm=12,
-                            md=7,
-                            lg=7,
-                            xl=7,
-                            xxl=7,
-                        ),
-                        dbc.Col(
-                            [
-                                html.Div(
-                                    [
-                                        html.I(
-                                            id=f"{id_sufix[0]}-info",
-                                            className="fa fa-info-circle info-icon",
-                                        ),
-                                        dbc.Tooltip(
-                                            [
-                                                html.Plaintext(
-                                                    [
-                                                        "Matriz de Confusión: Evalúa la precisión del modelo en la "
-                                                        "clasificación de ejemplos.",
-                                                    ]
-                                                ),
-                                                html.Plaintext(
-                                                    [
-                                                        html.Strong("VP: "),
-                                                        "ejemplos positivos correctamente clasificados.",
-                                                    ]
-                                                ),
-                                                html.Plaintext(
-                                                    [
-                                                        html.Strong("VN: "),
-                                                        "ejemplos negativos correctamente clasificados.",
-                                                    ]
-                                                ),
-                                                html.Plaintext(
-                                                    [
-                                                        html.Strong("FP: "),
-                                                        "ejemplos negativos incorrectamente clasificados como "
-                                                        "positivos.",
-                                                    ]
-                                                ),
-                                                html.Plaintext(
-                                                    [
-                                                        html.Strong("FN: "),
-                                                        "ejemplos positivos incorrectamente clasificados como "
-                                                        "negativos.",
-                                                    ]
-                                                ),
-                                            ],
-                                            className="personalized-tooltip",
-                                            target=f"{id_sufix[0]}-info",
-                                        ),
-                                    ],
-                                    style={"display": "flex", "justify-content": "end"},
-                                ),
-                                html.Plaintext(
-                                    "Parámetros Obtenidos", style={"color": "black"}
-                                ),
-                                html.Div(
-                                    id="matrix-explanation",
-                                ),
-                            ],
-                            xs=12,
-                            sm=12,
-                            md=5,
-                            lg=5,
-                            xl=5,
-                            xxl=5,
-                        ),
-                    ],
-                ),
-                html.Div(
-                    [
-                        html.I(
-                            id=f"{id_sufix[1]}-info",
-                            className="fa fa-info-circle info-icon",
-                        ),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        "Curva ROC: Muestra la relación entre la tasa de Verdaderos Positivos (",
-                                        html.Strong("Sensibilidad"),
-                                        ") y la tasa de Falsos Positivos (",
-                                        html.Strong("1-Especificidad"),
-                                        ") a diferentes umbrales de clasificación.",
-                                    ]
-                                ),
-                                html.Plaintext(
-                                    [
-                                        """
-                                        * El área bajo la curva (AUC) es una métrica que resume 
-                                        el comportamiento del modelo. Un AUC cercano a 1 indica un modelo 
-                                        que puede distinguir perfectamente entre positivos y negativos, mientras que un 
-                                        AUC cercano a 0.5 indica un modelo que no es mejor que una elección aleatoria.
-                                        """,
-                                    ]
-                                ),
-                            ],
-                            className="personalized-tooltip",
-                            target=f"{id_sufix[1]}-info",
-                        ),
-                    ],
-                    style={"display": "flex", "justify-content": "end"},
-                ),
-                dbc.Row(
-                    [
-                        dbc.Row(id="roc-output-upload"),
-                        dbc.Tooltip(
-                            [
-                                html.Plaintext(
-                                    [
-                                        "Punto porcentual en el que el modelo decide clasificar una clase como "
-                                        "verdadera.",
-                                    ]
-                                ),
-                            ],
-                            className="personalized-tooltip",
-                            target="ROC-check-cutoff",
-                        ),
-                        dbc.Row(
-                            [html.Div([ROCcutoff], style={"padding-left": "20px"})]
-                        ),
-                        dbc.Row([ROCclass_selector]),
-                        dbc.Row([ROCslider], style={"padding-top": "20px"}),
-                    ]
-                ),
-            ], className="container"
-        )
-    ],
-    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
-)
+    ROCslider = dcc.Slider(0.01, 0.99, value=0.5, id="ROC-cutoff-slider", disabled=True)
 
-metricsRegressorLayout = html.Div(
-    [
-        html.Div(
-            [
-                dbc.Row(
-                    [
-                        html.Div(id="regression-metrics", style={'width': 'max-content', 'margin': 'auto'}),
-                    ],
-                ),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                html.Div(
-                                    [
-                                        html.I(
-                                            id=f"{id_sufix[2]}-info",
-                                            className="fa fa-info-circle info-icon",
-                                        ),
-                                        dbc.Tooltip(
-                                            [
-                                                html.Plaintext(
-                                                    [
-                                                        "Evalúa la precisión del modelo en la "
-                                                        "regresión de resultados de modo que un mejor modelo "
-                                                        "está representado por los ",
-                                                        html.Strong("puntos más cercanos a la linea discontinua "),
-                                                        "central.",
-                                                    ]
-                                                ),
-                                                html.Plaintext(
-                                                    [
-                                                        "La línea discontínua representa los ",
-                                                        html.Strong("valores reales "),
-                                                    ]
-                                                ),
-                                            ],
-                                            className="personalized-tooltip",
-                                            target=f"{id_sufix[2]}-info",
-                                        ),
-                                    ],
-                                    style={"display": "flex", "justify-content": "end"},
-                                ),
-                                dbc.Row([html.Div(id="regression-simple-vs-actual")]),
-                            ],
-                            xs=12,
-                            sm=12,
-                            md=6,
-                            lg=6,
-                            xl=6,
-                            xxl=6,
-                        ),
-                        dbc.Col(
-                            [
-                                html.Div(
-                                    [
-                                        html.I(
-                                            id=f"{id_sufix[3]}-info",
-                                            className="fa fa-info-circle info-icon",
-                                        ),
-                                        dbc.Tooltip(
-                                            [
-                                                html.Plaintext(
-                                                    [
-                                                        "Evalúa la precisión del modelo en la "
-                                                        "regresión de resultados de modo que un mejor modelo "
-                                                        "está representado por los ",
-                                                        html.Strong("puntos más cercanos a la linea discontinua "),
-                                                        "central.",
-                                                    ]
-                                                ),
-                                                html.Plaintext(
-                                                    [
-                                                        "La línea discontínua representa la ",
-                                                        html.Strong("predicción "),
-                                                    ]
-                                                ),
-                                            ],
-                                            className="personalized-tooltip",
-                                            target=f"{id_sufix[3]}-info",
-                                        ),
-                                    ],
-                                    style={"display": "flex", "justify-content": "end"},
-                                ),
-                                html.Div(
-                                    id="regression-simple-vs-pred",
-                                ),
-                            ],
-                            xs=12,
-                            sm=12,
-                            md=6,
-                            lg=6,
-                            xl=6,
-                            xxl=6,
-                        ),
-                    ],
-                ),
-                dbc.Row(
-                    [
-                        html.Plaintext(
-                            "Dependencia Parcial de Variables",
-                            className="rules-title",
-                        ),
-                        dbc.Col([
-                            html.Plaintext(
-                                "Variables Cuantitativas",
-                                className="rules-title",
+    layout = html.Div(
+        [
+            html.Div(
+                [
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                [
+                                    dbc.Row([html.Div(id="matrix-output-upload")]),
+                                    dbc.Tooltip(
+                                        [
+                                            html.Plaintext(
+                                                [
+                                                    setText(classifierTranslations, 'cutoff-tooltip',
+                                                            'dashboard.metrics.classifier'),
+                                                ]
+                                            ),
+                                        ],
+                                        className="personalized-tooltip",
+                                        target="check-cutoff",
+                                    ),
+                                    dbc.Row(
+                                        [html.Div([cutoff], style={"padding-left": "20px"})]
+                                    ),
+                                    dbc.Row([class_selector]),
+                                    dbc.Row([slider], style={"padding-top": "20px"}),
+                                ],
+                                xs=12,
+                                sm=12,
+                                md=7,
+                                lg=7,
+                                xl=7,
+                                xxl=7,
                             ),
-                            html.Div(id="numeric-dependence-plot")
-                        ],
-                            xs=12,
-                            sm=12,
-                            md=6,
-                            lg=6,
-                            xl=6,
-                            xxl=6,
-                        ),
-                        dbc.Col([
-                            html.Plaintext(
-                                "Variables Cualitativas",
-                                className="rules-title",
+                            dbc.Col(
+                                [
+                                    html.Div(
+                                        [
+                                            html.I(
+                                                id=f"{id_sufix[0]}-info",
+                                                className="fa fa-info-circle info-icon",
+                                            ),
+                                            dbc.Tooltip(
+                                                [
+                                                    html.Plaintext(
+                                                        [
+                                                            setText(classifierMatrixTooltipTranslations, 'text-1',
+                                                                    'dashboard.metrics.classifier.matrix.tooltip'),
+                                                        ]
+                                                    ),
+                                                    html.Plaintext(
+                                                        [
+                                                            html.Strong(
+                                                                setText(classifierMatrixTooltipTranslations, 'text-2',
+                                                                        'dashboard.metrics.classifier.matrix.tooltip')),
+                                                            setText(classifierMatrixTooltipTranslations, 'text-3',
+                                                                    'dashboard.metrics.classifier.matrix.tooltip'),
+                                                        ]
+                                                    ),
+                                                    html.Plaintext(
+                                                        [
+                                                            html.Strong(
+                                                                setText(classifierMatrixTooltipTranslations, 'text-4',
+                                                                        'dashboard.metrics.classifier.matrix.tooltip')),
+                                                            setText(classifierMatrixTooltipTranslations, 'text-5',
+                                                                    'dashboard.metrics.classifier.matrix.tooltip'),
+                                                        ]
+                                                    ),
+                                                    html.Plaintext(
+                                                        [
+                                                            html.Strong(
+                                                                setText(classifierMatrixTooltipTranslations, 'text-6',
+                                                                        'dashboard.metrics.classifier.matrix.tooltip')),
+                                                            setText(classifierMatrixTooltipTranslations, 'text-7',
+                                                                    'dashboard.metrics.classifier.matrix.tooltip'),
+                                                        ]
+                                                    ),
+                                                    html.Plaintext(
+                                                        [
+                                                            html.Strong(
+                                                                setText(classifierMatrixTooltipTranslations, 'text-8',
+                                                                        'dashboard.metrics.classifier.matrix.tooltip')),
+                                                            setText(classifierMatrixTooltipTranslations, 'text-9',
+                                                                    'dashboard.metrics.classifier.matrix.tooltip'),
+                                                        ]
+                                                    ),
+                                                ],
+                                                className="personalized-tooltip",
+                                                target=f"{id_sufix[0]}-info",
+                                            ),
+                                        ],
+                                        style={"display": "flex", "justify-content": "end"},
+                                    ),
+                                    html.Plaintext(
+                                        setText(classifierMatrixParametersTranslations, 'title',
+                                                'dashboard.metrics.classifier.matrix.parameters'),
+                                        style={"color": "black"}
+                                    ),
+                                    html.Div(
+                                        id="matrix-explanation",
+                                    ),
+                                ],
+                                xs=12,
+                                sm=12,
+                                md=5,
+                                lg=5,
+                                xl=5,
+                                xxl=5,
                             ),
-                            html.Div(id="object-dependence-plot"),
                         ],
-                            xs=12,
-                            sm=12,
-                            md=6,
-                            lg=6,
-                            xl=6,
-                            xxl=6,
-                        ),
-                    ]
-                ),
-            ], className="container"
-        )
-    ],
-    style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
-)
+                    ),
+                    html.Div(
+                        [
+                            html.I(
+                                id=f"{id_sufix[1]}-info",
+                                className="fa fa-info-circle info-icon",
+                            ),
+                            dbc.Tooltip(
+                                [
+                                    html.Plaintext(
+                                        [
+                                            setText(classifierRocTooltipTranslations, 'text-1',
+                                                    'dashboard.metrics.classifier.roc.tooltip'),
+                                            html.Strong(
+                                                setText(classifierRocTooltipTranslations, 'text-2',
+                                                        'dashboard.metrics.classifier.roc.tooltip')),
+                                            setText(classifierRocTooltipTranslations, 'text-3',
+                                                    'dashboard.metrics.classifier.roc.tooltip'),
+                                            html.Strong(
+                                                setText(classifierRocTooltipTranslations, 'text-4',
+                                                        'dashboard.metrics.classifier.roc.tooltip')),
+                                            setText(classifierRocTooltipTranslations, 'text-5',
+                                                    'dashboard.metrics.classifier.roc.tooltip'),
+                                        ]
+                                    ),
+                                    html.Plaintext(
+                                        [
+                                            setText(classifierRocTooltipTranslations, 'text-6',
+                                                    'dashboard.metrics.classifier.roc.tooltip'),
+                                        ]
+                                    ),
+                                ],
+                                className="personalized-tooltip",
+                                target=f"{id_sufix[1]}-info",
+                            ),
+                        ],
+                        style={"display": "flex", "justify-content": "end"},
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Row(id="roc-output-upload"),
+                            dbc.Tooltip(
+                                [
+                                    html.Plaintext(
+                                        [
+                                            setText(classifierTranslations, 'cutoff-tooltip',
+                                                    'dashboard.metrics.classifier'),
+                                        ]
+                                    ),
+                                ],
+                                className="personalized-tooltip",
+                                target="ROC-check-cutoff",
+                            ),
+                            dbc.Row(
+                                [html.Div([ROCcutoff], style={"padding-left": "20px"})]
+                            ),
+                            dbc.Row([ROCclass_selector]),
+                            dbc.Row([ROCslider], style={"padding-top": "20px"}),
+                        ]
+                    ),
+                ], className="container"
+            )
+        ],
+        style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
+    )
+
+    return layout
+
+
+# COMMON FUNCTIONS
+def setBottomLegend(fig):
+    fig.update_layout(
+        legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="right", x=1)
+    )
+    return fig
+
+
+def addAxisNames(fig, axisTranslations):
+    fig = setBottomLegend(fig)
+    fig.update_layout(
+        yaxis_title=setText(axisTranslations, 'y', 'dashboard.metrics.regressor.partial-dependence.labels'),
+        xaxis_title=setText(axisTranslations, 'x', 'dashboard.metrics.regressor.partial-dependence.labels'),
+    )
+    return fig
 
 
 def generateDependencePlots(X: pd.DataFrame, qualitative_dict,
-                            random_forest_model: RandomForestClassifier | RandomForestRegressor, feature):
+                            random_forest_model: RandomForestClassifier | RandomForestRegressor, feature,
+                            legendTranslations):
     graph = {"predictor": feature, "graph_data": []}
-    print('qualitative_dict: ', qualitative_dict)
     feature_idx = list(random_forest_model.feature_names_in_).index(feature)
     isObject = False
     variableNames = []
@@ -767,15 +813,20 @@ def generateDependencePlots(X: pd.DataFrame, qualitative_dict,
         graph['graph_data'].append(go.Scatter(
             x=x,
             y=y,
-            name="Lineal",
+            name=setText(legendTranslations, 'line', 'dashboard.metrics.regressor.partial-dependence.legend'),
             line=dict(color="royalblue", width=1, dash="dot"),
         ))
-        graph['graph_data'].append(go.Bar(name="Barras", x=x, y=y, width=0.5))
+        graph['graph_data'].append(
+            go.Bar(
+                name=setText(legendTranslations, 'bars', 'dashboard.metrics.regressor.partial-dependence.legend'),
+                x=x, y=y, width=0.5
+            )
+        )
 
     return graph
 
 
-def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
+def metricsCallbacks(app, furl, isRegressor: bool = False):
     if isRegressor:
         @app.callback(
             Output("n-dependence-graph", "children"),
@@ -788,6 +839,15 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
+                # TRANSLATIONS
+                regressorTranslations = getTranslations(current_user.langSelection, 'metrics', 'regressor')
+                regressorDependenceTranslations = findTranslationsParent(regressorTranslations, 'partial-dependence')
+                regressorDependenceLabelsTranslations = findTranslationsParent(regressorDependenceTranslations,
+                                                                               'labels')
+                regressorDependenceLegendTranslations = findTranslationsParent(regressorDependenceTranslations,
+                                                                               'legend')
+
+                # NORMAL FLOW
                 model_x: ExplainedModel = ExplainedModel.query.filter(
                     ExplainedModel.id == model_id
                 ).first()
@@ -797,18 +857,19 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                 qualitative_graph = generateDependencePlots(df.drop(columns=model_x.getElement('target_row')),
                                                             model_x.getElement('q_variables_dict'),
                                                             model_x.getElement('model'),
-                                                            q_var)
+                                                            q_var, regressorDependenceLegendTranslations)
                 numeric_graph = generateDependencePlots(df.drop(columns=model_x.getElement('target_row')),
                                                         model_x.getElement('q_variables_dict'),
                                                         model_x.getElement('model'),
-                                                        n_var)
+                                                        n_var, regressorDependenceLegendTranslations)
                 return (
                     dcc.Graph(
                         figure=addAxisNames(
                             go.Figure(
                                 data=numeric_graph["graph_data"],
                                 layout=dict(title=numeric_graph["predictor"]),
-                            )
+                            ),
+                            regressorDependenceLabelsTranslations
                         )
                     ),
                     dcc.Graph(
@@ -816,7 +877,8 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                             go.Figure(
                                 data=qualitative_graph["graph_data"],
                                 layout=dict(title=qualitative_graph["predictor"], ),
-                            )
+                            ),
+                            regressorDependenceLabelsTranslations
                         )
                     ),
                 )
@@ -833,6 +895,15 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
+                # TRANSLATIONS
+                regressorTranslations = getTranslations(current_user.langSelection, 'metrics', 'regressor')
+                regressorDependenceTranslations = findTranslationsParent(regressorTranslations, 'partial-dependence')
+                regressorDependenceLabelsTranslations = findTranslationsParent(regressorDependenceTranslations,
+                                                                               'labels')
+                regressorDependenceLegendTranslations = findTranslationsParent(regressorDependenceTranslations,
+                                                                               'legend')
+
+                # NORMAL FLOW
                 model_x: ExplainedModel = ExplainedModel.query.filter(
                     ExplainedModel.id == model_id
                 ).first()
@@ -840,23 +911,26 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                 q_vars_names = [variable['column_name'] for variable in model_x.getElement('q_variables_dict')]
                 n_vars_names = list(model_x.getElement('model').feature_names_in_)
 
-                print('n_vars_names: ', n_vars_names)
-                print('q_vars_names: ', q_vars_names)
-
                 for elm in q_vars_names:
                     n_vars_names.remove(elm)
 
-                qualitative_graph = generateDependencePlots(original_df.drop(columns=model_x.getElement('target_row')),
-                                                            model_x.getElement('q_variables_dict'),
-                                                            model_x.getElement('model'),
-                                                            q_vars_names[0]) if q_vars_names else None
-                numeric_graph = generateDependencePlots(original_df.drop(columns=model_x.getElement('target_row')),
-                                                        model_x.getElement('q_variables_dict'),
-                                                        model_x.getElement('model'),
-                                                        n_vars_names[0]) if n_vars_names else None
+                qualitative_graph = generateDependencePlots(
+                    original_df.drop(columns=model_x.getElement('target_row')),
+                    model_x.getElement('q_variables_dict'),
+                    model_x.getElement('model'),
+                    q_vars_names[0],
+                    regressorDependenceLegendTranslations
+                ) if q_vars_names else None
+                numeric_graph = generateDependencePlots(
+                    original_df.drop(columns=model_x.getElement('target_row')),
+                    model_x.getElement('q_variables_dict'),
+                    model_x.getElement('model'),
+                    n_vars_names[0],
+                    regressorDependenceLegendTranslations
+                ) if n_vars_names else None
 
-                print('Running out from Graph Dependency Creation')
-
+                no_data_text = setText(regressorDependenceTranslations, 'no-data',
+                                       'dashboard.metrics.regressor.partial-dependence.no-data')
                 return (
                     [
                         dcc.Dropdown(
@@ -873,11 +947,12 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                                     go.Figure(
                                         data=numeric_graph["graph_data"],
                                         layout=dict(title=numeric_graph["predictor"]),
-                                    )
+                                    ),
+                                    regressorDependenceLabelsTranslations
                                 )
                             ),
                         )
-                    ] if numeric_graph else 'No Hay Datos',
+                    ] if numeric_graph else no_data_text,
                     [
                         dcc.Dropdown(
                             id="q-dependence-vars-dropdown",
@@ -893,11 +968,12 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                                     go.Figure(
                                         data=qualitative_graph["graph_data"],
                                         layout=dict(title=qualitative_graph["predictor"]),
-                                    )
+                                    ),
+                                    regressorDependenceLabelsTranslations
                                 )
                             ),
                         )
-                    ] if qualitative_graph else 'No Hay Datos',
+                    ] if qualitative_graph else no_data_text,
                 )
             except Exception as e:
                 print(e)
@@ -913,6 +989,24 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
+                # TRANSLATIONS
+                regressorTranslations = getTranslations(current_user.langSelection, 'metrics', 'regressor')
+                regressorParametersTranslations = findTranslationsParent(regressorTranslations, 'parameters')
+                regressorPredRealTranslations = findTranslationsParent(regressorTranslations, 'prediction-real')
+                regressorPredRealLabelsTranslations = findTranslationsParent(regressorPredRealTranslations, 'labels')
+                regressorRealPredTranslations = findTranslationsParent(regressorTranslations, 'real-prediction')
+                regressorRealPredLabelsTranslations = findTranslationsParent(regressorRealPredTranslations, 'labels')
+
+                # NORMAL FLOW
+
+                regrKeys = {
+                    "mse": setText(regressorParametersTranslations, 'mse', 'dashboard.metrics.regressor.parameters'),
+                    "rmse": setText(regressorParametersTranslations, 'rmse', 'dashboard.metrics.regressor.parameters'),
+                    "mae": setText(regressorParametersTranslations, 'mae', 'dashboard.metrics.regressor.parameters'),
+                    "mape": setText(regressorParametersTranslations, 'mape', 'dashboard.metrics.regressor.parameters'),
+                    "r2": setText(regressorParametersTranslations, 'r2', 'dashboard.metrics.regressor.parameters'),
+                }
+
                 model_x: ExplainedModel = ExplainedModel.query.filter(
                     ExplainedModel.id == model_id
                 ).first()
@@ -923,8 +1017,15 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                 )
                 y = regressor_dataset[model_x.getElement('target_row')]
                 y_pred = regressor_model.predict(regressor_dataset.drop(columns=model_x.getElement('target_row')))
-                fig = px.scatter(x=y, y=y_pred, title='Prediccción vs Valores Reales', marginal_y='histogram',
-                                 labels={'x': 'Valor Real', 'y': 'Predicción'})
+                fig = px.scatter(x=y, y=y_pred, title=setText(regressorPredRealTranslations, 'title',
+                                                              'dashboard.metrics.regressor.prediction-real'),
+                                 marginal_y='histogram',
+                                 labels={
+                                     'x': setText(regressorPredRealLabelsTranslations, 'x',
+                                                  'dashboard.metrics.regressor.prediction-real.labels'),
+                                     'y': setText(regressorPredRealLabelsTranslations, 'y',
+                                                  'dashboard.metrics.regressor.prediction-real.labels')
+                                 })
                 fig.add_shape(
                     type="line", line=dict(dash='dash'),
                     x0=y.min(), y0=y.min(),
@@ -933,8 +1034,15 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
 
                 fig_1 = dcc.Graph(figure=fig)
 
-                fig = px.scatter(x=y_pred, y=y, title='Valores Reales vs Prediccción', marginal_y='histogram',
-                                 labels={'x': 'Prediccción', 'y': 'Valor Real'})
+                fig = px.scatter(x=y_pred, y=y, title=setText(regressorRealPredTranslations, 'title',
+                                                              'dashboard.metrics.regressor.real-prediction'),
+                                 marginal_y='histogram',
+                                 labels={
+                                     'x': setText(regressorRealPredLabelsTranslations, 'x',
+                                                  'dashboard.metrics.regressor.real-prediction.labels'),
+                                     'y': setText(regressorRealPredLabelsTranslations, 'y',
+                                                  'dashboard.metrics.regressor.real-prediction.labels')
+                                 })
                 fig.add_shape(
                     type="line", line=dict(dash='dash'),
                     x0=y_pred.min(), y0=y_pred.min(),
@@ -943,7 +1051,7 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
 
                 fig_2 = dcc.Graph(figure=fig)
 
-                return fig_1, fig_2, generate_regression_metrics(y, y_pred)
+                return fig_1, fig_2, generate_regression_metrics(y, y_pred, regrKeys, regressorParametersTranslations)
             except Exception as e:
                 print(e)
                 raise PreventUpdate
@@ -964,6 +1072,31 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
+                # TRANSLATIONS
+                classifierTranslations = getTranslations(current_user.langSelection, 'metrics', 'classifier')
+                classifierMatrixTranslations = findTranslationsParent(classifierTranslations, 'matrix')
+                classifierMatrixParametersTranslations = findTranslationsParent(classifierMatrixTranslations,
+                                                                                'parameters')
+
+                # NORMAL FLOW
+
+                matrixKeys = {
+                    "precision": setText(classifierMatrixParametersTranslations, 'precision',
+                                         'dashboard.metrics.classifier.matrix.parameters'),
+                    "tpr": setText(classifierMatrixParametersTranslations, 'sensibility',
+                                   'dashboard.metrics.classifier.matrix.parameters'),
+                    "fpr": setText(classifierMatrixParametersTranslations, 'fp',
+                                   'dashboard.metrics.classifier.matrix.parameters'),
+                    "f1": setText(classifierMatrixParametersTranslations, 'f1',
+                                  'dashboard.metrics.classifier.matrix.parameters'),
+                    "tv": setText(classifierMatrixParametersTranslations, 'tv',
+                                  'dashboard.metrics.classifier.matrix.parameters'),
+                    "fv": setText(classifierMatrixParametersTranslations, 'fv',
+                                  'dashboard.metrics.classifier.matrix.parameters'),
+                    "accuracy": setText(classifierMatrixParametersTranslations, 'accuracy',
+                                        'dashboard.metrics.classifier.matrix.parameters'),
+                }
+
                 classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
                     ExplainedClassifierModel.explainer_model_id == model_id
                 ).first()
@@ -993,10 +1126,13 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                             classifier_model=classifier_model,
                             class_names=class_names,
                             old_class_names=old_class_names,
+                            matrixTranslations=classifierMatrixTranslations,
+                            keys=matrixKeys,
                         )
                         return (
                             dcc.Graph(figure=matrix_graph),
-                            generateMatrixExplanationLayout(matrix_explanation),
+                            generateMatrixExplanationLayout(matrix_explanation, classifierMatrixParametersTranslations,
+                                                            matrixKeys),
                             False,
                             False,
                             get_target_dropdown(target_description["variables"]),
@@ -1010,9 +1146,13 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                             classifier_model=classifier_model,
                             class_names=class_names,
                             old_class_names=old_class_names,
+                            matrixTranslations=classifierMatrixTranslations,
+                            keys=matrixKeys,
                         )
                         div = dcc.Graph(figure=matrix_graph)
-                        explanation = generateMatrixExplanationLayout(matrix_explanation)
+                        explanation = generateMatrixExplanationLayout(matrix_explanation,
+                                                                      classifierMatrixParametersTranslations,
+                                                                      matrixKeys)
                         if cutoff and positive_class is None:
                             return (
                                 div,
@@ -1054,6 +1194,12 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
             f = furl(cl)
             model_id = f.args["model_id"]
             try:
+                # TRANSLATIONS
+                classifierTranslations = getTranslations(current_user.langSelection, 'metrics', 'classifier')
+                classifierRocTranslations = findTranslationsParent(classifierTranslations, 'roc')
+
+                # NORMAL FLOW
+
                 classifier_dbmodel: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
                     ExplainedClassifierModel.explainer_model_id == model_id
                 ).first()
@@ -1086,6 +1232,7 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                                     ),
                                     pointers=pointers,
                                     useScatter=True,
+                                    curveTranslations=classifierRocTranslations
                                 )
                             ),
                             False,
@@ -1093,7 +1240,7 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                             get_target_dropdown(target_description["variables"]),
                         )
                     else:
-                        pointers = [-1 for element in target_description["variables"]]
+                        pointers = [-1 for _ in target_description["variables"]]
                         div = (
                             dcc.Graph(
                                 figure=create_curve(
@@ -1105,6 +1252,7 @@ def metricsCallbacks(app, furl: Function, isRegressor: bool = False):
                                         target_description["variables"]
                                     ),
                                     pointers=pointers,
+                                    curveTranslations=classifierRocTranslations
                                 )
                             ),
                         )
