@@ -11,8 +11,8 @@ from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-from Dashboard.metrics.metricsLayout import get_target_dropdown
-from Dashboard.utils import findTranslationsParent, getTranslations, setText
+from Dashboard.utils import get_target_dropdown
+from app.API.utils import findTranslationsParent, setText, getTranslations
 from app.proccessor.models import ExplainedModel
 
 from treeinterpreter import treeinterpreter as ti
@@ -88,7 +88,8 @@ def getTreeInterpreterParamethersRegressor(
 
         contribution_graph_data[0]["graph_data"].append(
             go.Bar(
-                name=f"{feature}({round(y[0], 3)}) {round(y[0] / (prediction[0][0] if prediction[0][0] > 0 else 1) * 100, 2)}%",
+                name=f"{feature}"
+                     f"({round(y[0], 3)}) {round(y[0] / (prediction[0][0] if prediction[0][0] > 0 else 1) * 100, 2)}%",
                 x=x,
                 y=y,
             )
@@ -102,7 +103,9 @@ def getTreeInterpreterParamethersRegressor(
     contribution_graph_data[0]["graph_data"].insert(
         0,
         go.Bar(
-            name=f"{media} ({round(media_array_y[0], 3)}) {round(media_array_y[0] / (prediction[0][0] if prediction[0][0] > 0 else 1) * 100, 3)}%",
+            name=f"{media}"
+                 f" ({round(media_array_y[0], 3)}) "
+                 f"{round(media_array_y[0] / (prediction[0][0] if prediction[0][0] > 0 else 1) * 100, 3)}%",
             x=media_array_x,
             y=media_array_y,
         ),
@@ -119,7 +122,9 @@ def getTreeInterpreterParamethersRegressor(
             x=[accumulated, finalPrediction],
             y=[point, point],
             mode="lines",
-            name=f"{actual} ({round(point, 3)}) {round((point / (prediction[0][0] if prediction[0][0] > 0 else 1) * 100), 2)} %",
+            name=f"{actual}"
+                 f" ({round(point, 3)}) "
+                 f"{round((point / (prediction[0][0] if prediction[0][0] > 0 else 1) * 100), 2)} %",
             line=dict(dash="dash"),
             marker_color=["blue", "blue"],
         )
@@ -198,7 +203,9 @@ def getTreeInterpreterParamethersClassifier(
 
                 contribution_graph_data[0]["graph_data"].append(
                     go.Bar(
-                        name=f"{feature}({round(y[0], 3)}) {round(y[0] / (prediction[0][index] if prediction[0][index] > 0 else 1) * 100, 2)}%",
+                        name=f"{feature}"
+                             f"({round(y[0], 3)}) "
+                             f"{round(y[0] / (prediction[0][index] if prediction[0][index] > 0 else 1) * 100, 2)}%",
                         x=x,
                         y=y,
                     )
@@ -212,7 +219,9 @@ def getTreeInterpreterParamethersClassifier(
             contribution_graph_data[0]["graph_data"].insert(
                 0,
                 go.Bar(
-                    name=f"{media} ({round(media_array_y[0], 3)}) {round(media_array_y[0] / (prediction[0][index] if prediction[0][index] > 0 else 1) * 100, 3)}%",
+                    name=f"{media} "
+                         f"({round(media_array_y[0], 3)}) "
+                         f"{round(media_array_y[0] / (prediction[0][index] if prediction[0][index] > 0 else 1) * 100, 3)}%",
                     x=media_array_x,
                     y=media_array_y,
                 ),

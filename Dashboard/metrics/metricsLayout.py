@@ -12,7 +12,8 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import partial_dependence
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-from Dashboard.utils import findTranslationsParent, setText, getTranslations, get_target_dropdown
+from Dashboard.utils import get_target_dropdown
+from app.API.utils import setText, findTranslationsParent, getTranslations
 from app.proccessor.model.dataset_interaction_methods import (
     get_y_transformed,
     update_y_pred,

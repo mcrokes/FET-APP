@@ -12,7 +12,7 @@ from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import permutation_importance
 
-from Dashboard.utils import getTranslations, setText, findTranslationsParent
+from app.API.utils import findTranslationsParent, setText, getTranslations
 from app.proccessor.model.values import get_target_dropdown
 from app.proccessor.models import ExplainedModel
 
@@ -164,7 +164,8 @@ def importancesCallbacks(app, furl, isRegressor: bool = False):
                 ]
                 try:
                     positive_class = old_class_names[int(positive_class)]
-                except:  # noqa: E722
+                except Exception as e:
+                    str(e)
                     if positive_class is None:
                         positive_class = dataset[model_x.target_row]
 

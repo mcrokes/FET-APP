@@ -22,12 +22,11 @@ from Dashboard.specificTrees.specificTreesLayout import (
     specificTreesLayout,
 )
 from app.API.routes import find_translations
+from app.API.utils import findTranslationsParent, setText
 
 from .Dash_fun import apply_layout_with_auth, load_object, save_object
 import dash_bootstrap_components as dbc
 from furl import furl
-
-from .utils import findTranslationsParent, setText
 
 url_base = "/dash/regression_dashboard/"
 

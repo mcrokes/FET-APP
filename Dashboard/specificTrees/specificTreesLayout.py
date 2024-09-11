@@ -9,13 +9,11 @@ from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-from Dashboard.utils import findTranslationsParent, setText, getTranslations
+from app.API.utils import findTranslationsParent, setText, getTranslations
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
-from app.proccessor.models import (
-    ExplainedClassifierModel, ExplainedModel,
-)
+from app.proccessor.models import ExplainedModel
 
 id_sufix = ["trees"]
 
@@ -147,8 +145,7 @@ def specificTreesLayout(specificTreesTranslations):
                                             html.Strong(
                                                 html.A(
                                                     setText(treeTooltipTranslations, 'text-2',
-                                                            'dashboard.trees.common.tree.tooltip')
-                                                    ,
+                                                            'dashboard.trees.common.tree.tooltip'),
                                                     href=setText(treeTooltipTranslations, 'text-3',
                                                                  'dashboard.trees.common.tree.tooltip'),
                                                     target='_blank')),
@@ -201,7 +198,7 @@ def specificTreesCallbacks(app, furl, isRegressor: bool = False):
         State("s-max-depth-input-row", "value"),
         Input("path", "href"),
     )
-    def refresh_specificTrees_layout(n, tree_number, cl):
+    def refresh_specificTrees_layout(_, tree_number, cl):
         f = furl(cl)
         model_id = f.args["model_id"]
 
@@ -343,7 +340,7 @@ def specificTreesCallbacks(app, furl, isRegressor: bool = False):
         Input("s-build-tree-btn", "n_clicks"),
         prevent_initial_call=True,
     )
-    def build_img_tree(tree_number, cl, build):
+    def build_img_tree(tree_number, cl, _):
         f = furl(cl)
         model_id = f.args["model_id"]
 

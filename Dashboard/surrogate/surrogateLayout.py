@@ -8,7 +8,7 @@ from dash.exceptions import PreventUpdate
 from flask_login import current_user
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-from Dashboard.utils import findTranslationsParent, setText, getTranslations
+from app.API.utils import findTranslationsParent, setText, getTranslations
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
@@ -130,8 +130,7 @@ def surrogateLayout(surrogateTranslations):
                                             html.Strong(
                                                 html.A(
                                                     setText(treeTooltipTranslations, 'text-2',
-                                                            'dashboard.surrogate.common.tree.tooltip')
-                                                    ,
+                                                            'dashboard.surrogate.common.tree.tooltip'),
                                                     href=setText(treeTooltipTranslations, 'text-3',
                                                                  'dashboard.surrogate.common.tree.tooltip'),
                                                     target='_blank')),
@@ -185,7 +184,7 @@ def surrogateCallbacks(app, furl, isRegressor: bool = False):
         Input("surrogate-tree-reconstruction-btn", "n_clicks"),
         Input("path", "href"),
     )
-    def refresh_surrogate_layout(max_depht, n, cl):
+    def refresh_surrogate_layout(max_depht, _, cl):
         f = furl(cl)
         model_id = f.args["model_id"]
 
@@ -348,7 +347,7 @@ def surrogateCallbacks(app, furl, isRegressor: bool = False):
         Input("build-tree-btn", "n_clicks"),
         prevent_initial_call=True,
     )
-    def build_img_tree(max_depht, cl, build):
+    def build_img_tree(max_depht, cl, _):
         f = furl(cl)
         model_id = f.args["model_id"]
 
@@ -378,7 +377,8 @@ def surrogateCallbacks(app, furl, isRegressor: bool = False):
             class_names = [
                 element["new_value"] for element in target_description["variables"]
             ]
-        except:
+        except Exception as e:
+            str(e)
             class_names = None
 
         tg, viz = ExplainSingleTree.graph_tree(

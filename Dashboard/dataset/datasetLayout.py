@@ -1,4 +1,3 @@
-from pyclbr import Function
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -8,8 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask_login import current_user
 
-from Dashboard.utils import setText, getTranslations, findTranslationsParent
-from app.API.routes import find_translations
+from app.API.utils import setText, findTranslationsParent, getTranslations
 from app.proccessor.models import ExplainedModel
 
 
