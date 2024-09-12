@@ -21,7 +21,7 @@
       <h1 id="home-title"></h1>
       <hr>
       <div  id="home-tree_img">
-        <img src="{{ url_for('static', filename='images/home-tree-1.png') }}" />
+        <img id="tree-image" src="" />
         <div style="text-align: initial; margin-top: 8rem;">
           <h2 id="home-index"></h2>
           <ul style="font-weight: bold;">
@@ -93,6 +93,8 @@
 
   <script>
     (async() => {
+      const currentLang = await t(["lang"]);
+      window.document.getElementById('tree-image').src = `/static/images/home-tree-${currentLang}.png`
       const homeTranslations = await t(["home"]);
       window.document.getElementById('home-title').innerHTML = homeTranslations['info-title'];
       window.document.getElementById('classifier-models-button').innerHTML = homeTranslations["classifier-btn"] ?? 'home.classifier-btn';
