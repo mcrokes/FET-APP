@@ -64,12 +64,13 @@
         <div>
           {% block sidebar %}
             <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}">
+              <div style="height: 57px; position: absolute;width: 100%; top: 0;background-color: #ffffffe0; margin-top: -57px;"></div>
               {% include "site_template/sidebar.html" %}
             </div>
           {% endblock sidebar %}
           <div id="body-container">
             {% block top_navigation %}
-              <div id="top-nav-container" class="top_nav" style="margin-left: 0; position: fixed; right: 0; width: 100%;">
+              <div id="top-nav-container" class="top_nav" style="margin-left: 0; position: fixed; right: 0; width: 100%; z-index: 999;">
                 {% include "site_template/top_navigation.html" %}
               </div>
             {% endblock top_navigation %}

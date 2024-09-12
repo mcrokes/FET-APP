@@ -5,7 +5,7 @@ const sidebarChevronIcon = document.getElementById('chevron-icon-sidebar');
 const sidebarItems = document.getElementsByClassName('sidebar-item');
 const sidebarIcons = document.getElementsByClassName('sidebar-icon');
 const body = document.getElementById('body-container');
-const topNav = document.getElementById('top-nav-container');
+//const topNav = document.getElementById('top-nav-container');
 const sidebarCollapseList = document.getElementById('collapseOne');
 const sidebarFooter = document.getElementById('sidebar-footer');
 const footer = document.getElementsByTagName('footer')[0];
@@ -27,9 +27,9 @@ document.addEventListener('mousemove', (e) => {
 });
 
 const setSmallSideBar = (mobile = false) => {
-	topbarImage.style.display = 'none';
+	topbarImage.style.display = '';
 	body.style.width = window.innerWidth + 'px';
-	topNav.style.width = window.innerWidth + 'px';
+//	topNav.style.width = window.innerWidth + 'px';
 	sidebarImage.style.display = 'none'
 	sidebarChevronIcon.style.display = 'none'
 	for (const item of sidebarItems) {
@@ -40,7 +40,7 @@ const setSmallSideBar = (mobile = false) => {
 		icon.style.marginLeft = '0.5rem';
 	}
 	if (!mobile) body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
-	topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+//	topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
 	sidebarFooter.style.display = 'block';
 	window.localStorage.setItem('sidebar-expanded', 'false');
 }
@@ -48,7 +48,7 @@ const setSmallSideBar = (mobile = false) => {
 const setNormalSideBar = () => {
 	topbarImage.style.display = 'none';
 	body.style.width = window.innerWidth + 'px';
-	topNav.style.width = window.innerWidth + 'px';
+//	topNav.style.width = window.innerWidth + 'px';
 	sidebarImage.style.display = 'unset'
 	sidebarChevronIcon.style.display = 'unset'
 	for (const item of sidebarItems) {
@@ -59,7 +59,7 @@ const setNormalSideBar = () => {
 		icon.style.marginLeft = '0';
 	}
 	body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
-	topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+//	topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
 	sidebarFooter.style.display = 'flex';
 	window.localStorage.removeItem('sidebar-expanded');
 }
@@ -68,7 +68,7 @@ const hide_sidebar = () => {
 	topbarImage.style.display = '';
 	sidebar.style.display = 'none';
 	body.style.width = window.innerWidth  + 'px';
-	topNav.style.width = window.innerWidth  + 'px';
+//	topNav.style.width = window.innerWidth  + 'px';
 	window.localStorage.setItem('sidebar-mobile-expanded', 'false');
 	window.localStorage.setItem('sidebar-expanded', 'false');
 }
@@ -97,7 +97,7 @@ if (window.localStorage.getItem('sidebar-expanded') === 'false') {
 	show_sidebar(false);
 } else {
 	body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
-	topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+//	topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
 }
 
 const checkPosition = ()=> {
@@ -115,7 +115,7 @@ const checkPosition = ()=> {
 		console.log('DISPLAYING');
 		setTimeout(() => {console.log('sidebar.style.width: ', sidebar.getBoundingClientRect().width);
 			body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
-			topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
+//			topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
 			console.log('body.style.width: ', body.style.width);
 		}, 200);
 	}
