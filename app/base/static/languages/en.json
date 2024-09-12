@@ -1,0 +1,669 @@
+{
+  "lang": "en",
+  "app-name": "FET",
+  "login": {
+    "title": "Welcome",
+    "btn": "Access",
+    "username": "Username",
+    "pwd": "Password"
+  },
+  "add-user": {
+    "title": "Create User",
+    "btn": "Create",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "user-exist-message": "Username already exists",
+    "email-exist-message": "Email already exists",
+    "successful-message": "User added successfully!",
+    "missing-data-message": "Please insert all data"
+  },
+  "delete-user": {
+    "title": "Delete User",
+    "back-btn": "Back",
+    "delete-btn": "Delete",
+    "username": "Username"
+  },
+  "edit-user": {
+    "title": "New Password",
+    "back-btn": "Back",
+    "check-btn": "Confirm",
+    "password": "Password"
+  },
+  "change-pwd": {
+    "title": "Change Password",
+    "btn": "Change",
+    "origin-password": "Original Password",
+    "new-password": "New Password",
+    "new-password2": "Repeat New Password",
+    "successful-message": "Password changed successfully!",
+    "mismatch-pwd-message": "New passwords do not match!",
+    "wrong-pwd-message": "Error in original password!"
+  },
+  "users": {
+    "title": "USERS",
+    "add-btn": "New User",
+    "table": {
+      "id": "ID",
+      "name": "Name",
+      "email": "Email",
+      "options": "Options"
+    }
+  },
+  "top-bar": {
+    "config": "Configuration",
+    "exit": "Exit"
+  },
+  "sidebar": {
+    "home-btn": "Home",
+    "classifier-btn": "Classification",
+    "classifier-btn-link": "Classification Models",
+    "regressor-btn": "Regression",
+    "regressor-btn-link": "Regression Models",
+    "config-btn": "Configuration",
+    "config-btn-link": "Configuration",
+    "config": "Configure users",
+    "config-sidebar-link": "Configure users",
+    "add-user": "Add user",
+    "add-user-sidebar-link": "Add user",
+    "password": "Change password",
+    "password-sidebar-link": "Change password",
+    "config-bottom-btn": "Admin configuration",
+    "full-screen-btn": "Full screen",
+    "exit": "Exit"
+  },
+  "footer": {
+    "text": "FET-APP - Based on templates",
+    "link": "Colorlib"
+  },
+  "home": {
+    "info-title": "Classification and Regression Models with Random Forest",
+    "classifier-btn": "Classification Models",
+    "regressor-btn": "Regression Models",
+    "index": "Index",
+    "index-intro": "Introduction",
+    "intro": {
+      "text": "Random Forest is a machine learning algorithm that combines multiple decision trees to improve the accuracy and robustness of classification and regression models."
+    },
+    "index-classifier": "Classification with Random Forest",
+    "classifier": {
+      "title-1": "How it works?",
+      "subtitle-1": "The Random Forest classification algorithm works as follows:",
+      "text-1-1": "A set of decision trees is created, each with a random sample of features and observations.",
+      "text-1-2": "Each decision tree is trained with a part of the dataset and used to predict the class of the observations.",
+      "text-1-3": "The predictions of each tree are combined to obtain a final prediction.",
+      "title-2": "Advantages",
+      "text-2-1": "Robustness: Random Forest is resistant to overfitting and can handle large datasets.",
+      "text-2-2": "Flexibility: It can handle different types of features, including numerical and categorical.",
+      "text-2-3": "Interpretability: Individual decision trees can be interpreted to understand the relationships between features and the target class.",
+      "title-3": "Disadvantages",
+      "text-3-1": "Computationally expensive: Training a Random Forest model can be slow for large datasets.",
+      "text-3-2": "Sensitivity to hyperparameter selection: The choice of hyperparameters, such as the number of trees and maximum depth, can affect the accuracy of the model."
+    },
+    "index-regressor": "Regression with Random Forest",
+    "regressor": {
+      "title-1": "How it works?",
+      "subtitle-1": "The Random Forest regression algorithm works as follows:",
+      "text-1-1": "A set of decision trees is created, each with a random sample of features and observations.",
+      "text-1-2": "Each decision tree is trained with a part of the dataset and used to predict the continuous value.",
+      "text-1-3": "The predictions of each tree are combined to obtain a final prediction.",
+      "title-2": "Advantages",
+      "text-2-1": "Robustness: Random Forest is resistant to overfitting and can handle large datasets.",
+      "text-2-2": "Flexibility: It can handle different types of features, including numerical and categorical.",
+      "text-2-3": "Interpretability: Individual decision trees can be interpreted to understand the relationships between features and the target variable.",
+      "title-3": "Disadvantages",
+      "text-3-1": "Computationally expensive: Training a Random Forest model can be slow for large datasets.",
+      "text-3-2": "Sensitivity to hyperparameter selection: The choice of hyperparameters, such as the number of trees and maximum depth, can affect the accuracy of the model."
+    },
+    "index-example": "Examples of application",
+    "example": {
+      "text-1": "Image classification: Random Forest can be used to classify images into different categories, such as objects, people, or places.",
+      "text-2": "House price prediction: Using features such as number of rooms, surface area, location, etc. to predict the price of a house.",
+      "text-3": "Product demand prediction: Using features such as season, day of the week, holidays, etc. to predict the demand for a product.",
+      "text-4": "Sports outcome prediction: Using features such as team statistics, injuries, weather conditions, etc. to predict the outcome of a game."
+    },
+    "index-conclusion": "Conclusion",
+    "conclusion": {
+      "text-1": "In summary, Random Forest classification and regression models are powerful tools for analyzing and predicting outcomes in a variety of fields. Their ability to handle large datasets and robustness to overfitting make them ideal for real-world applications.",
+      "text-2": "For more information <a href='https://cienciadedatos.net/documentos/py08_random_forest_python' target='_blank'>click here</a>"
+    }
+  },
+  "classifiers": {
+    "title": "CLASSIFICATION MODELS",
+    "add-btn": "New Model",
+    "compare-btn": "Open Comparative View",
+    "table": {
+      "id": "ID",
+      "name": "Name",
+      "description": "Description",
+      "target": "Target Value",
+      "options": "Options"
+    },
+    "modal": {
+      "title": "Delete Model",
+      "description": "Are you sure you want to delete the model? <br> This action is irreversible",
+      "cancel-btn": "Cancel",
+      "delete-btn": "Delete"
+    }
+  },
+  "regressors": {
+    "title": "REGRESSION MODELS",
+    "add-btn": "New Model",
+    "compare-btn": "Open Comparative View",
+    "table": {
+      "id": "ID",
+      "name": "Name",
+      "description": "Description",
+      "target": "Target Value",
+      "options": "Options"
+    },
+    "modal": {
+      "title": "Delete Model",
+      "description": "Are you sure you want to delete the model? <br> This action is irreversible",
+      "cancel-btn": "Cancel",
+      "delete-btn": "Delete"
+    }
+  },
+  "add-classifier": {
+    "title": "Load Classification Model",
+    "accept-btn": "Accept",
+    "next-btn": "Next",
+    "modify-btn": "Modify",
+    "create-btn": "Create",
+    "cancel-btn": "Cancel",
+    "back-btn": "Back",
+    "progress": {
+      "message-1": "Creating data set distributions...",
+      "message-2": "Synchronizing data...",
+      "message-3": "Generating base model...",
+      "message-4": "Loading data set metrics...",
+      "message-5": "Creating surrogate data model...",
+      "message-6": "Creating surrogate data model (depth: ",
+      "message-7": "Saving model database...",
+      "message-8": "Completed !!!"
+    },
+    "name": "Enter Model Name",
+    "model": "Enter Classification Model",
+    "description": "Add a description for the Studied Model",
+    "dataset": "Enter Training Data Set",
+    "required": "*Required",
+    "optional": "Optional",
+    "target-selector": "Classification Column",
+    "index-selector": "Residual Column as Index",
+    "descriptions": {
+      "title": "Variable Descriptions",
+      "placeholder": "Description...",
+      "no-description": "No Description"
+    },
+    "q-vars": {
+      "title": "Possible Qualitative Variable Values.",
+      "placeholder": "Original Value: "
+    }
+  },
+  "add-regressor": {
+    "title": "Load Regression Model",
+    "accept-btn": "Accept",
+    "next-btn": "Next",
+    "modify-btn": "Modify",
+    "create-btn": "Create",
+    "cancel-btn": "Cancel",
+    "back-btn": "Back",
+    "progress": {
+      "message-1": "Creating data set distributions...",
+      "message-2": "Synchronizing data...",
+      "message-3": "Generating base model...",
+      "message-4": "Loading data set metrics...",
+      "message-5": "Creating surrogate data model...",
+      "message-6": "Creating surrogate data model (depth: ",
+      "message-7": "Saving model database...",
+      "message-8": "Completed !!!"
+    },
+    "name": "Enter Model Name",
+    "model": "Enter Regression Model",
+    "description": "Add a description for the Studied Model",
+    "dataset": "Enter Training Data Set",
+    "required": "*Required",
+    "optional": "Optional",
+    "unit": "Unit of Measurement",
+    "units": [
+      {
+        "id": "",
+        "text": "None"
+      },
+      {
+        "id": "$",
+        "text": "$"
+      },
+      {
+        "id": "%",
+        "text": "%"
+      },
+      {
+        "id": "Ltr",
+        "text": "Ltr"
+      },
+      {
+        "id": "g",
+        "text": "g"
+      },
+      {
+        "id": "kg",
+        "text": "kg"
+      },
+      {
+        "id": "cm",
+        "text": "cm"
+      },
+      {
+        "id": "dm",
+        "text": "dm"
+      },
+      {
+        "id": "m",
+        "text": "m"
+      },
+      {
+        "id": "km",
+        "text": "km"
+      }
+    ],
+    "target-selector": "Target Column",
+    "index-selector": "Residual Column as Index",
+    "descriptions": {
+      "title": "Variable Descriptions",
+      "placeholder": "Description...",
+      "no-description": "No Description"
+    },
+    "q-vars": {
+      "title": "Possible Qualitative Variable Values.",
+      "placeholder": "Original Value: "
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "data": {
+        "title": "DATA",
+        "tooltip": "Data Set Study"
+      },
+      "importance": {
+        "title": "IMPORTANCE",
+        "tooltip": "Predictor Importance"
+      },
+      "metrics": {
+        "title": "METRICS",
+        "tooltip": "Model Metrics"
+      },
+      "surrogate": {
+        "title": "SURROGATE",
+        "tooltip": "Model Surrogate Tree"
+      },
+      "trees": {
+        "title": "TREES",
+        "tooltip": "Individual Model Trees"
+      },
+      "predictions": {
+        "title": "PREDICTIONS",
+        "tooltip": "Prediction Interpretation"
+      }
+    },
+    "data": {
+      "common": {
+        "filter": "Filter...",
+        "distributions": {
+          "labels": {
+            "x": "Variable",
+            "y": "Occurrences"
+          },
+          "legend": {
+            "bars": "Bars",
+            "line": "Line"
+          },
+          "no-data": "No data",
+          "title": "Distribution by Variables",
+          "numeric-title": "Quantitative Variables",
+          "q-title": "Qualitative Variables"
+        },
+        "title": "Data Set Metrics: ",
+        "dataset": {
+          "title": "Original Data Set",
+          "modified-title": "Data Set Metrics: ",
+          "tooltip": {
+            "text-1": "* If you want to filter the columns ",
+            "text-2": "Numerical",
+            "text-3": " you must enter the symbols (",
+            "text-4": ">",
+            "text-5": ") - (",
+            "text-6": "<",
+            "text-7": ") before the number. Eg: >56"
+          }
+        },
+        "correlation": {
+          "title": "Variable Correlation",
+          "tooltip": {
+            "text-1": "Correlation: Measure of the relationship between two variables, ranging from ",
+            "text-2": "-1 (negative correlation) to 1 (positive correlation). ",
+            "text-3": "Positive values",
+            "text-4": " indicate that the variables increase or decrease together, while ",
+            "text-5": "negative values",
+            "text-6": " indicate that one variable increases when the other decreases. Values ",
+            "text-7": "close to 0",
+            "text-8": " indicate little or no correlation."
+          }
+        },
+        "description-title": "Predictor Description"
+      }
+    },
+    "importance": {
+      "common": {
+        "gini": {
+          "title": "GINI IMPORTANCE",
+          "label-y": "Predictor",
+          "label-x": "Importance",
+          "tooltip": {
+            "text-1": "GINI Importance: Indicates the ability of each feature to reduce impurity in the target class. ",
+            "text-2": "High values",
+            "text-3": " mean that the feature is more important for prediction."
+          }
+        },
+        "permutation": {
+          "title": "PERMUTATION IMPORTANCE",
+          "label-y": "Predictor",
+          "label-x": "Importance +/- error: ",
+          "tooltip": {
+            "text-1": "Permutation Importance: Evaluates the importance of each feature by ",
+            "text-2": "measuring the loss of model accuracy when randomizing their values. ",
+            "text-3": "High values",
+            "text-4": " indicate key features."
+          }
+        }
+      },
+      "classifier": {
+        "hint": "Each response class can have divergent values",
+        "selector-placeholder": "Select the class you want to analyze as positive"
+      }
+    },
+    "metrics": {
+      "classifier": {
+        "cutoff": "Cutoff Point",
+        "cutoff-tooltip": "Percentage point at which the model decides to classify a class as true.",
+        "class-selector": "Select the class you want to analyze as positive",
+        "matrix": {
+          "title": "CONFUSION MATRIX",
+          "labels": {
+            "x": "PREDICTIONS",
+            "y": "REAL VALUES",
+            "color": "QUANTITY"
+          },
+          "tooltip": {
+            "text-1": "Confusion Matrix: Evaluates the model's accuracy in classifying examples.",
+            "text-2": "TP: ",
+            "text-3": "correctly classified positive examples.",
+            "text-4": "TN: ",
+            "text-5": "correctly classified negative examples.",
+            "text-6": "FP: ",
+            "text-7": "negatively classified examples as positive.",
+            "text-8": "FN: ",
+            "text-9": "positively classified examples as negative."
+          },
+          "parameters": {
+            "title": "Obtained Parameters",
+            "general-factors": "General Factors",
+            "individual": "Individual Parameters",
+            "value": "Value",
+            "precision": "Precision",
+            "precision-tooltip": "Proportion of true positives among all predicted positives. (Higher is Better)",
+            "sensibility": "Sensitivity",
+            "sensibility-tooltip": "Proportion of correct predictions among all real values of the class. (Higher is Better)",
+            "fp": "FP Rate",
+            "fp-tooltip": "Proportion of incorrect predictions among all real values of other classes. (Lower is Better)",
+            "f1": "F1 Score",
+            "f1-tooltip": "Harmonic mean of precision and sensitivity. (Higher is Better)",
+            "tv": "Correct Predictions",
+            "fv": "Failed Predictions",
+            "accuracy": "Global Accuracy"
+          }
+        },
+        "roc": {
+          "title": "ROC-AUC Curve",
+          "tooltip": {
+            "text-1": "ROC Curve: Shows the relationship between the True Positive Rate (",
+            "text-2": "Sensitivity",
+            "text-3": ") and the False Positive Rate (",
+            "text-4": "1-Specificity",
+            "text-5": ") at different classification thresholds.",
+            "text-6": "* The area under the curve (AUC) is a metric that summarizes the model's behavior. An AUC close to 1 indicates a model that can perfectly distinguish between positives and negatives, while an AUC close to 0.5 indicates a model that is no better than a random choice."
+          },
+          "parameters": {
+            "auc": "AUC[auc]",
+            "marker": "Marker",
+            "tpr": "TPR[tpr]",
+            "fpr": "FPR[fpr]"
+          },
+          "labels": {
+            "x": "False Positive Rate",
+            "y": "True Positive Rate"
+          }
+        }
+      },
+      "regressor": {
+        "prediction-real": {
+          "title": "Prediction vs Real Values",
+          "tooltip": {
+            "text-1": "Evaluates the model's accuracy in regression results, so a better model is represented by points closer to the central dashed line.",
+            "text-2": "The points closer to the line, the better the model is.",
+            "text-3": "The dashed line represents the real values.",
+            "text-4": "The line represents the real values.",
+            "text-5": "The closer the points are to the line, the better the model is."
+          },
+          "labels": {
+            "x": "Real Value",
+            "y": "Prediction"
+          }
+        },
+        "real-prediction": {
+          "title": "Real Values vs Prediction",
+          "tooltip": {
+            "text-1": "Evaluates the model's accuracy in regression results, so a better model is represented by points closer to the central dashed line.",
+            "text-2": "The points closer to the line, the better the model is.",
+            "text-3": "The dashed line represents the prediction.",
+            "text-4": "The line represents the prediction.",
+            "text-5": "The closer the points are to the line, the better the model is."
+          },
+          "labels": {
+            "x": "Prediction",
+            "y": "Real Value"
+          }
+        },
+        "parameters": {
+          "metrics": "Metrics",
+          "value": "Value",
+          "mse": "Mean Squared Error (mean-squared-error)",
+          "mse-tooltip": "The MSE measures the average of the squared errors between the real values and the predicted values. A low MSE indicates that the model fits the data well.",
+          "rmse": "Root Mean Squared Error (root-mean-squared-error)",
+          "rmse-tooltip": "The RMSE is the square root of the MSE. It is a metric that is easier to interpret than the MSE, since it has the same unit as the real values.",
+          "mae": "Mean Absolute Error (mean-absolute-error)",
+          "mae-tooltip": "The MAE measures the average of the absolute errors between the real values and the predicted values. A low MAE indicates that the model fits the data well.",
+          "mape": "Mean Absolute Percentage Error (mean-absolute-percentage-error)",
+          "mape-tooltip": "The MAPE measures the average of the absolute percentage errors between the real values and the predicted values. A low MAPE indicates that the model fits the data well.",
+          "r2": "Coefficient of Determination R² (R-squared)",
+          "r2-tooltip": "The R² measures the proportion of the variance in the real values that is explained by the model. A high R² indicates that the model fits the data well."
+        },
+        "partial-dependence": {
+          "labels": {
+            "x": "Variable",
+            "y": "Prediction"
+          },
+          "legend": {
+            "bars": "Bars",
+            "line": "Linear"
+          },
+          "no-data": "No data",
+          "title": "Partial Dependence of Variables",
+          "numeric-title": "Quantitative Variables",
+          "q-title": "Qualitative Variables"
+        }
+      }
+    },
+    "surrogate": {
+      "common": {
+        "depth": "Depth",
+        "build-btn": "Rebuild Tree",
+        "table": {
+          "title": "MODEL RULES",
+          "headers": {
+            "rule": "RULE",
+            "causes": "CAUSES",
+            "result": "RESULT",
+            "predictor": "PREDICTOR",
+            "condition": "CONDITION",
+            "value": "VALUE",
+            "target": "TARGET VALUE",
+            "proba": "PROBABILITY",
+            "samples": "SAMPLES"
+          },
+          "tooltip": {
+            "text-1": "Surrogate Tree: A decision tree that is trained with the predictions of the original Random Forest model, allowing to simplify the forest to interpret the model's output in a more easy and understandable way."
+          }
+        },
+        "tree": {
+          "title": "TREE VISUALIZATION",
+          "show-btn": "SHOW",
+          "download-btn": "DOWNLOAD",
+          "tooltip": {
+            "text-1": "* To visualize the tree, you need to install the software ",
+            "text-2": "Graphviz",
+            "text-3": "https://graphviz.org/download/",
+            "text-4": " on your computer.",
+            "text-5": "* The samples used for visualization ",
+            "text-6": "are not the same",
+            "text-7": "as the ones used for the model rules."
+          }
+        }
+      }
+    },
+    "trees": {
+      "common": {
+        "depth": "Tree No.",
+        "build-btn": "Perform Study",
+        "table": {
+          "title": "MODEL RULES",
+          "headers": {
+            "rule": "RULE",
+            "causes": "CAUSES",
+            "result": "RESULT",
+            "predictor": "PREDICTOR",
+            "condition": "CONDITION",
+            "value": "VALUE",
+            "target": "TARGET VALUE",
+            "proba": "PROBABILITY",
+            "samples": "SAMPLES"
+          },
+          "tooltip": {
+            "text-1": "Decision Tree: An independent component of the Random Forest model that contributes to the final prediction by combining its results with those of other trees. Each tree is trained with a random sample of features and examples.",
+            "text-2": "independent component",
+            "text-3": "of the Random Forest model",
+            "text-4": "by combining its results",
+            "text-5": "with those of other trees.",
+            "text-6": "random sample",
+            "text-7": "of features and examples."
+          }
+        },
+        "tree": {
+          "title": "TREE VISUALIZATION",
+          "show-btn": "SHOW",
+          "download-btn": "DOWNLOAD",
+          "tooltip": {
+            "text-1": "* To visualize the tree, you need to install the software ",
+            "text-2": "Graphviz",
+            "text-3": "https://graphviz.org/download/",
+            "text-4": " on your computer.",
+            "text-5": "* The samples used for visualization ",
+            "text-6": "are not the same",
+            "text-7": "as the ones used for the model rules."
+          }
+        }
+      }
+    },
+    "predictions": {
+      "common": {
+        "instance-selector-placeholder": "Select Instance to Analyze",
+        "prediction": "Prediction",
+        "contribution": {
+          "tooltip": {
+            "text-1": "It examines the ",
+            "text-2": "individual contribution ",
+            "text-3": "of each feature to the prediction, allowing to identify which features are most relevant to the model."
+          },
+          "prediction-upper": "PREDICTION",
+          "actual-upper": "ACTUAL",
+          "accumulated": "Accumulated",
+          "final-prediction": "Final Prediction",
+          "actual": "Actual",
+          "media": "Mean",
+          "population-media": "Population Mean",
+          "title": "Contribution of Each Predictor",
+          "individual-title": "Individual Contribution per Predictor",
+          "label-x": "Influential",
+          "headers": {
+            "contribution": "Contribution",
+            "instance": "Instance",
+            "predictor": "Predictor",
+            "value": "Value"
+          }
+        }
+      },
+      "classifier": {
+        "class-selector": {
+          "title": "Select Class to Analyze",
+          "placeholder": "Select a class",
+          "tooltip": "Limits the instances to choose to elements that are prototype responses of the selected class in the original dataset."
+        },
+        "contribution": {
+          "sub-title": " by Class",
+          "individual-sub-title": " for ",
+          "label-y": "Certainty in Prediction from 0 to 1"
+        },
+        "trees": {
+          "tooltip": {
+            "text-1": "Each tree",
+            "text-2": " in the model makes a prediction. The final prediction is based on the ",
+            "text-3": "combination of the predictions",
+            "text-4": " of all trees.",
+            "text-5": "* Blue",
+            "text-6": " represents the trees that predict the selected class as positive.",
+            "text-7": "* Red",
+            "text-8": " represents the trees that predict the remaining classes."
+          },
+          "bar-title": "Trees",
+          "line-title": "Cut-off",
+          "title": "Individual Prediction by Trees for Class:",
+          "labels": {
+            "x": "Tree Number",
+            "y": "Certainty of Prediction %"
+          }
+        }
+      },
+      "regressor": {
+        "contribution": {
+          "label-y": "Accumulated in Prediction"
+        },
+        "trees": {
+          "tooltip": {
+            "text-1": "Each tree",
+            "text-2": " in the model makes a prediction. The final prediction is based on the ",
+            "text-3": "combination of the predictions",
+            "text-4": " of all trees.",
+            "text-5": "The red line represents the average or final prediction."
+          },
+          "bar-title": "Trees",
+          "line-title": "Final Prediction",
+          "title": "Individual Prediction by Trees",
+          "labels": {
+            "x": "Tree Number",
+            "y": "Certainty of Prediction %"
+          }
+        }
+      }
+    }
+  }
+}

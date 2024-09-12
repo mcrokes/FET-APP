@@ -1,39 +1,89 @@
 <div class="nav_menu">
   <nav>
-    <div class="nav toggle" style="padding-top: 0;">
+    <div class="nav toggle" style="padding-top: 0; margin-left: 7px;">
       <a id="menu_toggle" onclick="show_sidebar()"><i class="fa fa-bars"></i></a>
     </div>
-    <img src="/static/images/logo-cujae.png" alt="" style="width: 3rem; margin-top: 0.7rem; float: left;">
-    <div id="logo-tob-bar" style="margin-left: 1rem; padding-top: 1.5rem; float: left; display: none;"><i class="fa fa-tree"></i> FORESTAL <i class="fa fa-tree"></i></div>
-    <ul class="nav navbar-nav navbar-right" style="width: 40%;">
-      <li class="my-3" style="text-align: end; margin-right: 2rem;">
-          <div class="dropdown" id="configuration">
-            <a href="#" class="user-profile dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false" onclick="show_toggle()">
-              <img src="/static/images/img.jpg" alt="">{{ current_user.username }}
-            </a>
-            <div style="position: absolute; margin-top: 15px; width: 100%; display: flex;  justify-content: flex-end;">
-              <ul class="dropdown-menu dropdown-usermenu pull-right" style="width: max-content; line-height: 24px;" id="dropdown-content-on-top-bar">
-                {% if Is_admin %}
-                  <li><a href="/setting/manage_users"> Configuración </a></li>
-                {% else %}
-                  <li><a href="/setting/change_password"> Configuración </a></li>
-                {% endif %}
-              <li><a href="/logout"><i class="fa fa-sign-out pull-right"></i> Salir</a></li>
+    <div id="logo-tob-bar" style="margin-left: 1rem; padding-top: 1.5rem; float: left; display: none;"><i
+            class="fa fa-tree"></i> <span id="app-name"></span> <i class="fa fa-tree"></i></div>
+    <ul class="nav navbar-nav navbar-right" style="width: min-content; margin: 4px; float: right;">
+      <li class="my-3" style="text-align: end; margin-right: 1rem;">
+        <div class="dropdown" id="language">
+          <a id="lang-selector-text" href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
+             aria-expanded="false" onclick="show_toggle_lang()">
+          </a>
+          <div style="position: absolute; margin-top: 15px; width: 100%; display: flex;  justify-content: flex-end;">
+            <ul class="pull-right"
+                style="width: min-content; line-height: 14px; display: none; background-color: white; border-radius: 3px; padding: 0; border: 1px solid #D9DEE4;"
+                id="dropdown-language-on-top-bar">
+              <li class="language-label" onclick="changeLanguage('es')">
+                <input type="radio" id="es" name="currentLanguage" class="currentLanguage"/>
+                <label for="es">Español</label>
+              </li>
+              <li class="language-label" onclick="changeLanguage('en')">
+                <input type="radio" id="en" name="currentLanguage" class="currentLanguage"/>
+                <label for="en">English</label>
+              </li>
+              <li class="language-label" onclick="changeLanguage('ru')">
+                <input type="radio" id="ru" name="currentLanguage" class="currentLanguage"/>
+                <label for="ru">Русский</label>
+              </li>
             </ul>
-            </div>
           </div>
+        </div>
+      </li>
+    </ul>
+    <img src="/static/images/logo-cujae.png" alt="" style="width: 4rem; margin: 0.2rem 44vw; position: absolute; left: 0;">
+
+    <ul class="nav navbar-nav navbar-right" style="width: min-content;">
+      <li class="my-3" style="text-align: end; margin-right: 1rem;">
+        <div class="dropdown" id="configuration">
+          <a href="#" class="user-profile dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false"
+             onclick="show_toggle()">
+            <img src="/static/images/img.jpg" alt="">{{ current_user.username }}
+          </a>
+          <div style="position: absolute; margin-top: 15px; display: flex;  justify-content: flex-end;">
+            <ul class="dropdown-menu dropdown-usermenu pull-right" style="width: min-content; line-height: 24px;"
+                id="dropdown-content-on-top-bar">
+              {% if Is_admin %}
+                <li><a href="/setting/manage_users" class="config-label"><span id="top-bar-config-adm"></span> <i class="fa fa-cogs pull-right"></i></a></li>
+              {% else %}
+                <li><a href="/setting/change_password" class="config-label"><span id="top-bar-config-usr"></span> <i class="fa fa-cog pull-right"></i></a></li>
+              {% endif %}
+              <li><a href="/logout" class="config-label"><span id="top-bar-exit"></span> <i class="fa fa-sign-out pull-right"></i></a></li>
+            </ul>
+          </div>
+        </div>
       </li>
     </ul>
   </nav>
+
   <script>
     let opened = false;
+    let openedLang = false;
     window.addEventListener('click', () => {
       if (content.style.display === 'unset' && !opened) {
         content.style.display = 'none';
       }
       opened = false;
+
+      if (langageDrop.style.display === 'unset' && !openedLang) {
+        langageDrop.style.display = 'none';
+      }
+      openedLang = false;
     })
     const content = document.getElementById('dropdown-content-on-top-bar')
+    const langageDrop = document.getElementById('dropdown-language-on-top-bar')
+
+    const show_toggle_lang = () => {
+      if (langageDrop.style.display === 'none' || langageDrop.style.display === '') {
+        langageDrop.style.display = 'unset';
+        openedLang = true;
+      } else {
+        langageDrop.style.display = 'none';
+        openedLang = false;
+      }
+    }
+
     const show_toggle = () => {
       if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'unset';
@@ -43,5 +93,41 @@
         opened = false;
       }
     }
+
+    const changeLanguage = async (lang) => {
+      // get
+      response = await fetch(`http://127.0.0.1:5000/INTERNAL_API/changeLanguage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: lang,
+      })
+
+      const text = response.json().then((value) => {
+        console.log(value)
+        return
+      }).then(() => window.location.reload())
+
+
+    }
+
+    (async() => {
+
+      const currentLanguage = await t(["lang"]);
+      for (const language of document.getElementsByClassName('currentLanguage')) {
+        console.log('language: ', language.id);
+        if (language.id === currentLanguage) {
+          language.checked = true;
+        }
+      }
+      document.getElementById('lang-selector-text').innerHTML = currentLanguage;
+      const app_name = await t(["app-name"]);
+      document.getElementById('app-name').innerHTML = typeof app_name !== 'object' ? app_name : 'FET';
+      const topBarTranslations = await t(["top-bar"]);
+      const admConfig = document.getElementById('top-bar-config-adm');
+      if (admConfig) admConfig.innerHTML = topBarTranslations["config"] ?? 'top-bar.config';
+      const usrConfig = document.getElementById('top-bar-config-usr');
+      if (usrConfig) usrConfig.innerHTML = topBarTranslations["config"] ?? 'top-bar.config';
+      document.getElementById('top-bar-exit').innerHTML = topBarTranslations["exit"] ?? 'top-bar.exit';
+    })();
   </script>
 </div>

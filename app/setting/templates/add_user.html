@@ -15,14 +15,14 @@
                 <div class="animate form login_form">
                   <section class="login_content">
                     <form data-parsley-validate method="post">
-                      <h1>Crear Usuario</h1>
+                      <h1 id="add-user-title"></h1>
                       {% for field in form if field.widget.input_type != 'hidden'  %}
                         <div>
-                          {{ field(class="form-control required", placeholder=field.label.text) }}
+                          {{ field(class="form-control required", placeholder=field.id) }}
                         </div>
                       {% endfor %}
                       <div>
-                      <button type="submit" class="btn btn-default submit" name="Add"> Crear </button>
+                      <button type="submit" class="btn btn-default submit" name="Add" id="add-user-btn"></button>
                       </div>
                       <div class="clearfix"></div>
                     </form>
@@ -39,4 +39,15 @@
 
 {% block javascripts %}
   {{ super()}}
+  <script>
+    (async()=>{
+      const addUserTranslations = await t(["add-user"]);
+      window.document.getElementById('add-user-title').innerHTML = addUserTranslations['title'] ?? 'add-user.title';
+      window.document.getElementById('add-user-btn').innerHTML = addUserTranslations['btn'] ?? 'add-user.btn';
+      window.document.getElementById('username-create').placeholder = addUserTranslations['username'] ?? 'add-user.username';
+      window.document.getElementById('email-create').placeholder = addUserTranslations['email'] ?? 'add-user.email';
+      window.document.getElementById('pwd-create').placeholder = addUserTranslations['password'] ?? 'add-user.password';
+
+    })();
+  </script>
 {% endblock javascripts %}

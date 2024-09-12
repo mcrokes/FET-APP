@@ -1,0 +1,12 @@
+{
+  "es": {
+    "home": {
+      "info-title": "Modelos de Clasificación y Regresión con Random Forest"
+    }
+  },
+  "en": {
+    "home": {
+      "info-title": "Classification and Regression models with Random Forest"
+    }
+  }
+}

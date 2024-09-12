@@ -1,4 +1,3 @@
-from pyclbr import Function
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -6,10 +5,13 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objects as go
+from flask_login import current_user
+
+from app.API.utils import setText, findTranslationsParent, getDashboardTranslations
 from app.proccessor.models import ExplainedModel
 
 
-def generateDataSetDistributions(df: pd.DataFrame, feature):
+def generateDataSetDistributions(df: pd.DataFrame, feature, legendTranslations):
     graph = {"predictor": feature, "graph_data": []}
     values = list(set(df[feature]))
     counts = df[feature].value_counts()
@@ -27,166 +29,205 @@ def generateDataSetDistributions(df: pd.DataFrame, feature):
         graph['graph_data'].append(go.Scatter(
             x=x,
             y=y,
-            name="Lineal",
+            name=setText(legendTranslations, 'line', 'dashboard.data.common.distributions.legend'),
             line=dict(color="royalblue", width=1, dash="dot"),
         ))
-        graph['graph_data'].append(go.Bar(name="Barras", x=x, y=y, width=0.5))
+        graph['graph_data'].append(
+            go.Bar(name=setText(legendTranslations, 'bars', 'dashboard.data.common.distributions.legend'), x=x, y=y,
+                   width=0.5))
     return graph
 
 
-datasetLayout = html.Div(
-    [
-        dcc.Loading(
-            [
-                html.Div([
-                    html.Plaintext(
-                        [
-                            "Métricas del Conjunto de Datos: ",
-                            html.Strong(id="dataset-title"),
-                        ],
-                        className="rules-title",
-                        style={"font-size": "30px"},
-                    ),
-                    html.Div(
-                        [
-                            html.Div(
-                                [
-                                    html.Plaintext(
-                                        "Conjunto de Datos Modificado",
-                                        className="rules-title",
-                                    ),
-                                    html.I(
-                                        id="dataset-info",
-                                        className="fa fa-info-circle info-icon",
-                                    ),
-                                    dbc.Tooltip(
-                                        [
-                                            html.Plaintext(
-                                                [
-                                                    "* Si desea filtrar las columnas ",
-                                                    html.Strong("Numéricas"),
-                                                    " deberá ingresar los símbolos (",
-                                                    html.Strong(">"),
-                                                    ") - (",
-                                                    html.Strong("<"),
-                                                    ") antes del número. Ej: >56",
-                                                ]
-                                            ),
-                                        ],
-                                        className="personalized-tooltip",
-                                        target="dataset-info",
-                                    ),
-                                ],
-                                className="title-hint-container",
-                            ),
-                            html.Div(
-                                id="modified-dataset-view", style={"overflow": "scroll", "border-radius": "5px"}
-                            ),
-                            html.Div(id="test-tert"),
-                        ]
-                    ),
-                    html.Div(
-                        [
-                            html.Plaintext(
-                                "Conjunto de Datos Original",
-                                className="rules-title",
-                            ),
-                            html.Div(id="dataset-view", style={"overflow": "scroll", "border-radius": "5px"}),
-                        ]
-                    ),
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                [
-                                    html.H3("DESCRIPCIÓN PREDICTORES"),
-                                    html.Div(id="features-description"),
-                                ],
-                                xs=8,
-                                sm=8,
-                                md=8,
-                                lg=8,
-                                xl=8,
-                                xxl=8,
-                            )
-                        ],
-                        style={"padding-top": "20px"},
-                    ),
-                    dbc.Row(
-                        [
-                            html.Plaintext(
-                                "Distribución Por Variables",
-                                className="rules-title",
-                            ),
-                            dbc.Col([
-                                html.Plaintext(
-                                    "Variables Cuantitativas",
-                                    className="rules-title",
-                                ),
-                                html.Div(id="numeric-plot")],
-                                xs=12,
-                                sm=12,
-                                md=6,
-                                lg=6,
-                                xl=6,
-                                xxl=6, ),
+def datasetLayout(dataTranslations):
+    commonTranslations = findTranslationsParent(dataTranslations, 'common')
+    distributionTranslations = findTranslationsParent(commonTranslations, 'distributions')
+    datasetTranslations = findTranslationsParent(commonTranslations, 'dataset')
+    datasetTooltipTranslations = findTranslationsParent(datasetTranslations, 'tooltip')
+    correlationTranslations = findTranslationsParent(commonTranslations, 'correlation')
+    correlationTooltipTranslations = findTranslationsParent(correlationTranslations, 'tooltip')
 
-                            dbc.Col([
-                                html.Plaintext(
-                                    "Variables Cualitativas",
-                                    className="rules-title",
-                                ),
-                                html.Div(id="object-plot"),
+    layout = html.Div(
+        [
+            dcc.Loading(
+                [
+                    html.Div(id='dummy', style={'display': 'none'}),
+                    html.Div([
+                        html.Plaintext(
+                            [
+                                setText(commonTranslations, 'title', 'dashboard.data.common'),
+                                html.Strong(id="dataset-title"),
                             ],
-                                xs=12,
-                                sm=12,
-                                md=6,
-                                lg=6,
-                                xl=6,
-                                xxl=6, ),
-                            html.Div(
-                                [
+                            className="rules-title",
+                            style={"font-size": "30px"},
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.Plaintext(
+                                            setText(datasetTranslations, 'modified-title',
+                                                    'dashboard.data.common.dataset'),
+                                            className="rules-title",
+                                        ),
+                                        html.I(
+                                            id="dataset-info",
+                                            className="fa fa-info-circle info-icon",
+                                        ),
+                                        dbc.Tooltip(
+                                            [
+                                                html.Plaintext(
+                                                    [
+                                                        setText(datasetTooltipTranslations, 'text-1',
+                                                                'dashboard.data.common.dataset.tooltip'),
+                                                        html.Strong(setText(datasetTooltipTranslations, 'text-2',
+                                                                            'dashboard.data.common.dataset.tooltip')),
+                                                        setText(datasetTooltipTranslations, 'text-3',
+                                                                'dashboard.data.common.dataset.tooltip'),
+                                                        html.Strong(setText(datasetTooltipTranslations, 'text-4',
+                                                                            'dashboard.data.common.dataset.tooltip')),
+                                                        setText(datasetTooltipTranslations, 'text-5',
+                                                                'dashboard.data.common.dataset.tooltip'),
+                                                        html.Strong(setText(datasetTooltipTranslations, 'text-6',
+                                                                            'dashboard.data.common.dataset.tooltip')),
+                                                        setText(datasetTooltipTranslations, 'text-7',
+                                                                'dashboard.data.common.dataset.tooltip'),
+                                                    ]
+                                                ),
+                                            ],
+                                            className="personalized-tooltip",
+                                            target="dataset-info",
+                                        ),
+                                    ],
+                                    className="title-hint-container",
+                                ),
+                                html.Div(
+                                    id="modified-dataset-view", style={"overflow": "scroll", "border-radius": "5px"}
+                                ),
+                                html.Div(id="test-tert"),
+                            ]
+                        ),
+                        html.Div(
+                            [
+                                html.Plaintext(
+                                    setText(datasetTranslations, 'title', 'dashboard.data.common.dataset'),
+                                    className="rules-title",
+                                ),
+                                html.Div(id="dataset-view", style={"overflow": "scroll", "border-radius": "5px"}),
+                            ]
+                        ),
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    [
+                                        html.Plaintext(
+                                            setText(commonTranslations, 'description-title', 'dashboard.data.common'),
+                                            className="rules-title",
+                                        ),
+                                        html.Div(id="features-description"),
+                                    ],
+                                    xs=8,
+                                    sm=8,
+                                    md=8,
+                                    lg=8,
+                                    xl=8,
+                                    xxl=8,
+                                )
+                            ],
+                            style={"padding-top": "20px"},
+                        ),
+                        dbc.Row(
+                            [
+                                html.Plaintext(
+                                    setText(distributionTranslations, 'title', 'dashboard.data.common.distributions'),
+                                    className="rules-title",
+                                ),
+                                dbc.Col([
                                     html.Plaintext(
-                                        "Correlación de Variables",
+                                        setText(distributionTranslations, 'numeric-title',
+                                                'dashboard.data.common.distributions'),
                                         className="rules-title",
                                     ),
-                                    html.I(
-                                        id="correlation-info",
-                                        className="fa fa-info-circle info-icon",
+                                    html.Div(id="numeric-plot")],
+                                    xs=12,
+                                    sm=12,
+                                    md=6,
+                                    lg=6,
+                                    xl=6,
+                                    xxl=6, ),
+
+                                dbc.Col([
+                                    html.Plaintext(
+                                        setText(distributionTranslations, 'q-title',
+                                                'dashboard.data.common.distributions'),
+                                        className="rules-title",
                                     ),
-                                    dbc.Tooltip(
-                                        [
-                                            html.Plaintext(
-                                                [
-                                                    "Correlación: Medida de la relación entre dos variables, que varía de "
-                                                    "-1 (correlación negativa) a 1 (correlación positiva). ",
-                                                    html.Strong("Valores positivos"),
-                                                    " indican que las variables aumentan o disminuyen juntas, mientras que ",
-                                                    html.Strong("valores negativos"),
-                                                    " indican que una variable aumenta cuando la otra disminuye. Valores ",
-                                                    html.Strong("cercanos a 0"),
-                                                    " indican poca o ninguna correlación.",
-                                                ]
-                                            ),
-                                        ],
-                                        className="personalized-tooltip",
-                                        target="correlation-info",
-                                    ),
+                                    html.Div(id="object-plot"),
                                 ],
-                                className="title-hint-container",
-                            ),
-                            html.Div(id="correlation-plot"),
-                        ],
-                    ),
-                ], className="container")
-            ],
-        )
-    ],
-    className="section-content",
-    style={"margin": "auto"},
-)
+                                    xs=12,
+                                    sm=12,
+                                    md=6,
+                                    lg=6,
+                                    xl=6,
+                                    xxl=6, ),
+                                html.Div(
+                                    [
+                                        html.Plaintext(
+                                            setText(correlationTranslations, 'title',
+                                                    'dashboard.data.common.correlation'),
+                                            className="rules-title",
+                                        ),
+                                        html.I(
+                                            id="correlation-info",
+                                            className="fa fa-info-circle info-icon",
+                                        ),
+                                        dbc.Tooltip(
+                                            [
+                                                html.Plaintext(
+                                                    [
+                                                        setText(
+                                                            correlationTooltipTranslations, 'text-1',
+                                                            'dashboard.data.common.correlation.tooltip'),
+                                                        setText(
+                                                            correlationTooltipTranslations, 'text-2',
+                                                            'dashboard.data.common.correlation.tooltip'),
+                                                        html.Strong(
+                                                            setText(correlationTooltipTranslations, 'text-3',
+                                                                    'dashboard.data.common.correlation.tooltip')),
+                                                        setText(correlationTooltipTranslations, 'text-4',
+                                                                'dashboard.data.common.correlation.tooltip'),
+                                                        html.Strong(
+                                                            setText(correlationTooltipTranslations, 'text-5',
+                                                                    'dashboard.data.common.correlation.tooltip')),
+                                                        setText(correlationTooltipTranslations, 'text-6',
+                                                                'dashboard.data.common.correlation.tooltip'),
+                                                        html.Strong(
+                                                            setText(correlationTooltipTranslations, 'text-7',
+                                                                    'dashboard.data.common.correlation.tooltip')),
+                                                        setText(correlationTooltipTranslations, 'text-8',
+                                                                'dashboard.data.common.correlation.tooltip'),
+                                                    ]
+                                                ),
+                                            ],
+                                            className="personalized-tooltip",
+                                            target="correlation-info",
+                                        ),
+                                    ],
+                                    className="title-hint-container",
+                                ),
+                                html.Div(id="correlation-plot"),
+                            ],
+                        ),
+                    ], className="container")
+                ],
+            )
+        ],
+        className="section-content",
+        style={"margin": "auto"},
+    )
+    return layout
 
 
-def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
+def datasetCallbacks(app, furl, isRegressor: bool = False):
     def setBottomLegend(fig):
         fig.update_layout(
             legend=dict(
@@ -195,39 +236,48 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
         )
         return fig
 
-    def addAxisNames(fig):
+    def addAxisNames(fig, axisTranslations):
         fig = setBottomLegend(fig)
         fig.update_layout(
-            yaxis_title="Ocurrencias",
-            xaxis_title="Variable",
+            yaxis_title=setText(axisTranslations, 'y', 'dashboard.data.common.distributions.labels'),
+            xaxis_title=setText(axisTranslations, 'x', 'dashboard.data.common.distributions.labels'),
         )
         return fig
 
     @app.callback(
-        Output("n-graph", "children"),
+        Output("n-graph", "children", allow_duplicate=True),
         Output("q-graph", "children"),
         State("path", "href"),
         Input("q-vars-dropdown", "value"),
         Input("n-vars-dropdown", "value"),
+        prevent_initial_call=True
     )
     def graph_explainers(cl, q_var, n_var):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
+            # TRANSLATIONS
+            translationsCommon = getDashboardTranslations(current_user.langSelection, 'data', 'common')
+            translationsDistributions = findTranslationsParent(translationsCommon, 'distributions')
+            legendTranslations = findTranslationsParent(translationsDistributions, 'legend')
+            axisTranslations = findTranslationsParent(translationsDistributions, 'labels')
+
+            # NORMAL FLOW
             model_x: ExplainedModel = ExplainedModel.query.filter(
                 ExplainedModel.id == model_id
             ).first()
 
             df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
-            qualitative_graph = generateDataSetDistributions(df, q_var)
-            numeric_graph = generateDataSetDistributions(df, n_var)
+            qualitative_graph = generateDataSetDistributions(df, q_var, legendTranslations)
+            numeric_graph = generateDataSetDistributions(df, n_var, legendTranslations)
             return (
                 dcc.Graph(
                     figure=addAxisNames(
                         go.Figure(
                             data=numeric_graph["graph_data"],
                             layout=dict(title=numeric_graph["predictor"]),
-                        )
+                        ),
+                        axisTranslations
                     )
                 ),
                 dcc.Graph(
@@ -235,7 +285,8 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
                         go.Figure(
                             data=qualitative_graph["graph_data"],
                             layout=dict(title=qualitative_graph["predictor"], ),
-                        )
+                        ),
+                        axisTranslations
                     )
                 ),
             )
@@ -244,18 +295,26 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
         raise PreventUpdate
 
     @app.callback(
-        Output("dataset-title", "children"),
+        Output("dataset-title", "children", allow_duplicate=True),
         Output("modified-dataset-view", "children"),
         Output("dataset-view", "children"),
         Output("numeric-plot", "children"),
         Output("object-plot", "children"),
         Output("correlation-plot", "children"),
         Input("path", "href"),
+        prevent_initial_call=True
     )
     def graph_explainers(cl):
         f = furl(cl)
         model_id = f.args["model_id"]
         try:
+            # TRANSLATIONS
+            translationsCommon = getDashboardTranslations(current_user.langSelection, 'data', 'common')
+            translationsDistributions = findTranslationsParent(translationsCommon, 'distributions')
+            legendTranslations = findTranslationsParent(translationsDistributions, 'legend')
+            axisTranslations = findTranslationsParent(translationsDistributions, 'labels')
+
+            # NORMAL FLOW
             model_x: ExplainedModel = ExplainedModel.query.filter(
                 ExplainedModel.id == model_id
             ).first()
@@ -280,12 +339,15 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
             for elm in q_vars_names:
                 n_vars_names.remove(elm)
 
-            qualitative_graph = generateDataSetDistributions(df, q_vars_names[0]) if q_vars_names else None
-            numeric_graph = generateDataSetDistributions(df, n_vars_names[0]) if n_vars_names else None
+            qualitative_graph = generateDataSetDistributions(df, q_vars_names[0],
+                                                             legendTranslations) if q_vars_names else None
+            numeric_graph = generateDataSetDistributions(df, n_vars_names[0],
+                                                         legendTranslations) if n_vars_names else None
             corr_matrix = original_df.drop(
                 columns=model_x.getElement("target_row")
             ).corr(method="pearson")
 
+            no_data_text = setText(translationsDistributions, 'no-data', 'dashboard.data.common.distributions')
             return (
                 dtt,
                 html.Div(
@@ -297,7 +359,8 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
                             ],
                             page_size=10,
                             filter_action="native",
-                            filter_options={"placeholder_text": "Filtrar..."},
+                            filter_options={
+                                "placeholder_text": setText(translationsCommon, 'filter', 'dashboard.data.common')},
                             sort_action="native",
                             sort_mode="multi",
                             row_selectable="single",
@@ -315,7 +378,8 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
                             ],
                             page_size=10,
                             filter_action="native",
-                            filter_options={"placeholder_text": "Filtrar..."},
+                            filter_options={
+                                "placeholder_text": setText(translationsCommon, 'filter', 'dashboard.data.common')},
                             sort_action="native",
                             sort_mode="multi",
                             row_selectable="single",
@@ -338,11 +402,12 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
                                 go.Figure(
                                     data=numeric_graph["graph_data"],
                                     layout=dict(title=numeric_graph["predictor"]),
-                                )
+                                ),
+                                axisTranslations
                             )
                         ),
                     )
-                ] if numeric_graph else 'No Hay Datos',
+                ] if numeric_graph else no_data_text,
                 [
                     dcc.Dropdown(
                         id="q-vars-dropdown",
@@ -358,11 +423,12 @@ def datasetCallbacks(app, furl: Function, isRegressor: bool = False):
                                 go.Figure(
                                     data=qualitative_graph["graph_data"],
                                     layout=dict(title=qualitative_graph["predictor"]),
-                                )
+                                ),
+                                axisTranslations
                             )
                         ),
                     )
-                ] if qualitative_graph else 'No Hay Datos',
+                ] if qualitative_graph else no_data_text,
                 dcc.Graph(
                     figure=setBottomLegend(
                         go.Figure(

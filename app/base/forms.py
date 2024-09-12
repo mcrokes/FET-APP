@@ -5,8 +5,8 @@ from wtforms import StringField, PasswordField
 
 
 class LoginForm(FlaskForm):
-    username = StringField("Username", id="username_login")
-    password = PasswordField("Password", id="pwd_login")
+    username = StringField(id="username-login")
+    password = PasswordField("Password", id="pwd-login")
 
 
 class CreateAccountForm(FlaskForm):

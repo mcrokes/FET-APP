@@ -1,10 +1,12 @@
+import json
+import os
 from ctypes import Array
 
 from app.proccessor.models import ExplainedClassifierModel, ExplainedRegressorModel, ExplainedModel
 from app.proccessor.models import ModelForProccess
 from . import blueprint
 from flask import current_app, make_response, render_template, request
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, AnonymousUserMixin
 
 from ..base.models import User
 
@@ -53,11 +55,9 @@ def get_regressor_list():
 @login_required
 def delete_classifier():
     modelId = request.data.decode()
-    print('modelId: ', modelId)
     classifier: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
         ExplainedClassifierModel.explainer_model_id == modelId
     ).first()
-    print(classifier.name)
     try:
         classifier.delete_from_db()
         return {'status': 200, 'statusText': 'OK'}
@@ -87,7 +87,7 @@ def get_classifier_namelist():
     for classifier in classifiers:
         nameList.append(classifier.name)
         idPath[f'{classifier.explainer_model_id}'] = classifier.name
-    return {"data": nameList, "idPath": idPath }
+    return {"data": nameList, "idPath": idPath}
 
 
 @blueprint.route("/regressor/namelist", methods=["GET", "POST"])
@@ -100,3 +100,60 @@ def get_regressor_namelist():
         nameList.append(regressor.name)
         idPath[f'{regressor.explainer_model_id}'] = regressor.name
     return {"data": nameList, "idPath": idPath}
+
+
+def find_translations(current_language, keys):
+    # Obtener la ruta actual de trabajo
+    ruta_actual = os.getcwd()
+    ruta_archivo = os.path.join(ruta_actual, f'app/base/static/languages/{current_language}.json')
+    text = ''
+    try:
+        with open(ruta_archivo) as archivo:
+            # Cargar el contenido del archivo en una variable
+            datos = json.load(archivo)
+            # print(datos)
+            text = datos
+            for key in keys:
+                text = text[key]
+    except Exception as e:
+        print('Translation key error: ', e)
+        return {"text": {}}
+
+    return {"text": text}
+
+@blueprint.route("/getTranslation", methods=["GET", "POST"])
+def get_translation():
+    requestData = json.loads(request.data.decode())
+    print('requestData: ', requestData)
+    keys = requestData["keys"]
+    lang = requestData["lang"]
+    isLogged = not isinstance(current_user, AnonymousUserMixin)
+
+    default: dict = {'langSelection': lang if lang in ["es", "en", "ru"] else "es"}
+    if isLogged:
+        user: User = User.query.filter(User.id == current_user.id).first()
+        current_language = user.langSelection if user.langSelection else default["langSelection"]
+    else:
+        current_language = default["langSelection"]
+
+    # print('keys: ', keys)
+    # Construir la ruta del archivo
+    return find_translations(current_language, keys)
+
+
+
+
+@blueprint.route("/changeLanguage", methods=["GET", "POST"])
+@login_required
+def change_language():
+    lang = request.data.decode()
+    user: User = User.query.filter(User.id == current_user.id).first()
+    try:
+        user.langSelection = lang
+        user.db_commit()
+        return {"status": 'ok'}
+    except Exception as e:
+        print('Error on setting language: ', e)
+        user.langSelection = 'es'
+        user.db_commit()
+        return {"status": "reset"}

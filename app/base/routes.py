@@ -33,6 +33,7 @@ def route_fixed_template(template):
 def route_errors(error):
     return render_template('errors/page_{}.html'.format(error))
 
+
 ## Login & Registration
 
 
@@ -49,12 +50,13 @@ def login():
                 status = 'Password Error !'
         else:
             status = "User doesn't exist !"
-        return render_template('login/login.html', login_form = login_form, status = status)
+        return render_template('login/login.html', login_form=login_form, status=status)
 
     if current_user.is_authenticated:
         return redirect(url_for('home_blueprint.index'))
-    return render_template('login/login.html', login_form = login_form, status = '')
-   
+    return render_template('login/login.html', login_form=login_form, status='')
+
+
 @blueprint.route('/logout')
 @login_required
 def logout():
@@ -69,6 +71,7 @@ def shutdown():
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
     return 'Server shutting down...'
+
 
 ## Errors
 

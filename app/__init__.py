@@ -20,7 +20,6 @@ def register_blueprints(app):
 
 
 def configure_database(app):
-
     if not app._got_first_request:
         with app.app_context():
             db.create_all()
@@ -89,8 +88,8 @@ def apply_themes(app):
     @app.context_processor
     def override_url_for():
         Is_admin = (
-            current_user.is_authenticated
-            and current_user.username == app.config["ADMIN"]["username"]
+                current_user.is_authenticated
+                and current_user.username == app.config["ADMIN"]["username"]
         )
         return dict(url_for=_generate_url_for_theme, Is_admin=Is_admin)
 
@@ -105,8 +104,10 @@ def apply_themes(app):
                     values["filename"] = theme_file
         return url_for(endpoint, **values)
 
+
 def configure_file_upload(app):
     app.config['UPLOAD_FOLDER'] = environ.get('UPLOAD_FOLDER')
+
 
 def create_app(config, selenium=False):
     app = Flask(__name__, static_folder="base/static")

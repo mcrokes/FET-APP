@@ -14,7 +14,6 @@
     
     #user_data {
       width: 100% !important;
-      /*text-align: center !important;*/
       align-items: center;
     }
     
@@ -37,14 +36,14 @@
       <div class="col-md-12 col-sm-12 col-xs-12" style="position: initial">
         <div class="dashboard_graph" style="width: 100% !important;">
           <div style="width: 100%;">
-            <h2 style="font-weight: bold; margin-bottom: 1.5rem; text-align: center;">USUARIOS</h2>
+            <h2 style="font-weight: bold; margin-bottom: 1.5rem; text-align: center;" id="users-title"></h2>
             <table id="user_data">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Email</th>
-                  <th>Opciones</th>
+                  <th id="users-table-id"></th>
+                  <th id="users-table-name"></th>
+                  <th id="users-table-email"></th>
+                  <th id="users-table-options"></th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -52,7 +51,7 @@
           </div>
           <div class="clearfix"></div>
           <a href="/setting/add_user" style="margin: 3rem;" class="btn btn-success">
-            <i class="fa fa-user-plus"></i> Nuevo Usuario
+            <i class="fa fa-user-plus"></i> <span id="users-add-btn"></span>
           </a>
         </div>
       </div>
@@ -64,11 +63,21 @@
 
   <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
   <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
-
   <script>
-    let table = $('#user_data').DataTable({
+    (async()=> {
+      const usersTranslations = await t(["users"]);
+      window.document.getElementById('users-title').innerHTML = usersTranslations['title'] ?? 'users.title';
+      window.document.getElementById('users-add-btn').innerHTML = usersTranslations['add-btn'] ?? 'users.add-btn';
+
+      const tableUsrTranslations = usersTranslations['table'] ?? {};
+      window.document.getElementById('users-table-id').innerHTML = tableUsrTranslations['id'] ?? 'users.table.id';
+      window.document.getElementById('users-table-name').innerHTML = tableUsrTranslations['name'] ?? 'users.table.name';
+      window.document.getElementById('users-table-email').innerHTML = tableUsrTranslations['email'] ?? 'users.table.email';
+      window.document.getElementById('users-table-options').innerHTML = tableUsrTranslations['options'] ?? 'users.table.options';
+
+      let table = $('#user_data').DataTable({
       ajax: '/INTERNAL_API/users/list',
-      language: { url: '/static/languages/datatable-es.json' },
+      language: { url: `/static/languages/datatable-${await t(['lang'])}.json` },
       columns: [{ data: 'id' }, { data: 'name' }, { data: 'email' }, { data: 'id' }],
       columnDefs: [
         {
@@ -83,5 +92,6 @@
         }
       ]
     })
+    })();
   </script>
 {% endblock %}

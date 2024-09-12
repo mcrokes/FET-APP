@@ -32,6 +32,29 @@
       <!-- Custom Theme Style -->
       <link href="{{ url_for('static', filename='build/css/custom.css') }}" rel="stylesheet">
       <link href="{{ url_for('static', filename='build/css/base_site.css') }}" rel="stylesheet">
+      <script>
+        const t = async (keys) => {
+          let localStorageData = localStorage.getItem('FET-LANG');
+          // get
+          response = await fetch(`/INTERNAL_API/getTranslation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ "keys": keys, "lang": localStorageData ?? window.navigator.language}),
+          })
+
+          text = await response.json().then((value) => {
+            console.log('keys', keys);
+            console.log('value', value.text   );
+            return value.text;
+          })
+
+          if (keys[0] === "lang" && (!localStorageData || localStorageData !== text)) {
+            localStorage.setItem('FET-LANG', text);
+          }
+
+          return text
+        }
+      </script>
     {% endblock head %}
   </head>
 
@@ -41,12 +64,13 @@
         <div>
           {% block sidebar %}
             <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}">
+              <div style="height: 57px; position: absolute;width: 100%; top: 0;background-color: #ffffffe0; margin-top: -57px;"></div>
               {% include "site_template/sidebar.html" %}
             </div>
           {% endblock sidebar %}
           <div id="body-container">
             {% block top_navigation %}
-              <div id="top-nav-container" class="top_nav" style="margin-left: 0; position: fixed; right: 0; width: 100%;">
+              <div id="top-nav-container" class="top_nav" style="margin-left: 0; position: fixed; right: 0; width: 100%; z-index: 999;">
                 {% include "site_template/top_navigation.html" %}
               </div>
             {% endblock top_navigation %}

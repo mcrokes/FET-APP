@@ -26,15 +26,19 @@ import pandas as pd
 
 import joblib
 
+from ..API.utils import getLocalTranslations, findTranslationsParent, setText
 
-def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "Regressor"], modelId):
+
+def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "Regressor"], modelId, progressTranslations):
     with app:
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == model_id
         ).first()
 
+        module = "classifier" if model_type == "Classifier" else "regressor"
+
         db_model.percent_processed = 10
-        db_model.process_message = "Sincronizando datos..."
+        db_model.process_message = setText(progressTranslations, 'message-2', f'add-{module}.progress')
         db_model.db_commit()
 
         if model_type == "Classifier":
@@ -61,7 +65,7 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
             db_model_qualitative_column_names.append(column["column_name"])
 
         db_model.percent_processed = 20
-        db_model.process_message = "Generando modelo base..."
+        db_model.process_message = setText(progressTranslations, 'message-3', f'add-{module}.progress')
         db_model.db_commit()
 
         #### BASE MODEL ####
@@ -97,7 +101,7 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
         model_data.indexesList = db_model.indexesList
 
         db_model.percent_processed = 30
-        db_model.process_message = "Cargando metricas del conjunto de datos..."
+        db_model.process_message = setText(progressTranslations, 'message-4', f'add-{module}.progress')
         db_model.db_commit()
 
         #### DATASET DATA ####
@@ -137,7 +141,6 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
                     "isNumeric": False,
                     "rows_amount": 3,
                     "columns_amount": 3,
-                    "distribution_dataset": "Dataset for the distribution type",
                     "isPrime": False,
                 }
             )
@@ -145,7 +148,6 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
                 **{
                     "rows_amount": 3,
                     "columns_amount": 3,
-                    "distribution_dataset": "Dataset for the distribution type",
                 }
             )
             # model_data.data_set_data.data_set_data_distributions[0].db_commit()
@@ -156,7 +158,6 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
                     "isNumeric": False,
                     "rows_amount": 3,
                     "columns_amount": 3,
-                    "distribution_dataset": "Dataset for the distribution type",
                     "isPrime": False,
                 }
             )
@@ -164,14 +165,13 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
                 **{
                     "rows_amount": 3,
                     "columns_amount": 3,
-                    "distribution_dataset": "Dataset for the distribution type",
                 }
             )
             dataset_data_distribution_qualitative.data_set_data = dataset_data
             dataset_data_distribution_numeric.data_set_data = dataset_data
 
         db_model.percent_processed = 40
-        db_model.process_message = "Creando modelo subrogado datos..."
+        db_model.process_message = setText(progressTranslations, 'message-5', f'add-{module}.progress')
         db_model.db_commit()
 
         tree_depth = 3
@@ -180,7 +180,8 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
             model_data.surrogate_trees_data = []
         while surrogate_inexact_rules_amount != 0:
 
-            db_model.process_message = f"Creando modelo subrogado datos (de profundidad {tree_depth})..."
+            db_model.process_message = (f"{setText(progressTranslations, 'message-6', f'add-{module}.progress')}"
+                                        f"{tree_depth})...")
             db_model.percent_processed += 1
             db_model.db_commit()
             surrogate_tree = ExplainSingleTree.createSurrogateTree(
@@ -244,7 +245,7 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
             surrogate_tree_data.add_to_db()
 
         db_model.percent_processed = 80
-        db_model.process_message = "Guardando la base de datos del modelo..."
+        db_model.process_message = setText(progressTranslations, 'message-7', f'add-{module}.progress')
         db_model.db_commit()
 
         if modelId:
@@ -300,7 +301,7 @@ def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "R
                 regressor_model_data.add_to_db()
 
         db_model.percent_processed = 100
-        db_model.process_message = "Completado !!!"
+        db_model.process_message = setText(progressTranslations, 'message-8', f'add-{module}.progress')
         db_model.db_commit()
 
 
@@ -492,13 +493,17 @@ def save_classifier(modelId: int = 0):
 
         q_dict = {}
         features_description = {}
+        translationsClassifier = getLocalTranslations(current_user.langSelection, 'add-classifier')
+        descriptionsClassifier = findTranslationsParent(translationsClassifier, 'descriptions')
+        progressClassifierTranslations = findTranslationsParent(translationsClassifier, 'progress')
+
         for element in request.form:
             if element != "model_id":
                 if element in df.columns:
                     features_description[element] = (
                         request.form[element]
                         if request.form[element] != ""
-                        else "Sin descripción"
+                        else setText(descriptionsClassifier, 'no-description', 'add-classifier.descriptions')
                     )
                 elif "Q-Variable" in element or element == "Add":
                     value_number = 0
@@ -546,7 +551,7 @@ def save_classifier(modelId: int = 0):
 
         x = threading.Thread(
             target=thread_function,
-            args=(db_model.id, current_app.app_context(), user_id, "Classifier", modelId),
+            args=(db_model.id, current_app.app_context(), user_id, "Classifier", modelId, progressClassifierTranslations),
         )
         x.start()
         return render_template(
@@ -752,13 +757,16 @@ def save_regressor(modelId: int = 0):
 
         q_dict = {}
         features_description = {}
+        translationsRegressor = getLocalTranslations(current_user.langSelection, 'add-classifier')
+        descriptionsRegressor = findTranslationsParent(translationsRegressor, 'descriptions')
+        progressRegressorTransations = findTranslationsParent(translationsRegressor, 'progress')
         for element in request.form:
             if element != "model_id":
                 if element in df.columns:
                     features_description[element] = (
                         request.form[element]
                         if request.form[element] != ""
-                        else "Sin descripción"
+                        else setText(descriptionsRegressor, 'no-description', 'add-regressor.descriptions')
                     )
                 elif "Q-Variable" in element or element == "Add":
                     value_number = 0
@@ -801,7 +809,7 @@ def save_regressor(modelId: int = 0):
         user_id = current_user.id
         x = threading.Thread(
             target=thread_function,
-            args=(db_model.id, current_app.app_context(), user_id, "Regressor", modelId),
+            args=(db_model.id, current_app.app_context(), user_id, "Regressor", modelId, progressRegressorTransations),
         )
         x.start()
         # Function to add, the models

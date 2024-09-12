@@ -1,0 +1,669 @@
+{
+  "lang": "es",
+  "app-name": "FET",
+  "login": {
+    "title": "Bienvenido",
+    "btn": "Acceder",
+    "username": "Nombre de Usuario",
+    "pwd": "Contraseña"
+  },
+  "add-user": {
+    "title": "Crear Usuario",
+    "btn": "Crear",
+    "username": "Nombre de Usuario",
+    "email": "Email",
+    "password": "Contraseña",
+    "user-exist-message": "El nombre de usuario ya existe",
+    "email-exist-message": "Este email ya existe",
+    "successful-message": "Usuario añadido con éxito !",
+    "missing-data-message": "Debe Insertar Todos los Datos"
+  },
+  "delete-user": {
+    "title": "Eliminar Usuario",
+    "back-btn": "Atrás",
+    "delete-btn": "Eliminar",
+    "username": "Nombre de Usuario"
+  },
+  "edit-user": {
+    "title": "Nueva Contraseña",
+    "back-btn": "Atrás",
+    "check-btn": "Confirmar",
+    "password": "Contraseña"
+  },
+  "change-pwd": {
+    "title": "Cambiar Contraseña",
+    "btn": "Cambiar",
+    "origin-password": "Contraseña Original",
+    "new-password": "Nueva Contraseña",
+    "new-password2": "Repite la Nueva Contraseña",
+    "successful-message": "Contraseña cambiada con éxito !",
+    "mismatch-pwd-message": "Las nuevas Contraseñas no son iguales !",
+    "wrong-pwd-message": "Error en la Contraseña Original !"
+  },
+  "users": {
+    "title": "USUARIOS",
+    "add-btn": "Nuevo Usuario",
+    "table": {
+      "id": "ID",
+      "name": "Nombre",
+      "email": "Email",
+      "options": "Opciones"
+    }
+  },
+  "top-bar": {
+    "config": "Configuración",
+    "exit": "Salir"
+  },
+  "sidebar": {
+    "home-btn": "Inicio",
+    "classifier-btn": "Clasificación",
+    "classifier-btn-link": "Modelos de Clasificación",
+    "regressor-btn": "Regresión",
+    "regressor-btn-link": "Modelos de Regresión",
+    "config-btn": "Configuración",
+    "config-btn-link": "Configuración",
+    "config": "Configurar usuarios",
+    "config-sidebar-link": "Configurar usuarios",
+    "add-user": "Añadir usuario",
+    "add-user-sidebar-link": "Añadir usuario",
+    "password": "Cambiar contraseña",
+    "password-sidebar-link": "Cambiar contraseña",
+    "config-bottom-btn": "Configuración de administrador",
+    "full-screen-btn": "Pantalla completa",
+    "exit": "Salir"
+  },
+  "footer": {
+    "text": "FET-APP - Basado en las plantillas",
+    "link": "Colorlib"
+  },
+  "home": {
+    "info-title": "Modelos de Clasificación y Regresión con Random Forest",
+    "classifier-btn": "Modelos de clasificación",
+    "regressor-btn": "Modelos de regresión",
+    "index": "Índice",
+    "index-intro": "Introducción",
+    "intro": {
+      "text": "Random Forest es un algoritmo de aprendizaje automático que combina múltiples árboles de decisión para mejorar la precisión y robustez de los modelos de clasificación y regresión."
+    },
+    "index-classifier": "Clasificación con Random Forest",
+    "classifier": {
+      "title-1": "¿Cómo funciona?",
+      "subtitle-1": "El algoritmo de Random Forest para clasificación funciona de la siguiente manera:",
+      "text-1-1": "Se crea un conjunto de árboles de decisión, cada uno con una muestra aleatoria de características y observaciones.",
+      "text-1-2": "Cada árbol de decisión se entrena con una parte del conjunto de datos y se utiliza para predecir la clase de las observaciones.",
+      "text-1-3": "Las predicciones de cada árbol se combinan para obtener una predicción final.",
+      "title-2": "Ventajas",
+      "text-2-1": "Robustez: Random Forest es resistente a la sobreajuste y puede manejar grandes conjuntos de datos.",
+      "text-2-2": "Flexibilidad: Puede manejar diferentes tipos de características, incluyendo numéricas y categóricas.",
+      "text-2-3": "Interpretabilidad: Los árboles de decisión individuales pueden ser interpretados para entender las relaciones entre las características y la clase.",
+      "title-3": "Desventajas",
+      "text-3-1": "Computacionalmente costoso: El entrenamiento de un modelo de Random Forest puede ser lento para grandes conjuntos de datos.",
+      "text-3-2": "Sensibilidad a la elección de hiperparámetros: La elección de los hiperparámetros, como el número de árboles y la profundidad máxima, puede afectar la precisión del modelo."
+    },
+    "index-regressor": "Regresión con Random Forest",
+    "regressor": {
+      "title-1": "¿Cómo funciona?",
+      "subtitle-1": "El algoritmo de Random Forest para regresión funciona de la siguiente manera:",
+      "text-1-1": "Se crea un conjunto de árboles de decisión, cada uno con una muestra aleatoria de características y observaciones.",
+      "text-1-2": "Cada árbol de decisión se entrena con una parte del conjunto de datos y se utiliza para predecir el valor continuo.",
+      "text-1-3": "Las predicciones de cada árbol se combinan para obtener una predicción final.",
+      "title-2": "Ventajas",
+      "text-2-1": "Robustez: Random Forest es resistente a la sobreajuste y puede manejar grandes conjuntos de datos.",
+      "text-2-2": "Flexibilidad: Puede manejar diferentes tipos de características, incluyendo numéricas y categóricas.",
+      "text-2-3": "Interpretabilidad: Los árboles de decisión individuales pueden ser interpretados para entender las relaciones entre las características y la variable objetivo.",
+      "title-3": "Desventajas",
+      "text-3-1": "Computacionalmente costoso: El entrenamiento de un modelo de Random Forest puede ser lento para grandes conjuntos de datos.",
+      "text-3-2": "Sensibilidad a la elección de hiperparámetros: La elección de los hiperparámetros, como el número de árboles y la profundidad máxima, puede afectar la precisión del modelo."
+    },
+    "index-example": "Ejemplos de aplicación",
+    "example": {
+      "text-1": "Clasificación de imágenes: Random Forest se puede utilizar para clasificar imágenes en diferentes categorías, como objetos, personas o lugares.",
+      "text-2": "Predicción de precios de viviendas: Utilizar características como número de habitaciones, superficie, ubicación, etc. para predecir el precio de una vivienda.",
+      "text-3": "Predicción de demanda de productos: Utilizar características como temporada, día de la semana, festividades, etc. para predecir la demanda de un producto.",
+      "text-4": "Predicción de resultados deportivos: Utilizar características como estadísticas de equipo, lesiones, condiciones climáticas, etc. para predecir el resultado de un partido."
+    },
+    "index-conclusion": "Conclusión",
+    "conclusion": {
+      "text-1": "En resumen, los modelos de clasificación y regresión con Random Forest son herramientas poderosas para analizar y predecir resultados en una variedad de campos. Su capacidad para manejar grandes conjuntos de datos y su robustez frente a la sobreajuste los hacen ideales para aplicaciones en la vida real.",
+      "text-2": "Para más información <a href='https://cienciadedatos.net/documentos/py08_random_forest_python' target='_blank'>haga click aquí</a>"
+    }
+  },
+  "classifiers": {
+    "title": "MODELOS DE CLASIFICACIÓN",
+    "add-btn": "Nuevo Modelo",
+    "compare-btn": "Abrir Vista Comparativa",
+    "table": {
+      "id": "ID",
+      "name": "Nombre",
+      "description": "Descripción",
+      "target": "Valor Estudiado",
+      "options": "Opciones"
+    },
+    "modal": {
+      "title": "Eliminar Modelo",
+      "description": "¿Está seguro que desea eliminar el modelo? <br> Esta acción es irreversible",
+      "cancel-btn": "Cancelar",
+      "delete-btn": "Eliminar"
+    }
+  },
+  "regressors": {
+    "title": "MODELOS DE REGRESIÓN",
+    "add-btn": "Nuevo Modelo",
+    "compare-btn": "Abrir Vista Comparativa",
+    "table": {
+      "id": "ID",
+      "name": "Nombre",
+      "description": "Descripción",
+      "target": "Valor Estudiado",
+      "options": "Opciones"
+    },
+    "modal": {
+      "title": "Eliminar Modelo",
+      "description": "¿Está seguro que desea eliminar el modelo? <br> Esta acción es irreversible",
+      "cancel-btn": "Cancelar",
+      "delete-btn": "Eliminar"
+    }
+  },
+  "add-classifier": {
+    "title": "Cargar Modelo de Clasificación",
+    "accept-btn": "Aceptar",
+    "next-btn": "Siguiente",
+    "modify-btn": "Modificar",
+    "create-btn": "Crear",
+    "cancel-btn": "Cancelar",
+    "back-btn": "Atrás",
+    "progress": {
+      "message-1": "Creando distribuciones del conjunto de datos...",
+      "message-2": "Sincronizando datos...",
+      "message-3": "Generando modelo base...",
+      "message-4": "Cargando metricas del conjunto de datos...",
+      "message-5": "Creando modelo subrogado datos...",
+      "message-6": "Creando modelo subrogado datos (profundidad: ",
+      "message-7": "Guardando la base de datos del modelo...",
+      "message-8": "Completado !!!"
+    },
+    "name": "Inserte el Nombre del Modelo",
+    "model": "Inserte el Modelo de Clasificación",
+    "description": "Añada una descripción para Modelo Estudiado",
+    "dataset": "Inserte el set de datos de entrenamiento",
+    "required": "*Requerido",
+    "optional": "Opcional",
+    "target-selector": "Columna de Clasificación",
+    "index-selector": "Columna sobrante como índice",
+    "descriptions": {
+      "title": "Descripción de variables",
+      "placeholder": "Descripción...",
+      "no-description": "Sin descripción"
+    },
+    "q-vars": {
+      "title": "Valores de las posibles variables cualitativas.",
+      "placeholder": "Original Value: "
+    }
+  },
+  "add-regressor": {
+    "title": "Cargar Modelo de Regresión",
+    "accept-btn": "Aceptar",
+    "next-btn": "Siguiente",
+    "modify-btn": "Modificar",
+    "create-btn": "Crear",
+    "cancel-btn": "Cancelar",
+    "back-btn": "Atrás",
+    "progress": {
+      "message-1": "Creando distribuciones del conjunto de datos...",
+      "message-2": "Sincronizando datos...",
+      "message-3": "Generando modelo base...",
+      "message-4": "Cargando metricas del conjunto de datos...",
+      "message-5": "Creando modelo subrogado datos...",
+      "message-6": "Creando modelo subrogado datos (profundidad: ",
+      "message-7": "Guardando la base de datos del modelo...",
+      "message-8": "Completado !!!"
+    },
+    "name": "Inserte el Nombre del Modelo",
+    "model": "Inserte el Modelo de Regresión",
+    "description": "Añada una descripción para Modelo Estudiado",
+    "dataset": "Inserte el set de datos de entrenamiento",
+    "required": "*Requerido",
+    "optional": "Opcional",
+    "unit": "Unidad de Medida",
+    "units": [
+      {
+        "id": "",
+        "text": "Ninguna"
+      },
+      {
+        "id": "$",
+        "text": "$"
+      },
+      {
+        "id": "%",
+        "text": "%"
+      },
+      {
+        "id": "Ltr",
+        "text": "Ltr"
+      },
+      {
+        "id": "g",
+        "text": "g"
+      },
+      {
+        "id": "kg",
+        "text": "kg"
+      },
+      {
+        "id": "cm",
+        "text": "cm"
+      },
+      {
+        "id": "dm",
+        "text": "dm"
+      },
+      {
+        "id": "m",
+        "text": "m"
+      },
+      {
+        "id": "km",
+        "text": "km"
+      }
+    ],
+    "target-selector": "Columna Objetivo",
+    "index-selector": "Columna sobrante como índice",
+    "descriptions": {
+      "title": "Descripción de variables",
+      "placeholder": "Descripción...",
+      "no-description": "Sin descripción"
+    },
+    "q-vars": {
+      "title": "Valores de las posibles variables cualitativas.",
+      "placeholder": "Original Value: "
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "data": {
+        "title": "DATOS",
+        "tooltip": "Estudio del Conjunto de Datos"
+      },
+      "importance": {
+        "title": "IMPORTANCIAS",
+        "tooltip": "Importancias de los predictores"
+      },
+      "metrics": {
+        "title": "MÉTRICAS",
+        "tooltip": "Métricas del Modelo"
+      },
+      "surrogate": {
+        "title": "SUBROGADO",
+        "tooltip": "Árbol subrogado del modelo"
+      },
+      "trees": {
+        "title": "ÁRBOLES",
+        "tooltip": "Árboles individuales del modelo"
+      },
+      "predictions": {
+        "title": "PREDICCIONES",
+        "tooltip": "Interpretación de predicciones"
+      }
+    },
+    "data": {
+      "common": {
+        "filter": "Filtrar...",
+        "distributions": {
+          "labels": {
+            "x": "Variable",
+            "y": "Ocurrencias"
+          },
+          "legend": {
+            "bars": "Barras",
+            "line": "Lineal"
+          },
+          "no-data": "No hay datos",
+          "title": "Distribución Por Variables",
+          "numeric-title": "Variables Cuantitativas",
+          "q-title": "Variables Cualitativas"
+        },
+        "title": "Métricas del Conjunto de Datos: ",
+        "dataset": {
+          "title": "Conjunto de Datos Original",
+          "modified-title": "Métricas del Conjunto de Datos: ",
+          "tooltip": {
+            "text-1": "* Si desea filtrar las columnas ",
+            "text-2": "Numéricas",
+            "text-3": " deberá ingresar los símbolos (",
+            "text-4": ">",
+            "text-5": ") - (",
+            "text-6": "<",
+            "text-7": ") antes del número. Ej: >56"
+          }
+        },
+        "correlation": {
+          "title": "Correlación de Variables",
+          "tooltip": {
+            "text-1": "Correlación: Medida de la relación entre dos variables, que varía de ",
+            "text-2": "-1 (correlación negativa) a 1 (correlación positiva). ",
+            "text-3": "Valores positivos",
+            "text-4": " indican que las variables aumentan o disminuyen juntas, mientras que ",
+            "text-5": "valores negativos",
+            "text-6": " indican que una variable aumenta cuando la otra disminuye. Valores ",
+            "text-7": "cercanos a 0",
+            "text-8": " indican poca o ninguna correlación."
+          }
+        },
+        "description-title": "Descripción de Predictores"
+      }
+    },
+    "importance": {
+      "common": {
+        "gini": {
+          "title": "IMPORTANCIAS GINI",
+          "label-y": "Predictor",
+          "label-x": "Importancia",
+          "tooltip": {
+            "text-1": "Importancia GINI: Indica la capacidad de cada característica para reducir la impureza en la clase objetivo. ",
+            "text-2": "Valores altos",
+            "text-3": " significan que la característica es más importante para la predicción."
+          }
+        },
+        "permutation": {
+          "title": "IMPORTANCIAS POR PERMUTACION",
+          "label-y": "Predictor",
+          "label-x": "Importancia +- error: ",
+          "tooltip": {
+            "text-1": "Importancia por Permutación: Evalúa la importancia de cada característica al ",
+            "text-2": "medir la pérdida de precisión del modelo al aleatorizar sus valores. ",
+            "text-3": "Valores altos",
+            "text-4": " indican características clave."
+          }
+        }
+      },
+      "classifier": {
+        "hint": "Cada clase respuesta puede tener valores divergentes",
+        "selector-placeholder": "Seleccione como positiva la clase que desea analizar"
+      }
+    },
+    "metrics": {
+      "classifier": {
+        "cutoff": "Punto de Corte",
+        "cutoff-tooltip": "Punto porcentual en el que el modelo decide clasificar una clase como verdadera.",
+        "class-selector": "Seleccione como positiva la clase que desea analizar",
+        "matrix": {
+          "title": "MATRIZ DE CONFUSION",
+          "labels": {
+            "x": "PREDICCIONES",
+            "y": "VALORES REALES",
+            "color": "CANTIDAD"
+          },
+          "tooltip": {
+            "text-1": "Matriz de Confusión: Evalúa la precisión del modelo en la clasificación de ejemplos.",
+            "text-2": "VP: ",
+            "text-3": "ejemplos positivos correctamente clasificados.",
+            "text-4": "VN: ",
+            "text-5": "ejemplos negativos correctamente clasificados.",
+            "text-6": "FP: ",
+            "text-7": "ejemplos negativos incorrectamente clasificados como positivos.",
+            "text-8": "FN: ",
+            "text-9": "ejemplos positivos incorrectamente clasificados como negativos."
+          },
+          "parameters": {
+            "title": "Parámetros Obtenidos",
+            "general-factors": "Factores Generales",
+            "individual": "Parámetros Individuales",
+            "value": "Valor",
+            "precision": "Precisión",
+            "precision-tooltip": "Proporción de verdaderos positivos entre todos los positivos predichos. (Mayor es Mejor)",
+            "sensibility": "Sensibilidad",
+            "sensibility-tooltip": "Proporción de predicciones correctas entre todos los valores reales de la clase. (Mayor es Mejor)",
+            "fp": "Tasa FP",
+            "fp-tooltip": "Proporción de predicciones erroneas entre todos los valores reales de otras clases clase. (Menor es Mejor)",
+            "f1": "Medición F1",
+            "f1-tooltip": "Media armónica de la precisión y la sensibilidad. (Mayor es Mejor)",
+            "tv": "Predicciones Correctas",
+            "fv": "Predicciones Fallidas",
+            "accuracy": "Precisión Global"
+          }
+        },
+        "roc": {
+          "title": "ROC-AUC curva",
+          "tooltip": {
+            "text-1": "Curva ROC: Muestra la relación entre la tasa de Verdaderos Positivos (",
+            "text-2": "Sensibilidad",
+            "text-3": ") y la tasa de Falsos Positivos (",
+            "text-4": "1-Especificidad",
+            "text-5": ") a diferentes umbrales de clasificación.",
+            "text-6": "* El área bajo la curva (AUC) es una métrica que resume el comportamiento del modelo. Un AUC cercano a 1 indica un modelo que puede distinguir perfectamente entre positivos y negativos, mientras que un AUC cercano a 0.5 indica un modelo que no es mejor que una elección aleatoria."
+          },
+          "parameters": {
+            "auc": "ABC[auc]",
+            "marker": "Marcador",
+            "tpr": "TVP[tpr]",
+            "fpr": "TFP[fpr]"
+          },
+          "labels": {
+            "x": "Tasa de Falsos Positivos",
+            "y": "Tasa de Positivos"
+          }
+        }
+      },
+      "regressor": {
+        "prediction-real": {
+          "title": "Predicción vs Valores Reales",
+          "tooltip": {
+            "text-1": "Evalúa la precisión del modelo en la regresión de resultados de modo que un mejor modelo está representado por los ",
+            "text-2": "puntos más cercanos a la linea discontinua ",
+            "text-3": "central.",
+            "text-4": "La línea discontínua representa los ",
+            "text-5": "valores reales"
+          },
+          "labels": {
+            "x": "Valor Real",
+            "y": "Predicción"
+          }
+        },
+        "real-prediction": {
+          "title": "Valores Reales vs Predicción",
+          "tooltip": {
+            "text-1": "Evalúa la precisión del modelo en la regresión de resultados de modo que un mejor modelo está representado por los ",
+            "text-2": "puntos más cercanos a la linea discontinua ",
+            "text-3": "central.",
+            "text-4": "La línea discontínua representa la ",
+            "text-5": "predicción"
+          },
+          "labels": {
+            "x": "Predicción",
+            "y": "Valor Real"
+          }
+        },
+        "parameters": {
+          "metrics": "Métricas",
+          "value": "Valor",
+          "mse": "Error Cuadrático Medio (mean-squared-error)",
+          "mse-tooltip": "El MSE mide la media de los errores cuadrados entre los valores reales y los valores predichos. Un MSE bajo indica que el modelo se ajusta bien a los datos.",
+          "rmse": "Raíz del Error Cuadrático Medio (root-mean-squared-error)",
+          "rmse-tooltip": "El RMSE es la raíz cuadrada del MSE. Es una métrica más fácil de interpretar que el MSE, ya que tiene la misma unidad que los valores reales.",
+          "mae": "Error Absoluto Medio (mean-absolute-error)",
+          "mae-tooltip": "El MAE mide la media de los errores absolutos entre los valores reales y los valores predichos. Un MAE bajo indica que el modelo se ajusta bien a los datos.",
+          "mape": "Error Absoluto Porcentual Medio (mean-absolute-percentage-error)",
+          "mape-tooltip": "El MAPE mide la media de los errores absolutos porcentuales entre los valores reales y los valores predichos. Un MAPE bajo indica que el modelo se ajusta bien a los datos.",
+          "r2": "Coeficiente de Determinación R² (R-squared)",
+          "r2-tooltip": "El R² mide la proporción de la varianza en los valores reales que es explicada por el modelo. Un R² alto indica que el modelo se ajusta bien a los datos."
+        },
+        "partial-dependence": {
+          "labels": {
+            "x": "Variable",
+            "y": "Prediction"
+          },
+          "legend": {
+            "bars": "Barras",
+            "line": "Lineal"
+          },
+          "no-data": "No hay datos",
+          "title": "Dependencia Parcial de Variables",
+          "numeric-title": "Variables Cuantitativas",
+          "q-title": "Variables Cualitativas"
+        }
+      }
+    },
+    "surrogate": {
+      "common": {
+        "depth": "Profundidad",
+        "build-btn": "Reconstruir Árbol",
+        "table": {
+          "title": "REGLAS DEL MODELO",
+          "headers": {
+            "rule": "REGLA",
+            "causes": "CAUSAS",
+            "result": "RESULTADO",
+            "predictor": "PREDICTOR",
+            "condition": "CONDICIÓN",
+            "value": "VALOR",
+            "target": "VALOR OBJETIVO",
+            "proba": "PROBABILIDAD",
+            "samples": "MUESTRAS"
+          },
+          "tooltip": {
+            "text-1": "Árbol Subrogado: Un árbol de decisión que se entrena con las predicciones del modelo de Random Forest original, permitiendo simplificar el bosque para interpretar la salida del modelo de manera más fácil y comprensible."
+          }
+        },
+        "tree": {
+          "title": "VISUALIZACION DEL ARBOL",
+          "show-btn": "MOSTRAR",
+          "download-btn": "DESCARGAR",
+          "tooltip": {
+            "text-1": "* Para visualizar el árbol deberá instalar el software ",
+            "text-2": "Graphviz",
+            "text-3": "https://graphviz.org/download/",
+            "text-4": " en su ordenador.",
+            "text-5": "* Las muestras con las que se hace la visualización ",
+            "text-6": "no son las mismas",
+            "text-7": " que las de las reglas de modelo."
+          }
+        }
+      }
+    },
+    "trees": {
+      "common": {
+        "depth": "Árbol No.",
+        "build-btn": "Realizar Estudio",
+        "table": {
+          "title": "REGLAS DEL MODELO",
+          "headers": {
+            "rule": "REGLA",
+            "causes": "CAUSAS",
+            "result": "RESULTADO",
+            "predictor": "PREDICTOR",
+            "condition": "CONDICIÓN",
+            "value": "VALOR",
+            "target": "VALOR OBJETIVO",
+            "proba": "PROBABILIDAD",
+            "samples": "MUESTRAS"
+          },
+          "tooltip": {
+            "text-1": "Árbol de Decisión: Un ",
+            "text-2": "componente independiente ",
+            "text-3": "del modelo de Random Forest que contribuye a la predicción final mediante la ",
+            "text-4": "combinación de sus resultados",
+            "text-5": "con los de otros árboles. Cada árbol se entrena con una ",
+            "text-6": "muestra aleatoria",
+            "text-7": " de características y ejemplos."
+          }
+        },
+        "tree": {
+          "title": "VISUALIZACION DEL ARBOL",
+          "show-btn": "MOSTRAR",
+          "download-btn": "DESCARGAR",
+          "tooltip": {
+            "text-1": "* Para visualizar el árbol deberá instalar el software ",
+            "text-2": "Graphviz",
+            "text-3": "https://graphviz.org/download/",
+            "text-4": " en su ordenador.",
+            "text-5": "* Las muestras con las que se hace la visualización ",
+            "text-6": "no son las mismas",
+            "text-7": " que las de las reglas de modelo."
+          }
+        }
+      }
+    },
+    "predictions": {
+      "common": {
+        "instance-selector-placeholder": "Seleccione la Instancia a Analizar",
+        "prediction": "Predicción",
+        "contribution": {
+          "tooltip": {
+            "text-1": "Se examina la ",
+            "text-2": "contribución individual ",
+            "text-3": "de cada característica a la predicción, lo que permite identificar qué características son más relevantes para el modelo."
+          },
+          "prediction-upper": "PREDICCIÓN",
+          "actual-upper": "ACTUAL",
+          "accumulated": "Acumulado",
+          "final-prediction": "Predicción Final",
+          "actual": "Actual",
+          "media": "Media",
+          "population-media": "Media Poblacional",
+          "title": "Contribución de Cada Predictor",
+          "individual-title": "Cotribucion individual por predictor",
+          "label-x": "Influyentes",
+          "headers": {
+            "contribution": "Contribución",
+            "instance": "Instancia",
+            "predictor": "Predictor",
+            "value": "Valor"
+          }
+        }
+      },
+      "classifier": {
+        "class-selector": {
+          "title": "Seleccione la Clase a Analizar",
+          "placeholder": "Seleccione una clase",
+          "tooltip": "Limita la instancias a elegir a elementos que son prototipos respuesta de la clase seleccionada en el conjunto original de datos."
+        },
+        "contribution": {
+          "sub-title": " por Clase",
+          "individual-sub-title": " para ",
+          "label-y": "Certeza en la Predicción de 0 a 1"
+        },
+        "trees": {
+          "tooltip": {
+            "text-1": "Cada árbol",
+            "text-2": " del modelo hace una predicción. La predicción final se basa en la ",
+            "text-3": "combinación de las predicciones",
+            "text-4": " de todos los árboles.",
+            "text-5": "* El azul",
+            "text-6": " representa los árboles que predicen la clase seleccionada como positiva.",
+            "text-7": "* El rojo",
+            "text-8": " representa los árboles que predicen la(s) clases restantes."
+          },
+          "bar-title": "Árboles",
+          "line-title": "Corte",
+          "title": "Predicción individual por árboles para la clase:",
+          "labels": {
+            "x": "Número del Árbol",
+            "y": "Certeza de la Predicción %"
+          }
+        }
+      },
+      "regressor": {
+        "contribution": {
+          "label-y": "Acumulado en la predicción"
+        },
+        "trees": {
+          "tooltip": {
+            "text-1": "Cada árbol",
+            "text-2": " del modelo hace una predicción. La predicción final se basa en la ",
+            "text-3": "combinación de las predicciones",
+            "text-4": " de todos los árboles.",
+            "text-5": "La línea roja representa la predicción promedio o final."
+          },
+          "bar-title": "Árboles",
+          "line-title": "Predicción Final",
+          "title": "Predicción individual por árboles",
+          "labels": {
+            "x": "Número del Árbol",
+            "y": "Certeza de la Predicción %"
+          }
+        }
+      }
+    }
+  }
+}
