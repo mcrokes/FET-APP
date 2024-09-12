@@ -9,7 +9,7 @@ from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-from app.API.utils import findTranslationsParent, setText, getTranslations
+from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
@@ -203,7 +203,7 @@ def specificTreesCallbacks(app, furl, isRegressor: bool = False):
         model_id = f.args["model_id"]
 
         # TRANSLATIONS
-        commonTranslations = getTranslations(current_user.langSelection, 'trees', 'common')
+        commonTranslations = getDashboardTranslations(current_user.langSelection, 'trees', 'common')
         tableTranslations = findTranslationsParent(commonTranslations, 'table')
         tableHeadersTranslations = findTranslationsParent(tableTranslations, 'headers')
 

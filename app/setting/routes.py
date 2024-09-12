@@ -7,6 +7,7 @@ from .forms import (
     change_password_Form,
     setting_password_Form,
 )
+from ..API.utils import getLocalTranslations, setText
 from ..base.models import User
 from .common.useful_functions import check_admin
 
@@ -25,18 +26,19 @@ def add_User():
     if check_admin():
         form = add_user_Form(request.form)
         if "Add" in request.form:
+            translations = getLocalTranslations(current_user.langSelection, 'add-user')
             if request.form["username"] and request.form["email"] and request.form["password"]:
                 user = User.query.filter_by(username=request.form["username"]).first()
                 email = User.query.filter_by(email=request.form["email"]).first()
                 if user:
-                    status = "El nombre de usuario ya existe"
+                    status = setText(translations, 'user-exist-message', 'add-user')
                 elif email:
-                    status = "Este email ya existe"
+                    status = setText(translations, 'email-exist-message', 'add-user')
                 else:
                     User(**request.form).add_to_db()
-                    status = "Usuario añadido con éxito !"
+                    status = setText(translations, 'successful-message', 'add-user')
             else:
-                status = "Debe Insertar Todos los Datos"
+                status = setText(translations, 'missing-data-message', 'add-user')
             return render_template("add_user.html", form=form, status=status)
         return render_template("add_user.html", form=form, status="")
     return redirect("/page_403")
@@ -83,14 +85,15 @@ def change_password():
     form = change_password_Form(request.form)
     if "Change" in request.form:
         user = User.query.filter_by(username=current_user.username).first()
+        translations = getLocalTranslations(current_user.langSelection, 'change-pwd')
         if user.checkpw(request.form["origin_password"]):
             if request.form["new_password"] == request.form["new_password2"]:
                 user.password = user.hashpw(request.form["new_password"])
                 user.db_commit()
-                status = "Contraseña cambiada con éxito !"
+                status = setText(translations, 'successful-message', 'change-pwd')
             else:
-                status = "Las nuevas Contraseñas no son iguales !"
+                status = setText(translations, 'mismatch-pwd-message', 'change-pwd')
         else:
-            status = "Error en la Contraseña Original !"
+            status = setText(translations, 'wrong-pwd-message', 'change-pwd')
         return render_template("change_password.html", form=form, status=status)
     return render_template("change_password.html", form=form, status="")

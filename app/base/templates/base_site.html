@@ -34,17 +34,23 @@
       <link href="{{ url_for('static', filename='build/css/base_site.css') }}" rel="stylesheet">
       <script>
         const t = async (keys) => {
+          let localStorageData = localStorage.getItem('FET-LANG');
           // get
-          response = await fetch(`http://127.0.0.1:5000/INTERNAL_API/getTranslation`, {
+          response = await fetch(`/INTERNAL_API/getTranslation`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: keys,
+            body: JSON.stringify({ "keys": keys, "lang": localStorageData ?? window.navigator.language}),
           })
 
           text = await response.json().then((value) => {
-            console.log(value)
+            console.log('keys', keys);
+            console.log('value', value.text   );
             return value.text;
           })
+
+          if (keys[0] === "lang" && (!localStorageData || localStorageData !== text)) {
+            localStorage.setItem('FET-LANG', text);
+          }
 
           return text
         }

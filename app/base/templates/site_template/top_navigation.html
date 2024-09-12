@@ -3,41 +3,56 @@
     <div class="nav toggle" style="padding-top: 0;">
       <a id="menu_toggle" onclick="show_sidebar()"><i class="fa fa-bars"></i></a>
     </div>
-    <img src="/static/images/logo-cujae.png" alt="" style="width: 3rem; margin-top: 0.7rem; float: left;">
-    <div id="logo-tob-bar" style="margin-left: 1rem; padding-top: 1.5rem; float: left; display: none;"><i class="fa fa-tree"></i> <span id="app-name"></span> <i class="fa fa-tree"></i></div>
-    <ul class="nav navbar-nav navbar-right" style="width: 8px; margin: 5px; float: left; margin-left: 2rem;">
-      <li class="my-3" style="text-align: end; margin-right: 2rem;">
-          <div class="dropdown" id="language">
-            <a id="lang-selector-text" href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false" onclick="show_toggle_lang()">
-              en
-            </a>
-            <div style="position: absolute; margin-top: 15px; width: 100%; display: flex;  justify-content: flex-end;">
-              <ul class="pull-right" style="width: min-content; line-height: 14px; display: none; background-color: white; border-radius: 3px; padding: 0.5rem;" id="dropdown-language-on-top-bar">
-                <li onclick="changeLanguage('es')" style="padding: 6px; cursor: pointer;">es</li>
-                <li onclick="changeLanguage('en')" style="padding: 6px; cursor: pointer;">en</li>
-                <li onclick="changeLanguage('ru')" style="padding: 6px; cursor: pointer;">ru</li>
+    <div id="logo-tob-bar" style="margin-left: 1rem; padding-top: 1.5rem; float: left; display: none;"><i
+            class="fa fa-tree"></i> <span id="app-name"></span> <i class="fa fa-tree"></i></div>
+    <ul class="nav navbar-nav navbar-right" style="width: min-content; margin: 4px; float: right;">
+      <li class="my-3" style="text-align: end; margin-right: 1rem;">
+        <div class="dropdown" id="language">
+          <a id="lang-selector-text" href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
+             aria-expanded="false" onclick="show_toggle_lang()">
+          </a>
+          <div style="position: absolute; margin-top: 15px; width: 100%; display: flex;  justify-content: flex-end;">
+            <ul class="pull-right"
+                style="width: min-content; line-height: 14px; display: none; background-color: white; border-radius: 3px; padding: 0; border: 1px solid #D9DEE4;"
+                id="dropdown-language-on-top-bar">
+              <li class="language-label" onclick="changeLanguage('es')">
+                <input type="radio" id="es" name="currentLanguage" class="currentLanguage"/>
+                <label for="es">Español</label>
+              </li>
+              <li class="language-label" onclick="changeLanguage('en')">
+                <input type="radio" id="en" name="currentLanguage" class="currentLanguage"/>
+                <label for="en">English</label>
+              </li>
+              <li class="language-label" onclick="changeLanguage('ru')">
+                <input type="radio" id="ru" name="currentLanguage" class="currentLanguage"/>
+                <label for="ru">Русский</label>
+              </li>
             </ul>
-            </div>
           </div>
+        </div>
       </li>
     </ul>
-    <ul class="nav navbar-nav navbar-right" style="width: 30%;">
-      <li class="my-3" style="text-align: end; margin-right: 2rem;">
-          <div class="dropdown" id="configuration">
-            <a href="#" class="user-profile dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false" onclick="show_toggle()">
-              <img src="/static/images/img.jpg" alt="">{{ current_user.username }}
-            </a>
-            <div style="position: absolute; margin-top: 15px; width: 100%; display: flex;  justify-content: flex-end;">
-              <ul class="dropdown-menu dropdown-usermenu pull-right" style="width: max-content; line-height: 24px;" id="dropdown-content-on-top-bar">
-                {% if Is_admin %}
-                  <li><a href="/setting/manage_users" id="top-bar-config-adm"></a></li>
-                {% else %}
-                  <li><a href="/setting/change_password" id="top-bar-config-usr"></a></li>
-                {% endif %}
-              <li><a href="/logout"><i class="fa fa-sign-out pull-right"></i> <span id="top-bar-exit"></span></a></li>
+    <img src="/static/images/logo-cujae.png" alt="" style="width: 4rem; margin: 0.2rem 44vw; position: absolute; left: 0;">
+
+    <ul class="nav navbar-nav navbar-right" style="width: min-content;">
+      <li class="my-3" style="text-align: end; margin-right: 1rem;">
+        <div class="dropdown" id="configuration">
+          <a href="#" class="user-profile dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false"
+             onclick="show_toggle()">
+            <img src="/static/images/img.jpg" alt="">{{ current_user.username }}
+          </a>
+          <div style="position: absolute; margin-top: 15px; display: flex;  justify-content: flex-end;">
+            <ul class="dropdown-menu dropdown-usermenu pull-right" style="width: min-content; line-height: 24px;"
+                id="dropdown-content-on-top-bar">
+              {% if Is_admin %}
+                <li><a href="/setting/manage_users" class="config-label"><span id="top-bar-config-adm"></span> <i class="fa fa-cogs pull-right"></i></a></li>
+              {% else %}
+                <li><a href="/setting/change_password" class="config-label"><span id="top-bar-config-usr"></span> <i class="fa fa-cog pull-right"></i></a></li>
+              {% endif %}
+              <li><a href="/logout" class="config-label"><span id="top-bar-exit"></span> <i class="fa fa-sign-out pull-right"></i></a></li>
             </ul>
-            </div>
           </div>
+        </div>
       </li>
     </ul>
   </nav>
@@ -96,14 +111,23 @@
     }
 
     (async() => {
-      window.document.getElementById('lang-selector-text').innerHTML = await t(["lang"]);
-      window.document.getElementById('app-name').innerHTML = await t(["app-name"]);
+
+      const currentLanguage = await t(["lang"]);
+      for (const language of document.getElementsByClassName('currentLanguage')) {
+        console.log('language: ', language.id);
+        if (language.id === currentLanguage) {
+          language.checked = true;
+        }
+      }
+      document.getElementById('lang-selector-text').innerHTML = currentLanguage;
+      const app_name = await t(["app-name"]);
+      document.getElementById('app-name').innerHTML = typeof app_name !== 'object' ? app_name : 'FET';
       const topBarTranslations = await t(["top-bar"]);
-      const admConfig = window.document.getElementById('top-bar-config-adm');
+      const admConfig = document.getElementById('top-bar-config-adm');
       if (admConfig) admConfig.innerHTML = topBarTranslations["config"] ?? 'top-bar.config';
-      const usrConfig = window.document.getElementById('top-bar-config-usr');
+      const usrConfig = document.getElementById('top-bar-config-usr');
       if (usrConfig) usrConfig.innerHTML = topBarTranslations["config"] ?? 'top-bar.config';
-      window.document.getElementById('top-bar-exit').innerHTML = topBarTranslations["exit"] ?? 'top-bar.exit';
+      document.getElementById('top-bar-exit').innerHTML = topBarTranslations["exit"] ?? 'top-bar.exit';
     })();
   </script>
 </div>

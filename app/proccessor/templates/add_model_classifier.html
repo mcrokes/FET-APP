@@ -35,31 +35,30 @@
                         <!-- Name -->
                         <div class="col col-lg-6 custom-col">
                           <span style="color: red;" class="required-field-info"></span>
-                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" placeholder="{{form.name.label.text}}" type="text" value="{{form.name.default}}"/>
+                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" type="text" value="{{form.name.default}}"/>
                         </div>
                         {% if type == 'add' %}
                           <!-- Model -->
                           <div class="col col-lg-6 custom-col">
                             <span style="color: red;" class="required-field-info"></span>
-                            <input accept="{{form.model.render_kw.accept}}" class="form-control custom-file-input" id="{{form.model.id}}" name="model" placeholder="{{form.model.label.text}}" type="file">
+                            <input accept="{{form.model.render_kw.accept}}" class="form-control custom-file-input" id="{{form.model.id}}" name="model" type="file">
                             <label class="form-control custom-file-input" for="{{form.model.id}}">
-                              <p id="{{form.model.id}}-holder">{{ form.model.label.text }}</p>
+                              <p id="{{form.model.id}}-holder"></p>
                             </label>
                           </div>
                         {% endif %}
                         <!-- Description -->
                         <div class="col col-lg-6 custom-col">
                           <span style="color: green;" class="optional-field-info"></span>
-                          <textarea class="form-control custom-input" id="{{form.description.id}}" name="description" placeholder="{{form.description.label.text}}">{{form.description.default}}</textarea>
+                          <textarea class="form-control custom-input" id="{{form.description.id}}" name="description">{{form.description.default}}</textarea>
                         </div>
                         {% if type == 'add' %}
                           <!-- Dataset -->
                           <div class="col col-lg-6 custom-col">
                             <span style="color: red;" class="required-field-info"></span>
-                            <input accept="{{form.dataset.render_kw.accept}}"  class="form-control custom-file-input" id="{{form.dataset.id}}" name="dataset"
-                                    placeholder="{{form.dataset.label.text}}" type="file" />
+                            <input accept="{{form.dataset.render_kw.accept}}"  class="form-control custom-file-input" id="{{form.dataset.id}}" name="dataset" type="file" />
                             <label class="form-control custom-file-input" for="{{form.dataset.id}}">
-                              <p id="{{form.dataset.id}}-holder">{{ form.dataset.label.text }}</p>
+                              <p id="{{form.dataset.id}}-holder"></p>
                             </label>
                           </div>
                         {% endif %}
@@ -148,55 +147,4 @@
   {{ super() }}
   <script src="{{ url_for('static', filename='build/js/add_model.js') }}"></script>
   <script src="{{ url_for('static', filename='build/js/add_model_classifier.js') }}"></script>
-
-  <script>
-    (async()=>{
-      const classifierTranslations = await t(["add-classifier"]);
-
-      document.getElementById('classifier-title').innerHTML = classifierTranslations['title'] ?? 'classifier.title';
-
-      const progressTranslations = classifierTranslations['progress'] ?? {};
-      if (window.document.getElementById('progress-message')) window.document.getElementById('progress-message').innerHTML = progressTranslations['message-1'] ?? 'classifier.progress.message-1';
-
-      const requiredInfo = window.document.getElementsByClassName('required-field-info');
-      if(requiredInfo){
-        for (const info of requiredInfo) {
-          info.innerHTML = classifierTranslations['required'] ?? 'classifier.required';
-        }
-        const optionalInfo = window.document.getElementsByClassName('optional-field-info');
-        for (const info of optionalInfo) {
-          info.innerHTML = classifierTranslations['optional'] ?? 'classifier.optional';
-        }
-      }
-
-      if (document.getElementById('target-selector-label')) document.getElementById('target-selector-label').innerHTML = classifierTranslations['target-selector'] ?? 'classifier.target-selector';
-      if (document.getElementById('index-selector-label')) document.getElementById('index-selector-label').innerHTML = classifierTranslations['index-selector'] ?? 'classifier.index-selector';
-
-      const descriptionsTranslations = classifierTranslations['descriptions'] ?? {};
-      if (document.getElementById('description-title')) document.getElementById('description-title').innerHTML = descriptionsTranslations['title'] ?? 'classifier.descriptions.title';
-      const qVarsTranslations = classifierTranslations['q-vars'] ?? {};
-      if (document.getElementById('q-vars-title')) document.getElementById('q-vars-title').innerHTML = qVarsTranslations['title'] ?? 'classifier.q-vars.title';
-
-      const descriptionTexts = window.document.getElementsByClassName('description-text');
-      if(descriptionTexts){
-        for (const text of descriptionTexts) {
-          text.placeholder = descriptionsTranslations['placeholder'] ?? 'classifier.descriptions.placeholder';
-        }
-        const qVarsText = window.document.getElementsByClassName('q-vars-text');
-        for (const text of qVarsText) {
-          text.placeholder = `${qVarsTranslations['placeholder'] ?? 'classifier.q-vars.placeholder'}${text.getAttribute('oldValue')}`;
-        }
-      }
-
-
-      if (document.getElementById('classifier-cancel-btn')) document.getElementById('classifier-cancel-btn').innerHTML = classifierTranslations['cancel-btn'] ?? 'classifier.cancel-btn';
-      if (document.getElementById('classifier-create-back-btn')) document.getElementById('classifier-create-back-btn').innerHTML = classifierTranslations['back-btn'] ?? 'classifier.back-btn';
-      if (document.getElementById('classifier-back-btn')) document.getElementById('classifier-back-btn').innerHTML = classifierTranslations['back-btn'] ?? 'classifier.back-btn';
-      if (document.getElementById('classifier-accept-btn')) document.getElementById('classifier-accept-btn').innerHTML = classifierTranslations['accept-btn'] ?? 'classifier.accept-btn';
-      if (document.getElementById('classifier-next-btn')) document.getElementById('classifier-next-btn').innerHTML = classifierTranslations['next-btn'] ?? 'classifier.next-btn';
-      if (document.getElementById('classifier-modify-btn')) document.getElementById('classifier-modify-btn').innerHTML = classifierTranslations['modify-btn'] ?? 'classifier.modify-btn';
-      if (document.getElementById('classifier-create-btn')) document.getElementById('classifier-create-btn').innerHTML = classifierTranslations['create-btn'] ?? 'classifier.create-btn';
-
-    })();
-  </script>
 {% endblock %}

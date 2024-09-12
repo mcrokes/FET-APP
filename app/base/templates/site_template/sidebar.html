@@ -90,7 +90,9 @@
 
     (async() => {
       const sidebarTranslations = await t(["sidebar"]);
-      window.document.getElementById('app-name-sidebar').innerHTML = await t(["app-name"]);
+
+      const app_name = await t(["app-name"]);
+      window.document.getElementById('app-name-sidebar').innerHTML = typeof app_name !== 'object' ? app_name : 'FET';
 
       window.document.getElementById('home-btn').innerHTML = sidebarTranslations["home-btn"] ?? 'sidebar.home-btn';
       window.document.getElementById('home-btn-link').title = sidebarTranslations["home-btn"] ?? 'sidebar.home-btn';

@@ -10,25 +10,26 @@
 }
 
 .linked-button-card {
-	width: 18rem;
+	width: 23rem;
 	text-align: right;
 	margin-top: 1rem;
 	font-size: 20px;
 	font-weight: bold;
 	border-radius: 1rem !important;
 	text-align: center;
-	color: white !important;
+/*	color: white !important;*/
 	background-color: #83dd914a;
-	text-shadow: 1px 1px 10px red, -1px -1px 10px #1400ff, -1px 1px 10px #ff009b, 1px -1px 10px #ebff00;
+/*	text-shadow: 1px 1px 10px red, -1px -1px 10px #1400ff, -1px 1px 10px #ff009b, 1px -1px 10px #ebff00;*/
 	text-transform: uppercase;
 	background-size: 100% 100%;
 	background-repeat: no-repeat;
+	min-width: max-content;
 }
 
 .linked-button-card:hover{
 	border-color: grey;
 	text-shadow: 5px 5px 10px #ffc600, -5px -5px 10px #e600ff, -5px 5px 10px #0032fb, 5px -5px 10px #ff0000;
-
+	color: white !important;
 }
 
 .linked-button-card:active{
@@ -65,11 +66,12 @@
 
 #home-info {
 	color: black;
-	font-weight: bold;
 	background-color: #eeeeee78;
 	padding: 3rem;
 	text-align: initial;
 	border-radius: 4px;
+	line-height: 25px;
+	font-size: larger;
 }
 
 #home-info > h1 {

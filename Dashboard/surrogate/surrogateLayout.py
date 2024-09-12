@@ -8,7 +8,7 @@ from dash.exceptions import PreventUpdate
 from flask_login import current_user
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-from app.API.utils import findTranslationsParent, setText, getTranslations
+from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
 from app.proccessor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
@@ -189,7 +189,7 @@ def surrogateCallbacks(app, furl, isRegressor: bool = False):
         model_id = f.args["model_id"]
 
         # TRANSLATIONS
-        commonTranslations = getTranslations(current_user.langSelection, 'surrogate', 'common')
+        commonTranslations = getDashboardTranslations(current_user.langSelection, 'surrogate', 'common')
         tableTranslations = findTranslationsParent(commonTranslations, 'table')
         tableHeadersTranslations = findTranslationsParent(tableTranslations, 'headers')
 

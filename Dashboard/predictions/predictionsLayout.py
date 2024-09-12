@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from Dashboard.utils import get_target_dropdown
-from app.API.utils import findTranslationsParent, setText, getTranslations
+from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
 from app.proccessor.models import ExplainedModel
 
 from treeinterpreter import treeinterpreter as ti
@@ -319,7 +319,7 @@ def getIndividualPredictionsClassifier(model, class_names, instance, cut_point, 
             x=x,
             marker_color=np.array(sorted_predictions)[:, 1],
         ), go.Scatter(
-            name=setText(treesTranslations, 'lines-title', 'dashboard.predictions.classifier.trees'),
+            name=setText(treesTranslations, 'line-title', 'dashboard.predictions.classifier.trees'),
             x=[1, x[0]] if markers.count("blue") < markers.count("red") else [x[-1], 1],
             y=[cut_point, cut_point],
             mode="lines",
@@ -578,7 +578,7 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
         ):
 
             # TRANSLATIONS
-            commonTranslations = getTranslations(current_user.langSelection, 'predictions', 'common')
+            commonTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'common')
             contributionTranslations = findTranslationsParent(commonTranslations, 'contribution')
 
             # NORMAL FLOW
@@ -650,13 +650,13 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
         model_id = f.args["model_id"]
         try:
             # TRANSLATIONS
-            commonTranslations = getTranslations(current_user.langSelection, 'predictions', 'common')
+            commonTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'common')
 
-            classifierTranslations = getTranslations(current_user.langSelection, 'predictions', 'classifier')
+            classifierTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'classifier')
             classifierTreesTranslations = findTranslationsParent(classifierTranslations, 'trees')
             classifierTreesTooltipTranslations = findTranslationsParent(classifierTreesTranslations, 'tooltip')
 
-            regressorTranslations = getTranslations(current_user.langSelection, 'predictions', 'regressor')
+            regressorTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'regressor')
             regressorTreesTranslations = findTranslationsParent(regressorTranslations, 'trees')
             regressorTreesTooltipTranslations = findTranslationsParent(regressorTreesTranslations, 'tooltip')
 
@@ -771,10 +771,10 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
     def graph_trees_predictions(cl, n, cut_point, positive_class):
         if n or n == 0:
             # TRANSLATIONS
-            classifierTranslations = getTranslations(current_user.langSelection, 'predictions', 'classifier')
+            classifierTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'classifier')
             classifierTreesTranslations = findTranslationsParent(classifierTranslations, 'trees')
 
-            regressorTranslations = getTranslations(current_user.langSelection, 'predictions', 'regressor')
+            regressorTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'regressor')
             regressorTreesTranslations = findTranslationsParent(regressorTranslations, 'trees')
 
             # NORMAL FLOW
@@ -853,14 +853,14 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
     def graph_explainers(cl, n, positive_class):
         if n or n == 0:
             # TRANSLATIONS
-            commonTranslations = getTranslations(current_user.langSelection, 'predictions', 'common')
+            commonTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'common')
             contributionTranslations = findTranslationsParent(commonTranslations, 'contribution')
             contributionHeadersTranslations = findTranslationsParent(contributionTranslations, 'headers')
 
-            classifierTranslations = getTranslations(current_user.langSelection, 'predictions', 'classifier')
+            classifierTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'classifier')
             classifierContributionTranslations = findTranslationsParent(classifierTranslations, 'contribution')
 
-            regressorTranslations = getTranslations(current_user.langSelection, 'predictions', 'regressor')
+            regressorTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'regressor')
             regressorContributionTranslations = findTranslationsParent(regressorTranslations, 'contribution')
 
             # NORMAL FLOW
@@ -1090,7 +1090,7 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
             model_id = f.args["model_id"]
             try:
                 # TRANSLATIONS
-                commonTranslations = getTranslations(current_user.langSelection, 'predictions', 'common')
+                commonTranslations = getDashboardTranslations(current_user.langSelection, 'predictions', 'common')
                 placeholder = setText(commonTranslations, 'instance-selector-placeholder',
                                       'dashboard.predictions.common')
 

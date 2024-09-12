@@ -43,50 +43,55 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-      <div class="col-md-12 col-sm-12 col-xs-12" style="position: initial">
-        <div class="dashboard_graph">
-          <div style="width: 100%; padding: 1rem;">
-            <h2 style="font-weight: bold; margin-bottom: 1.5rem; text-align: center;" id="classifiers-title"></h2>
-            <table id="classifier_data">
-              <thead>
-                <tr>
-                  <th id="classifiers-table-id"></th>
-                  <th id="classifiers-table-name"></th>
-                  <th id="classifiers-table-description"></th>
-                  <th id="classifiers-table-target"></th>
-                  <th id="classifiers-table-options"></th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-          <div class="clearfix"></div>
-          <a href="/processor/add_classifier" style="margin: 3rem;" class="btn btn-success">
-            <i class="fa fa-cubes"></i> <span id="classifiers-add-btn"></span>
-          </a>
-          <button id="open-comparison" style="margin: 3rem;" onclick="redirect('classifier')" class="btn btn-warning" disabled>
-            <i class="fa fa-sitemap"></i> <span id="classifiers-compare-btn"></span>
-          </button>
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12" style="position: initial">
+      <div class="dashboard_graph">
+        <div style="width: 100%; padding: 1rem;">
+          <h2 style="font-weight: bold; margin-bottom: 1.5rem; text-align: center;" id="classifiers-title"></h2>
+          <table id="classifier_data">
+            <thead>
+            <tr>
+              <th id="classifiers-table-id"></th>
+              <th id="classifiers-table-name"></th>
+              <th id="classifiers-table-description"></th>
+              <th id="classifiers-table-target"></th>
+              <th id="classifiers-table-options"></th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="clearfix"></div>
+        <a href="/processor/add_classifier" style="margin: 3rem;" class="btn btn-success">
+          <i class="fa fa-cubes"></i> <span id="classifiers-add-btn"></span>
+        </a>
+        <button id="open-comparison" style="margin: 3rem;" onclick="redirect('classifier')" class="btn btn-warning"
+                disabled>
+          <i class="fa fa-sitemap"></i> <span id="classifiers-compare-btn"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+       aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content .bg-danger">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel"><i class="fa fa-trash"></i> <span
+                  id="classifiers-modal-title"></span></h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="background-color: #dc3535; color: white;" id="classifiers-modal-description"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                  id="classifiers-modal-cancel-btn"></button>
+          <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="deleteModel('classifier')"
+                  id="classifiers-modal-delete-btn"></button>
         </div>
       </div>
     </div>
-    <!-- Modal -->
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content .bg-danger">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="staticBackdropLabel"><i class="fa fa-trash"></i> <span id="classifiers-modal-title"></span></h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body" style="background-color: #dc3535; color: white;" id="classifiers-modal-description"></div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="classifiers-modal-cancel-btn"></button>
-            <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="deleteModel('classifier')" id="classifiers-modal-delete-btn"></button>
-          </div>
-        </div>
-      </div>
-    </div>
+  </div>
 {% endblock %}
 
 {% block javascripts %}
@@ -119,14 +124,18 @@
   </script>
 
   <script>
-    (async () => {
-      let modelForDelete = null;
-      const saveModelId = (id) => {
-        modelForDelete = id;
-        console.log(modelForDelete);
-      }
+    let table;
+    let modelForDelete = null;
+    let selectedModels = []
 
-      let table = $('#classifier_data').DataTable({
+    const comparison_btn = document.getElementById('open-comparison');
+    const saveModelId = (id) => {
+      modelForDelete = id;
+      console.log(modelForDelete);
+    }
+
+    (async () => {
+      table = $('#classifier_data').DataTable({
         ajax: '/INTERNAL_API/classifier/list',
         language: { url: `/static/languages/datatable-${await t(['lang'])}.json` },
         select: {
@@ -147,27 +156,6 @@
           }
         ]
       })
-
-      let selectedModels = []
-      const deleteModel = async (modelType) => {
-        response = await fetch(`/INTERNAL_API/${modelType}/delete`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: modelForDelete,
-        })
-
-        res = await response.json().then((value) => {
-          console.log(value)
-          if (value.status == 200) {
-            table.ajax.reload()
-          }
-          modelForDelete = null;
-        })
-        comparison_btn.disabled = true;
-        selectedModels = []
-      }
-
-      const comparison_btn = document.getElementById('open-comparison');
       table.on('select deselect', function ( e, dt, type, ix ) {
         var selected = dt.rows({selected: true});
         console.log('selected: ', selected[0]);
@@ -188,11 +176,32 @@
           console.log('selectedModels: ', selectedModels);
         }
       })
-      const redirect = (modelType) => {
-        const enlace = document.createElement('a');
-        enlace.href = `/dashboard/${modelType}/comparison?model_1_id=${selectedModels[0]}&model_2_id=${selectedModels[1]}`;
-        enlace.click()
-      }
     })();
+
+
+    const deleteModel = async (modelType) => {
+      response = await fetch(`/INTERNAL_API/${modelType}/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: modelForDelete,
+      })
+
+      res = await response.json().then((value) => {
+        console.log(value)
+        if (value.status == 200) {
+          table.ajax.reload()
+        }
+        modelForDelete = null;
+      })
+      comparison_btn.disabled = true;
+      selectedModels = []
+    }
+    const redirect = (modelType) => {
+      const enlace = document.createElement('a');
+      enlace.href = `/dashboard/${modelType}/comparison?model_1_id=${selectedModels[0]}&model_2_id=${selectedModels[1]}`;
+      enlace.click()
+    }
+
+
   </script>
 {% endblock %}

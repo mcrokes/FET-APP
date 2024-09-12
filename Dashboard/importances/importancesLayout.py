@@ -12,7 +12,7 @@ from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import permutation_importance
 
-from app.API.utils import findTranslationsParent, setText, getTranslations
+from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
 from app.proccessor.model.values import get_target_dropdown
 from app.proccessor.models import ExplainedModel
 
@@ -124,8 +124,8 @@ def importancesCallbacks(app, furl, isRegressor: bool = False):
         model_id = f.args["model_id"]
         try:
             # TRANSLATIONS
-            translationsCommon = getTranslations(current_user.langSelection, 'importance', 'common')
-            translationsClassifier = getTranslations(current_user.langSelection, 'importance', 'classifier')
+            translationsCommon = getDashboardTranslations(current_user.langSelection, 'importance', 'common')
+            translationsClassifier = getDashboardTranslations(current_user.langSelection, 'importance', 'classifier')
             translationsGini = findTranslationsParent(translationsCommon, 'gini')
             translationsPermutation = findTranslationsParent(translationsCommon, 'permutation')
 

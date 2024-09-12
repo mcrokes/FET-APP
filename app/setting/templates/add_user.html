@@ -18,7 +18,7 @@
                       <h1 id="add-user-title"></h1>
                       {% for field in form if field.widget.input_type != 'hidden'  %}
                         <div>
-                          {{ field(class="form-control required", placeholder=field.label.text) }}
+                          {{ field(class="form-control required", placeholder=field.id) }}
                         </div>
                       {% endfor %}
                       <div>
@@ -44,6 +44,10 @@
       const addUserTranslations = await t(["add-user"]);
       window.document.getElementById('add-user-title').innerHTML = addUserTranslations['title'] ?? 'add-user.title';
       window.document.getElementById('add-user-btn').innerHTML = addUserTranslations['btn'] ?? 'add-user.btn';
+      window.document.getElementById('username-create').placeholder = addUserTranslations['username'] ?? 'add-user.username';
+      window.document.getElementById('email-create').placeholder = addUserTranslations['email'] ?? 'add-user.email';
+      window.document.getElementById('pwd-create').placeholder = addUserTranslations['password'] ?? 'add-user.password';
+
     })();
   </script>
 {% endblock javascripts %}

@@ -34,7 +34,6 @@ const setSmallSideBar = (mobile = false) => {
 	sidebarChevronIcon.style.display = 'none'
 	for (const item of sidebarItems) {
 		item.style.display = 'none';
-		console.log('item. ', item);
 	}
 	for (const icon of sidebarIcons) {
 		icon.style.fontSize = '25px';

@@ -13,7 +13,7 @@ from sklearn.inspection import partial_dependence
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 from Dashboard.utils import get_target_dropdown
-from app.API.utils import setText, findTranslationsParent, getTranslations
+from app.API.utils import setText, findTranslationsParent, getDashboardTranslations
 from app.proccessor.model.dataset_interaction_methods import (
     get_y_transformed,
     update_y_pred,
@@ -841,7 +841,7 @@ def metricsCallbacks(app, furl, isRegressor: bool = False):
             model_id = f.args["model_id"]
             try:
                 # TRANSLATIONS
-                regressorTranslations = getTranslations(current_user.langSelection, 'metrics', 'regressor')
+                regressorTranslations = getDashboardTranslations(current_user.langSelection, 'metrics', 'regressor')
                 regressorDependenceTranslations = findTranslationsParent(regressorTranslations, 'partial-dependence')
                 regressorDependenceLabelsTranslations = findTranslationsParent(regressorDependenceTranslations,
                                                                                'labels')
@@ -897,7 +897,7 @@ def metricsCallbacks(app, furl, isRegressor: bool = False):
             model_id = f.args["model_id"]
             try:
                 # TRANSLATIONS
-                regressorTranslations = getTranslations(current_user.langSelection, 'metrics', 'regressor')
+                regressorTranslations = getDashboardTranslations(current_user.langSelection, 'metrics', 'regressor')
                 regressorDependenceTranslations = findTranslationsParent(regressorTranslations, 'partial-dependence')
                 regressorDependenceLabelsTranslations = findTranslationsParent(regressorDependenceTranslations,
                                                                                'labels')
@@ -991,7 +991,7 @@ def metricsCallbacks(app, furl, isRegressor: bool = False):
             model_id = f.args["model_id"]
             try:
                 # TRANSLATIONS
-                regressorTranslations = getTranslations(current_user.langSelection, 'metrics', 'regressor')
+                regressorTranslations = getDashboardTranslations(current_user.langSelection, 'metrics', 'regressor')
                 regressorParametersTranslations = findTranslationsParent(regressorTranslations, 'parameters')
                 regressorPredRealTranslations = findTranslationsParent(regressorTranslations, 'prediction-real')
                 regressorPredRealLabelsTranslations = findTranslationsParent(regressorPredRealTranslations, 'labels')
@@ -1074,7 +1074,7 @@ def metricsCallbacks(app, furl, isRegressor: bool = False):
             model_id = f.args["model_id"]
             try:
                 # TRANSLATIONS
-                classifierTranslations = getTranslations(current_user.langSelection, 'metrics', 'classifier')
+                classifierTranslations = getDashboardTranslations(current_user.langSelection, 'metrics', 'classifier')
                 classifierMatrixTranslations = findTranslationsParent(classifierTranslations, 'matrix')
                 classifierMatrixParametersTranslations = findTranslationsParent(classifierMatrixTranslations,
                                                                                 'parameters')
@@ -1196,7 +1196,7 @@ def metricsCallbacks(app, furl, isRegressor: bool = False):
             model_id = f.args["model_id"]
             try:
                 # TRANSLATIONS
-                classifierTranslations = getTranslations(current_user.langSelection, 'metrics', 'classifier')
+                classifierTranslations = getDashboardTranslations(current_user.langSelection, 'metrics', 'classifier')
                 classifierRocTranslations = findTranslationsParent(classifierTranslations, 'roc')
 
                 # NORMAL FLOW

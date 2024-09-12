@@ -23,11 +23,11 @@
               <section class="login_content">
                 <form data-parsley-validate method="post">
                   <h1 style="font-weight: bold;" id="login-title"></h1>
-                  {% for field in login_form if field.widget.input_type != 'hidden' %}
-                  <div>
-                    {{ field(class="form-control required", placeholder=field.label.text) }}
-                  </div>
-                  {% endfor %}
+                    {% for field in login_form if field.widget.input_type != 'hidden' %}
+                      <div>
+                        {{ field(class="form-control required", id=field.id) }}
+                      </div>
+                    {% endfor %}
                   <div>
                     <button type="submit" class="btn btn-outline-success submit" name="login" id="login-btn"></button>
                   </div>
@@ -49,6 +49,8 @@
         const loginTranslations = await t(["login"]);
         window.document.getElementById('login-title').innerHTML = loginTranslations['title'] ?? 'login.title';
         window.document.getElementById('login-btn').innerHTML = loginTranslations['btn'] ?? 'login.btn';
+        window.document.getElementById('username-login').placeholder = loginTranslations['username'] ?? 'login.username';
+        window.document.getElementById('pwd-login').placeholder = loginTranslations['pwd'] ?? 'login.pwd';
       })();
     </script>
   {% endblock javascripts %}

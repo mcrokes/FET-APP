@@ -123,17 +123,21 @@ def find_translations(current_language, keys):
 
 @blueprint.route("/getTranslation", methods=["GET", "POST"])
 def get_translation():
-    keys = request.data.decode().split(',')
+    requestData = json.loads(request.data.decode())
+    print('requestData: ', requestData)
+    keys = requestData["keys"]
+    lang = requestData["lang"]
     isLogged = not isinstance(current_user, AnonymousUserMixin)
+
+    default: dict = {'langSelection': lang if lang in ["es", "en", "ru"] else "es"}
     if isLogged:
         user: User = User.query.filter(User.id == current_user.id).first()
+        current_language = user.langSelection if user.langSelection else default["langSelection"]
     else:
-        user: dict = {'langSelection': 'es'}
+        current_language = default["langSelection"]
+
     # print('keys: ', keys)
     # Construir la ruta del archivo
-
-    current_language = user.langSelection if isLogged else user["langSelection"]
-
     return find_translations(current_language, keys)
 
 

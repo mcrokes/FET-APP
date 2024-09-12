@@ -3,25 +3,42 @@
   "app-name": "FET",
   "login": {
     "title": "Bienvenido",
-    "btn": "Acceder"
+    "btn": "Acceder",
+    "username": "Nombre de Usuario",
+    "pwd": "Contraseña"
   },
   "add-user": {
     "title": "Crear Usuario",
-    "btn": "Crear"
+    "btn": "Crear",
+    "username": "Nombre de Usuario",
+    "email": "Email",
+    "password": "Contraseña",
+    "user-exist-message": "El nombre de usuario ya existe",
+    "email-exist-message": "Este email ya existe",
+    "successful-message": "Usuario añadido con éxito !",
+    "missing-data-message": "Debe Insertar Todos los Datos"
   },
   "delete-user": {
     "title": "Eliminar Usuario",
     "back-btn": "Atrás",
-    "delete-btn": "Eliminar"
+    "delete-btn": "Eliminar",
+    "username": "Nombre de Usuario"
   },
   "edit-user": {
     "title": "Nueva Contraseña",
     "back-btn": "Atrás",
-    "check-btn": "Confirmar"
+    "check-btn": "Confirmar",
+    "password": "Contraseña"
   },
   "change-pwd": {
     "title": "Cambiar Contraseña",
-    "btn": "Cambiar"
+    "btn": "Cambiar",
+    "origin-password": "Contraseña Original",
+    "new-password": "Nueva Contraseña",
+    "new-password2": "Repite la Nueva Contraseña",
+    "successful-message": "Contraseña cambiada con éxito !",
+    "mismatch-pwd-message": "Las nuevas Contraseñas no son iguales !",
+    "wrong-pwd-message": "Error en la Contraseña Original !"
   },
   "users": {
     "title": "USUARIOS",
@@ -156,18 +173,27 @@
     "cancel-btn": "Cancelar",
     "back-btn": "Atrás",
     "progress": {
-      "message-1": "Creating Dataset Distributions",
-      "message-2": "Creating Dataset Distributions",
-      "message-3": "Creating Dataset Distributions",
-      "message-4": "Creating Dataset Distributions"
+      "message-1": "Creando distribuciones del conjunto de datos...",
+      "message-2": "Sincronizando datos...",
+      "message-3": "Generando modelo base...",
+      "message-4": "Cargando metricas del conjunto de datos...",
+      "message-5": "Creando modelo subrogado datos...",
+      "message-6": "Creando modelo subrogado datos (profundidad: ",
+      "message-7": "Guardando la base de datos del modelo...",
+      "message-8": "Completado !!!"
     },
+    "name": "Inserte el Nombre del Modelo",
+    "model": "Inserte el Modelo de Clasificación",
+    "description": "Añada una descripción para Modelo Estudiado",
+    "dataset": "Inserte el set de datos de entrenamiento",
     "required": "*Requerido",
     "optional": "Opcional",
     "target-selector": "Columna de Clasificación",
     "index-selector": "Columna sobrante como índice",
     "descriptions": {
       "title": "Descripción de variables",
-      "placeholder": "Descripción..."
+      "placeholder": "Descripción...",
+      "no-description": "Sin descripción"
     },
     "q-vars": {
       "title": "Valores de las posibles variables cualitativas.",
@@ -183,19 +209,70 @@
     "cancel-btn": "Cancelar",
     "back-btn": "Atrás",
     "progress": {
-      "message-1": "Creating Dataset Distributions",
-      "message-2": "Creating Dataset Distributions",
-      "message-3": "Creating Dataset Distributions",
-      "message-4": "Creating Dataset Distributions"
+      "message-1": "Creando distribuciones del conjunto de datos...",
+      "message-2": "Sincronizando datos...",
+      "message-3": "Generando modelo base...",
+      "message-4": "Cargando metricas del conjunto de datos...",
+      "message-5": "Creando modelo subrogado datos...",
+      "message-6": "Creando modelo subrogado datos (profundidad: ",
+      "message-7": "Guardando la base de datos del modelo...",
+      "message-8": "Completado !!!"
     },
+    "name": "Inserte el Nombre del Modelo",
+    "model": "Inserte el Modelo de Regresión",
+    "description": "Añada una descripción para Modelo Estudiado",
+    "dataset": "Inserte el set de datos de entrenamiento",
     "required": "*Requerido",
     "optional": "Opcional",
     "unit": "Unidad de Medida",
+    "units": [
+      {
+        "id": "",
+        "text": "Ninguna"
+      },
+      {
+        "id": "$",
+        "text": "$"
+      },
+      {
+        "id": "%",
+        "text": "%"
+      },
+      {
+        "id": "Ltr",
+        "text": "Ltr"
+      },
+      {
+        "id": "g",
+        "text": "g"
+      },
+      {
+        "id": "kg",
+        "text": "kg"
+      },
+      {
+        "id": "cm",
+        "text": "cm"
+      },
+      {
+        "id": "dm",
+        "text": "dm"
+      },
+      {
+        "id": "m",
+        "text": "m"
+      },
+      {
+        "id": "km",
+        "text": "km"
+      }
+    ],
     "target-selector": "Columna Objetivo",
     "index-selector": "Columna sobrante como índice",
     "descriptions": {
       "title": "Descripción de variables",
-      "placeholder": "Descripción..."
+      "placeholder": "Descripción...",
+      "no-description": "Sin descripción"
     },
     "q-vars": {
       "title": "Valores de las posibles variables cualitativas.",
@@ -306,8 +383,6 @@
       }
     },
     "metrics": {
-      "common": {
-      },
       "classifier": {
         "cutoff": "Punto de Corte",
         "cutoff-tooltip": "Punto porcentual en el que el modelo decide clasificar una clase como verdadera.",

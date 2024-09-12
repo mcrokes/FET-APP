@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from flask_login import current_user
 
-from app.API.utils import setText, findTranslationsParent, getTranslations
+from app.API.utils import setText, findTranslationsParent, getDashboardTranslations
 from app.proccessor.models import ExplainedModel
 
 
@@ -257,7 +257,7 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
         model_id = f.args["model_id"]
         try:
             # TRANSLATIONS
-            translationsCommon = getTranslations(current_user.langSelection, 'data', 'common')
+            translationsCommon = getDashboardTranslations(current_user.langSelection, 'data', 'common')
             translationsDistributions = findTranslationsParent(translationsCommon, 'distributions')
             legendTranslations = findTranslationsParent(translationsDistributions, 'legend')
             axisTranslations = findTranslationsParent(translationsDistributions, 'labels')
@@ -309,7 +309,7 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
         model_id = f.args["model_id"]
         try:
             # TRANSLATIONS
-            translationsCommon = getTranslations(current_user.langSelection, 'data', 'common')
+            translationsCommon = getDashboardTranslations(current_user.langSelection, 'data', 'common')
             translationsDistributions = findTranslationsParent(translationsCommon, 'distributions')
             legendTranslations = findTranslationsParent(translationsDistributions, 'legend')
             axisTranslations = findTranslationsParent(translationsDistributions, 'labels')

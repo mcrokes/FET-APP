@@ -35,31 +35,30 @@
                         <!-- Name -->
                         <div class="col col-lg-6 custom-col">
                           <span style="color: red;" class="required-field-info"></span>
-                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" placeholder="{{form.name.label.text}}" type="text" value="{{form.name.default}}"/>
+                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" type="text" value="{{form.name.default}}"/>
                         </div>
                         {% if type == 'add' %}
                           <!-- Model -->
                           <div class="col col-lg-6 custom-col">
                             <span style="color: red;" class="required-field-info"></span>
-                            <input accept="{{form.model.render_kw.accept}}" class="form-control custom-file-input" id="{{form.model.id}}" name="model" placeholder="{{form.model.label.text}}" type="file">
+                            <input accept="{{form.model.render_kw.accept}}" class="form-control custom-file-input" id="{{form.model.id}}" name="model" type="file">
                             <label class="form-control custom-file-input" for="{{form.model.id}}">
-                              <p id="{{form.model.id}}-holder">{{ form.model.label.text }}</p>
+                              <p id="{{form.model.id}}-holder"></p>
                             </label>
                           </div>
                         {% endif %}
                         <!-- Description -->
                         <div class="col col-lg-6 custom-col">
                           <span style="color: green;" class="optional-field-info"></span>
-                          <textarea class="form-control custom-input" id="{{form.description.id}}" name="description" placeholder="{{form.description.label.text}}">{{form.description.default}}</textarea>
+                          <textarea class="form-control custom-input" id="{{form.description.id}}" name="description">{{form.description.default}}</textarea>
                         </div>
                         {% if type == 'add' %}
                           <!-- Dataset -->
                           <div class="col col-lg-6 custom-col">
                             <span style="color: red;" class="required-field-info"></span>
-                            <input accept="{{form.dataset.render_kw.accept}}"  class="form-control custom-file-input" id="{{form.dataset.id}}" name="dataset"
-                                    placeholder="{{form.dataset.label.text}}" type="file" />
+                            <input accept="{{form.dataset.render_kw.accept}}" class="form-control custom-file-input" id="{{form.dataset.id}}" name="dataset" type="file" />
                             <label class="form-control custom-file-input" for="{{form.dataset.id}}">
-                              <p id="{{form.dataset.id}}-holder">{{ form.dataset.label.text }}</p>
+                              <p id="{{form.dataset.id}}-holder"></p>
                             </label>
                           </div>
                         {% endif %}
@@ -158,57 +157,4 @@
   {{ super() }}
   <script src="{{ url_for('static', filename='build/js/add_model.js') }}"></script>
   <script src="{{ url_for('static', filename='build/js/add_model_regressor.js') }}"></script>
-
-  <script>
-    (async()=>{
-      const regressorTranslations = await t(["add-regressor"]);
-
-      document.getElementById('regressor-title').innerHTML = regressorTranslations['title'] ?? 'regressor.title';
-
-      const progressTranslations = regressorTranslations['progress'] ?? {};
-      if (window.document.getElementById('progress-message')) window.document.getElementById('progress-message').innerHTML = progressTranslations['message-1'] ?? 'regressor.progress.message-1';
-
-      const requiredInfo = window.document.getElementsByClassName('required-field-info');
-      if(requiredInfo){
-        for (const info of requiredInfo) {
-          info.innerHTML = regressorTranslations['required'] ?? 'regressor.required';
-        }
-        const optionalInfo = window.document.getElementsByClassName('optional-field-info');
-        for (const info of optionalInfo) {
-          info.innerHTML = regressorTranslations['optional'] ?? 'regressor.optional';
-        }
-      }
-
-      if (document.getElementById('unit-selector-label')) document.getElementById('unit-selector-label').innerHTML = regressorTranslations['unit'] ?? 'regressor.unit';
-
-      if (document.getElementById('target-selector-label')) document.getElementById('target-selector-label').innerHTML = regressorTranslations['target-selector'] ?? 'regressor.target-selector';
-      if (document.getElementById('index-selector-label')) document.getElementById('index-selector-label').innerHTML = regressorTranslations['index-selector'] ?? 'regressor.index-selector';
-
-      const descriptionsTranslations = regressorTranslations['descriptions'] ?? {};
-      if (document.getElementById('description-title')) document.getElementById('description-title').innerHTML = descriptionsTranslations['title'] ?? 'regressor.descriptions.title';
-      const qVarsTranslations = regressorTranslations['q-vars'] ?? {};
-      if (document.getElementById('q-vars-title')) document.getElementById('q-vars-title').innerHTML = qVarsTranslations['title'] ?? 'regressor.q-vars.title';
-
-      const descriptionTexts = window.document.getElementsByClassName('description-text');
-      if(descriptionTexts){
-        for (const text of descriptionTexts) {
-          text.placeholder = descriptionsTranslations['placeholder'] ?? 'regressor.descriptions.placeholder';
-        }
-        const qVarsText = window.document.getElementsByClassName('q-vars-text');
-        for (const text of qVarsText) {
-          text.placeholder = `${qVarsTranslations['placeholder'] ?? 'regressor.q-vars.placeholder'}${text.getAttribute('oldValue')}`;
-        }
-      }
-
-
-      if (document.getElementById('regressor-cancel-btn')) document.getElementById('regressor-cancel-btn').innerHTML = regressorTranslations['cancel-btn'] ?? 'regressor.cancel-btn';
-      if (document.getElementById('regressor-create-back-btn')) document.getElementById('regressor-create-back-btn').innerHTML = regressorTranslations['back-btn'] ?? 'regressor.back-btn';
-      if (document.getElementById('regressor-back-btn')) document.getElementById('regressor-back-btn').innerHTML = regressorTranslations['back-btn'] ?? 'regressor.back-btn';
-      if (document.getElementById('regressor-accept-btn')) document.getElementById('regressor-accept-btn').innerHTML = regressorTranslations['accept-btn'] ?? 'regressor.accept-btn';
-      if (document.getElementById('regressor-next-btn')) document.getElementById('regressor-next-btn').innerHTML = regressorTranslations['next-btn'] ?? 'regressor.next-btn';
-      if (document.getElementById('regressor-modify-btn')) document.getElementById('regressor-modify-btn').innerHTML = regressorTranslations['modify-btn'] ?? 'regressor.modify-btn';
-      if (document.getElementById('regressor-create-btn')) document.getElementById('regressor-create-btn').innerHTML = regressorTranslations['create-btn'] ?? 'regressor.create-btn';
-
-    })();
-  </script>
 {% endblock %}
