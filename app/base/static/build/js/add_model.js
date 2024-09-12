@@ -32,13 +32,45 @@ const getModelsList = async (model_type) => {
   })
 }
 
-const isNameValid = () => editedModelName === model_name_field.value || !models_list.includes(model_name_field.value);
+const isNameValid = () => {
+  const validName = editedModelName === model_name_field.value || !models_list.includes(model_name_field.value);
+  document.getElementById('not-available-name').style.display = validName ? 'none' : '';
+  return validName;
+};
 
-const verify_inputs = (isOnModelCreation = false) => {
+const classifierModel = document.getElementById('not-classifier-model');
+const regressorModel = document.getElementById('not-regressor-model');
+const isModelValid = () => {
+  let validModel = false;
+  if (classifierModel) {
+    // validModel = await evaluateModelType('classifier');
+    classifierModel.style.display = validModel ? 'none' : '';
+  } else {
+    // validModel = await evaluateModelType('regressor');
+    regressorModel.style.display = validModel ? 'none' : '';
+  }
+  return validModel;
+};
+
+const isDatasetValid = () => {
+  let validDataset = false;
+  const datasetField = document.getElementById('not-compatible-dataset')
+
+  if (classifierModel) {
+    // validModel = await evaluateDatast(classifierModel, datasetField);
+    datasetField.style.display = validDataset ? 'none' : '';
+  } else {
+    // validModel = await evaluateDatast(regressorModel, datasetField);
+    datasetField.style.display = validDataset ? 'none' : '';
+  }
+  return validDataset;
+};
+
+const verify_inputs = async (isOnModelCreation = false) => {
   if (isOnModelCreation) {
     add_button.disabled = true;
-    add_button.classList.remove("btn-success");
-    add_button.classList.add("btn-danger");
+    add_button.classList.add("btn-success");
+    add_button.classList.remove("btn-danger");
     cancel_button.style.display = '';
     cancel_button.disabled = true;
   } else if (
@@ -47,7 +79,7 @@ const verify_inputs = (isOnModelCreation = false) => {
       (
         (model_data_set_field == null && model_name_field.value) ||
         (model_name_field.value && model_field.value && model_data_set_field.value)
-      ) && isNameValid()
+      ) && isNameValid() && await isModelValid() && await isDatasetValid()
     )
   ) {
     add_button.disabled = false
@@ -63,10 +95,12 @@ const verify_inputs = (isOnModelCreation = false) => {
     console.log('DEACTIVATED');
   }
   if (model_data_set_field && model_data_set_field.value) {
+    await isDatasetValid()
     model_data_set_field_holder.innerHTML = model_data_set_field.value;
     model_data_set_field_holder.style.color = 'black';
   }
   if (model_field && model_field.value) {
+    await isModelValid()
     model_field_holder.innerHTML = model_field.value;
     model_field_holder.style.color = 'black';
   }
@@ -84,9 +118,9 @@ const initial_check = async (model_type) => {
   }
 }
 
-const is_first_page = () => {
+const is_first_page = async () => {
   if (model_id == null || (model_name_field !== null && model_id.dataset.status == 'Create')) {
-    verify_inputs();
+    await verify_inputs();
   }
 }
 
