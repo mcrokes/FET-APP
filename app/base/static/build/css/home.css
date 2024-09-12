@@ -46,14 +46,19 @@
 
 #home-tree_img {
 	width: 100%;
-	text-align: center;
+	display: flex;
+  flex-direction: row-reverse;
+  align-items: end;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 #home-tree_img > img {
 	max-width: 500px;
+	width: 100%;
 	margin: auto;
 	margin-top: 2rem;
-	width: 90%;
+	margin-bottom: -4rem;
 }
 
 #model-buttons {
