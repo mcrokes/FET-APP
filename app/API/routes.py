@@ -2,6 +2,10 @@ import json
 import os
 from ctypes import Array
 
+import joblib
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
 from app.proccessor.models import ExplainedClassifierModel, ExplainedRegressorModel, ExplainedModel
 from app.proccessor.models import ModelForProccess
 from . import blueprint
@@ -121,10 +125,10 @@ def find_translations(current_language, keys):
 
     return {"text": text}
 
+
 @blueprint.route("/getTranslation", methods=["GET", "POST"])
 def get_translation():
     requestData = json.loads(request.data.decode())
-    print('requestData: ', requestData)
     keys = requestData["keys"]
     lang = requestData["lang"]
     isLogged = not isinstance(current_user, AnonymousUserMixin)
@@ -141,8 +145,6 @@ def get_translation():
     return find_translations(current_language, keys)
 
 
-
-
 @blueprint.route("/changeLanguage", methods=["GET", "POST"])
 @login_required
 def change_language():
@@ -157,3 +159,42 @@ def change_language():
         user.langSelection = 'es'
         user.db_commit()
         return {"status": "reset"}
+
+
+@blueprint.route("/verify_model", methods=["GET", "POST"])
+@login_required
+def verify_model():
+    formModel = request.files['model']
+    modelType = request.form['model_type']
+    is_valid = False
+    try:
+        model: RandomForestClassifier | RandomForestRegressor = joblib.load(formModel)
+        if modelType == 'classifier' and isinstance(model, RandomForestClassifier):
+            is_valid = True
+        elif modelType == 'regressor' and isinstance(model, RandomForestRegressor):
+            is_valid = True
+        print('model: ', isinstance(model, RandomForestClassifier))
+    except Exception as e:
+        print('Error loading model: ', e)
+    return {"is_valid": is_valid}
+
+
+@blueprint.route("/verify_dataset", methods=["GET", "POST"])
+@login_required
+def verify_dataset():
+    formModel = request.files['model']
+    datasetModel = request.files['dataset']
+    is_valid = False
+    try:
+        model: RandomForestClassifier | RandomForestRegressor = joblib.load(formModel)
+        try:
+            training_df = pd.read_csv(datasetModel)
+        except:  # noqa: E722
+            training_df = pd.read_excel(datasetModel)
+
+        if all(x in list(training_df.columns) for x in model.feature_names_in_) and len(list(model.feature_names_in_)) + 2 >= len(
+                list(training_df.columns)):
+            is_valid = True
+    except Exception as e:
+        print('Error loading dataset: ', e)
+    return {"is_valid": is_valid}

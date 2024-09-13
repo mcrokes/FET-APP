@@ -29,7 +29,8 @@ import joblib
 from ..API.utils import getLocalTranslations, findTranslationsParent, setText
 
 
-def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "Regressor"], modelId, progressTranslations):
+def thread_function(model_id, app, user_id, model_type: Literal["Classifier", "Regressor"], modelId,
+                    progressTranslations):
     with app:
         db_model: ModelForProccess = ModelForProccess.query.filter(
             ModelForProccess.id == model_id
@@ -361,16 +362,20 @@ def save_classifier(modelId: int = 0):
                     except:  # noqa: E722
                         training_df = pd.read_excel(request.files["dataset"])
 
-                db_model = ModelForProccess(
-                    **{
-                        "name": name,
-                        "description": description,
-                        "model": model,
-                        "dataset": training_df,
-                    }
-                )
-                db_model.user = User.query.filter(User.id == current_user.id).first()
-                db_model.add_to_db()
+                db_model: ModelForProccess = ModelForProccess.query.filter(
+                    ModelForProccess.user_id == current_user.id
+                ).first()
+                if not db_model:
+                    db_model = ModelForProccess(
+                        **{
+                            "name": name,
+                            "description": description,
+                            "model": model,
+                            "dataset": training_df,
+                        }
+                    )
+                    db_model.user = User.query.filter(User.id == current_user.id).first()
+                    db_model.add_to_db()
             status = "Second"
             possible_targets = list(
                 set(db_model.getElement("dataset").columns)
@@ -551,7 +556,8 @@ def save_classifier(modelId: int = 0):
 
         x = threading.Thread(
             target=thread_function,
-            args=(db_model.id, current_app.app_context(), user_id, "Classifier", modelId, progressClassifierTranslations),
+            args=(
+                db_model.id, current_app.app_context(), user_id, "Classifier", modelId, progressClassifierTranslations),
         )
         x.start()
         return render_template(
@@ -633,17 +639,21 @@ def save_regressor(modelId: int = 0):
                     except:  # noqa: E722
                         training_df = pd.read_excel(request.files["dataset"])
 
-                db_model = ModelForProccess(
-                    **{
-                        "name": name,
-                        "description": description,
-                        "model": model,
-                        "dataset": training_df,
-                        "unit": unit,
-                    }
-                )
-                db_model.user = User.query.filter(User.id == current_user.id).first()
-                db_model.add_to_db()
+                db_model: ModelForProccess = ModelForProccess.query.filter(
+                    ModelForProccess.user_id == current_user.id
+                ).first()
+                if not db_model:
+                    db_model = ModelForProccess(
+                        **{
+                            "name": name,
+                            "description": description,
+                            "model": model,
+                            "dataset": training_df,
+                            "unit": unit,
+                        }
+                    )
+                    db_model.user = User.query.filter(User.id == current_user.id).first()
+                    db_model.add_to_db()
             status = "Second"
             possible_targets = list(
                 set(db_model.getElement("dataset").columns)

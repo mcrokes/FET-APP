@@ -38,29 +38,66 @@ const isNameValid = () => {
   return validName;
 };
 
+const evaluateModelType = async(model_type) => {
+  console.log('model: ', model_field.files[0]);
+  const formData = new FormData();
+  formData.append('model', model_field.files[0]);
+  formData.append('model_type', model_type);
+
+  response = await fetch('/INTERNAL_API/verify_model', {
+    method: 'POST',
+    body: formData
+  })
+
+  res = await response.json().then((value) => {
+    console.log(value)
+    return value.is_valid
+  })
+  return res;
+}
+
+const evaluateDatasetCompatibility = async(model_type) => {
+  console.log('model: ', model_field.files[0]);
+  console.log('dataset: ', model_data_set_field.files[0]);
+  const formData = new FormData();
+  formData.append('model', model_field.files[0]);
+  formData.append('dataset', model_data_set_field.files[0]);
+
+  response = await fetch('/INTERNAL_API/verify_dataset', {
+    method: 'POST',
+    body: formData
+  })
+
+  res = await response.json().then((value) => {
+    console.log(value)
+    return value.is_valid
+  })
+  return res;
+}
+
 const classifierModel = document.getElementById('not-classifier-model');
 const regressorModel = document.getElementById('not-regressor-model');
-const isModelValid = () => {
+const isModelValid = async() => {
   let validModel = true;
   if (classifierModel) {
-    // validModel = await evaluateModelType('classifier');
+    validModel = await evaluateModelType('classifier');
     classifierModel.style.display = validModel ? 'none' : '';
   } else {
-    // validModel = await evaluateModelType('regressor');
+    validModel = await evaluateModelType('regressor');
     regressorModel.style.display = validModel ? 'none' : '';
   }
   return validModel;
 };
 
-const isDatasetValid = () => {
+const isDatasetValid = async() => {
   let validDataset = true;
   const datasetField = document.getElementById('not-compatible-dataset')
 
+
+  validDataset = await evaluateDatasetCompatibility();
   if (classifierModel) {
-    // validModel = await evaluateDatast(classifierModel, datasetField);
     datasetField.style.display = validDataset ? 'none' : '';
   } else {
-    // validModel = await evaluateDatast(regressorModel, datasetField);
     datasetField.style.display = validDataset ? 'none' : '';
   }
   return validDataset;
@@ -132,7 +169,7 @@ const getProgressPercent = async () => {
   const progress_bar = document.getElementById('progress_bar');
   const progress_message = document.getElementById('progress-message');
 
-  response = await fetch('http://127.0.0.1:5000/INTERNAL_API/model/percent', {
+  response = await fetch('/INTERNAL_API/model/percent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: model_id.value
