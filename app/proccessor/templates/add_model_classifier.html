@@ -35,7 +35,7 @@
                         <!-- Name -->
                         <div class="custom-col">
                           <span style="color: red;" class="required-field-info"></span>
-                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" type="text" value="{{form.name.default}}"/>
+                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" type="text" autoComplete="off"  value="{{form.name.default}}"/>
                           <span style="color: red; padding-left: 2rem; display: none;" id="not-available-name">Este nombre no está disponible</span>
                         </div>
                         {% if type == 'add' %}

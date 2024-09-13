@@ -41,7 +41,7 @@ const isNameValid = () => {
 const classifierModel = document.getElementById('not-classifier-model');
 const regressorModel = document.getElementById('not-regressor-model');
 const isModelValid = () => {
-  let validModel = false;
+  let validModel = true;
   if (classifierModel) {
     // validModel = await evaluateModelType('classifier');
     classifierModel.style.display = validModel ? 'none' : '';
@@ -53,7 +53,7 @@ const isModelValid = () => {
 };
 
 const isDatasetValid = () => {
-  let validDataset = false;
+  let validDataset = true;
   const datasetField = document.getElementById('not-compatible-dataset')
 
   if (classifierModel) {
@@ -93,6 +93,9 @@ const verify_inputs = async (isOnModelCreation = false) => {
     add_button.classList.add('btn-danger');
     cancel_button.style.display = 'none';
     console.log('DEACTIVATED');
+  }
+  if (model_name_field && model_name_field.value) {
+    await isNameValid()
   }
   if (model_data_set_field && model_data_set_field.value) {
     await isDatasetValid()

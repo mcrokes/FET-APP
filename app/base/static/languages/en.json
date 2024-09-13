@@ -1,6 +1,6 @@
 {
   "lang": "en",
-  "app-name": "FET",
+  "app-name": "<span>ARBOL<span style=\"color: #0cff04;\">EX</span></span>",
   "login": {
     "title": "Welcome",
     "btn": "Access",
@@ -73,7 +73,7 @@
     "exit": "Exit"
   },
   "footer": {
-    "text": "FET-APP - Based on templates",
+    "text": " - Based on templates",
     "link": "Colorlib"
   },
   "home": {

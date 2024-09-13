@@ -5,7 +5,6 @@
       <span id="app-name-sidebar"></span>
       <i class="fa fa-tree"></i>
     </h3>
-    <br />
   </div>
 
   <!-- sidebar menu -->
@@ -92,7 +91,7 @@
       const sidebarTranslations = await t(["sidebar"]);
 
       const app_name = await t(["app-name"]);
-      window.document.getElementById('app-name-sidebar').innerHTML = typeof app_name !== 'object' ? app_name : 'FET';
+      window.document.getElementById('app-name-sidebar').innerHTML = typeof app_name !== 'object' ? app_name : "<span>ARBOL<span style=\"color: #ffcb00;\">EX</span></span>";
 
       window.document.getElementById('home-btn').innerHTML = sidebarTranslations["home-btn"] ?? 'sidebar.home-btn';
       window.document.getElementById('home-btn-link').title = sidebarTranslations["home-btn"] ?? 'sidebar.home-btn';

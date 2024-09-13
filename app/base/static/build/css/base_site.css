@@ -17,7 +17,7 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: .3rem 1rem !important;
-	color: red;
+	color: white !important;
 }
 
 .language-label {
@@ -46,7 +46,8 @@
 	top: 53px;
 	left: 0;
 	height: 100%;
-	background-color: #095e49;
+	background-color: #095e49c4;
+/*	background-color: #095e49;*/
 	position: fixed;
 	z-index: 3;
 }
@@ -96,11 +97,13 @@
 
 .flask-view-container {
 	height: fit-content;
-	min-height: 100vh;
 	margin-left: 0;
 	background-color: #ffffffd6;
 	padding: 10px;
-	padding-top: 7rem !important;
+/*	padding-top: 7rem !important;*/
+	margin-top: 53px;
+	height: calc(100vh - 53px);
+	overflow: scroll;
 }
 
 footer {

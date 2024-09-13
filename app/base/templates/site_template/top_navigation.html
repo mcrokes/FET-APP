@@ -1,19 +1,30 @@
-<div class="nav_menu">
+<div class="nav_menu" style="background-color: #095e49c4; color: white;">
   <nav>
     <div class="nav toggle" style="padding-top: 0; margin-left: 7px;">
       <a id="menu_toggle" onclick="show_sidebar()"><i class="fa fa-bars"></i></a>
     </div>
     <div id="logo-tob-bar" style="margin-left: 1rem; padding-top: 1.5rem; float: left; display: none;"><i
             class="fa fa-tree"></i> <span id="app-name"></span> <i class="fa fa-tree"></i></div>
+    <img src="/static/images/logo-cujae.png" alt="" style="width: 4rem; float: right; filter: drop-shadow(-0px 0px 6px rgb(255, 255, 255));">
     <ul class="nav navbar-nav navbar-right" style="width: min-content; margin: 4px; float: right;">
-      <li class="my-3" style="text-align: end; margin-right: 1rem;">
+      <li class="my-3" style="text-align: end; margin-right: 1rem; color: white;">
         <div class="dropdown" id="language">
           <a id="lang-selector-text" href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
-             aria-expanded="false" onclick="show_toggle_lang()">
+             aria-expanded="false" onclick="show_toggle_lang()" style="color: white;">
           </a>
-          <div style="position: absolute; margin-top: 15px; width: 100%; display: flex;  justify-content: flex-end;">
+          <div style="position: absolute; margin-top: 18px; display: flex;  justify-content: flex-end; left: -3px;">
             <ul class="pull-right"
-                style="width: min-content; line-height: 14px; display: none; background-color: white; border-radius: 3px; padding: 0; border: 1px solid #D9DEE4;"
+                style="
+                  width: min-content;
+                  line-height: 14px;
+                  display: none;
+                  background-color: rgba(6, 86, 48, 0.91);
+                  border-radius: 5px;
+                  padding: 0;
+                  border: 1px solid #D9DEE4;
+                  border-top-left-radius: 0;
+                  border-top-right-radius: 0;
+                "
                 id="dropdown-language-on-top-bar">
               <li class="language-label" onclick="changeLanguage('es')">
                 <input type="radio" id="es" name="currentLanguage" class="currentLanguage"/>
@@ -32,17 +43,15 @@
         </div>
       </li>
     </ul>
-    <img src="/static/images/logo-cujae.png" alt="" style="width: 4rem; margin: 0.2rem 44vw; position: absolute; left: 0;">
-
-    <ul class="nav navbar-nav navbar-right" style="width: min-content;">
+    <ul class="nav navbar-nav navbar-right" style="width: min-content; float: right;">
       <li class="my-3" style="text-align: end; margin-right: 1rem;">
         <div class="dropdown" id="configuration">
           <a href="#" class="user-profile dropdown-toggle" role="button" data-toggle="dropdown" aria-expanded="false"
-             onclick="show_toggle()">
+             onclick="show_toggle()" style="color: white !important;">
             <img src="/static/images/img.jpg" alt="">{{ current_user.username }}
           </a>
-          <div style="position: absolute; margin-top: 15px; display: flex;  justify-content: flex-end;">
-            <ul class="dropdown-menu dropdown-usermenu pull-right" style="width: min-content; line-height: 24px;"
+          <div style="position: absolute; margin-top: 12px; display: flex; justify-content: flex-end; right: -10px;">
+            <ul class="dropdown-menu dropdown-usermenu pull-right" style="width: min-content; line-height: 24px; background-color: rgba(6, 86, 48, 0.91)"
                 id="dropdown-content-on-top-bar">
               {% if Is_admin %}
                 <li><a href="/setting/manage_users" class="config-label"><span id="top-bar-config-adm"></span> <i class="fa fa-cogs pull-right"></i></a></li>
@@ -105,9 +114,7 @@
       const text = response.json().then((value) => {
         console.log(value)
         return
-      }).then(() => window.location.reload())
-
-
+      }).then(() => window.location.reload());
     }
 
     (async() => {
@@ -121,7 +128,7 @@
       }
       document.getElementById('lang-selector-text').innerHTML = currentLanguage;
       const app_name = await t(["app-name"]);
-      document.getElementById('app-name').innerHTML = typeof app_name !== 'object' ? app_name : 'FET';
+      document.getElementById('app-name').innerHTML = typeof app_name !== 'object' ? app_name : "<span>ARBOL<span style=\"color: #ffcb00;\">EX</span></span>";
       const topBarTranslations = await t(["top-bar"]);
       const admConfig = document.getElementById('top-bar-config-adm');
       if (admConfig) admConfig.innerHTML = topBarTranslations["config"] ?? 'top-bar.config';

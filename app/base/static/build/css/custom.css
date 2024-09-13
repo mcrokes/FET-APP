@@ -7,10 +7,10 @@ html , body{
 
 .iframe-container {
 	background-color: #ffffffde !important;
-	border-radius: 10px !important;
-	padding-top: 5rem !important;
 	padding-bottom: 5rem !important;
-	height: 100vh !important;
+	height: calc(100vh - 53px) !important;
+  margin-top: 53px;
+	overflow: hidden;
 }
 
 .full-width {
