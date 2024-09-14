@@ -1,10 +1,14 @@
-<div class="pull-right" style="color: white;">
-  <span id="footer-text"></span> <a style="color: blue;" href="https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/" id="footer-link"></a>
+<div class="pull-right" style="color: black;">
+  <span id="app-name-footer"></span>
+  <span id="footer-text"></span>
+  <a style="color: #23bd0d; font-weight: bolder;" href="https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/" id="footer-link" target="_blank"></a>
 </div>
 <div class="clearfix"></div>
 <script>
   (async() => {
+    const app_name = await t(["app-name"]);
     const footerTranslations = await t(["footer"]);
+    window.document.getElementById('app-name-footer').innerHTML = typeof app_name !== 'object' ? app_name : "<span>ARBOL<span style=\"color: #ffcb00;\">EX</span></span>";
     window.document.getElementById('footer-text').innerHTML = footerTranslations["text"] ?? 'footer.text';
     window.document.getElementById('footer-link').innerHTML = footerTranslations["link"] ?? 'footer.link';
   })();

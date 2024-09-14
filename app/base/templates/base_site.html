@@ -62,12 +62,7 @@
     {% block body %}
       <div class="main_container">
         <div>
-          {% block sidebar %}
-            <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}">
-              <div style="height: 57px; position: absolute;width: 100%; top: 0;background-color: #ffffffe0; margin-top: -57px;"></div>
-              {% include "site_template/sidebar.html" %}
-            </div>
-          {% endblock sidebar %}
+          <div style="width: 100vw; height: 100vh; background-color: #2b3c3cba; position: absolute; z-index: 2; display: none;"></div>
           <div id="body-container">
             {% block top_navigation %}
               <div id="top-nav-container" class="top_nav" style="margin-left: 0; position: fixed; right: 0; width: 100%; z-index: 999;">
@@ -76,14 +71,22 @@
             {% endblock top_navigation %}
 
             {% block content_top %}
-              <div class="right_col flask-view-container" role="main">
-                {% block content %}
-                  <!-- {{ content }} -->
-                {% endblock content %}
+              <div style="display: flex;">
+                {% block sidebar %}
+                  <div id="sidebar-container" class="{% block sidebar_class %} {% endblock sidebar_class %}">
+                    {% include "site_template/sidebar.html" %}
+                  </div>
+                {% endblock sidebar %}
+                <div class="right_col flask-view-container" role="main" style="flex-grow: 100;">
+                  {% block content %}
+                    <!-- {{ content }} -->
+                  {% endblock content %}
+                </div>
               </div>
+
             {% endblock content_top %}
             {% block footer %}
-              <footer>
+              <footer style="background-color: #095e490f;">
                 {% include "site_template/footer.html" %}
               </footer>
             {% endblock footer %}

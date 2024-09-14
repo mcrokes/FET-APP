@@ -1,5 +1,6 @@
 .index-container {
-	padding-bottom: 5rem;
+	padding-bottom: 5rem !important;
+	padding-top: 2rem !important;
 }
 
 .index-container > div:first-child {
@@ -12,14 +13,11 @@
 .linked-button-card {
 	width: 23rem;
 	text-align: right;
-	margin-top: 1rem;
 	font-size: 20px;
 	font-weight: bold;
 	border-radius: 1rem !important;
 	text-align: center;
-/*	color: white !important;*/
 	background-color: #83dd914a;
-/*	text-shadow: 1px 1px 10px red, -1px -1px 10px #1400ff, -1px 1px 10px #ff009b, 1px -1px 10px #ebff00;*/
 	text-transform: uppercase;
 	background-size: 100% 100%;
 	background-repeat: no-repeat;
@@ -66,17 +64,18 @@
 	justify-content: center;
 	gap: 2rem;
 	flex-wrap: wrap;
-	margin-top: 2rem;
 }
 
 #home-info {
 	color: black;
 	background-color: #eeeeee78;
-	padding: 3rem;
+	padding: 0 3rem 3rem;
 	text-align: initial;
 	border-radius: 4px;
 	line-height: 25px;
 	font-size: larger;
+	height: 60vh;
+  overflow: scroll;
 }
 
 #home-info > h1 {

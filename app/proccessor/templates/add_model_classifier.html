@@ -33,33 +33,36 @@
                     {% else %}
                       {% if status == 'Initial' %}
                         <!-- Name -->
-                        <div class="col col-lg-6 custom-col">
+                        <div class="custom-col">
                           <span style="color: red;" class="required-field-info"></span>
-                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" type="text" value="{{form.name.default}}"/>
+                          <input class="form-control custom-input" id="{{form.name.id}}" name="name" type="text" autoComplete="off"  value="{{form.name.default}}"/>
+                          <span style="color: red; padding-left: 2rem; display: none;" id="not-available-name"></span>
                         </div>
                         {% if type == 'add' %}
                           <!-- Model -->
-                          <div class="col col-lg-6 custom-col">
+                          <div class="custom-col">
                             <span style="color: red;" class="required-field-info"></span>
                             <input accept="{{form.model.render_kw.accept}}" class="form-control custom-file-input" id="{{form.model.id}}" name="model" type="file">
                             <label class="form-control custom-file-input" for="{{form.model.id}}">
                               <p id="{{form.model.id}}-holder"></p>
                             </label>
+                            <span style="color: red; padding-left: 2rem; display: none;" id="not-classifier-model"></span>
                           </div>
                         {% endif %}
                         <!-- Description -->
-                        <div class="col col-lg-6 custom-col">
+                        <div class="custom-col">
                           <span style="color: green;" class="optional-field-info"></span>
                           <textarea class="form-control custom-input" id="{{form.description.id}}" name="description">{{form.description.default}}</textarea>
                         </div>
                         {% if type == 'add' %}
                           <!-- Dataset -->
-                          <div class="col col-lg-6 custom-col">
+                          <div class="custom-col">
                             <span style="color: red;" class="required-field-info"></span>
                             <input accept="{{form.dataset.render_kw.accept}}"  class="form-control custom-file-input" id="{{form.dataset.id}}" name="dataset" type="file" />
                             <label class="form-control custom-file-input" for="{{form.dataset.id}}">
                               <p id="{{form.dataset.id}}-holder"></p>
                             </label>
+                            <span style="color: red; padding-left: 2rem; display: none;" id="not-compatible-dataset"></span>
                           </div>
                         {% endif %}
 
@@ -71,9 +74,9 @@
                               <option value="{{ option }}">{{ option }}</option>
                             {% endfor %}
                           </select>
-                          <div class="col custom-col">
+                          <div style="width: fit-content; display: flex; flex-direction: column; justify-content: center; margin-bottom: 1rem;">
                             {% if form|length > 1 %}
-                              <div class="form-check form-switch" style="margin: 1rem; margin-bottom: 3rem;">
+                              <div class="form-check form-switch" style="margin: 3rem;">
                                 <input class="form-check-input" type="checkbox" role="switch" id="index-selector" name="index">
                                 <label class="form-check-label" for="index-selector" id="index-selector-label"></label>
                               </div>
@@ -83,7 +86,7 @@
                       {% elif status == 'Add' %}
                         <h5 class="q-vars-header" id="description-title"></h5>
                         {% for var in variables %}
-                          <div class="col col-lg-6 custom-col">
+                          <div class="col custom-col">
                             <label>{{ var }}</label>
                             <textarea class="form-control custom-input description-text" name="{{ var }}"></textarea>
                           </div>
@@ -91,15 +94,15 @@
                         <h5 class="q-vars-header" id="q-vars-title"></h5>
                         {% for col in form %}
                           <input type="text" name="Q-Variable-{{ col.name }}" value="{{ col.name }}" hidden />
-                          <div class="col col-lg-6 custom-col custom-qualitative-col">
+                          <div class="custom-col custom-qualitative-col">
                             <label>{{ col.name }}</label>
                             {% for var in col.variables %}
                               {% if col.values_on_current[loop.index-1]|string != var|string %}
-                                <div class="col custom-col-no-media">
+                                <div class="custom-col-no-media">
                                   <input class="form-control custom-input q-vars-text" oldValue="{{ var }}" type="text" name="{{ col.name }}-{{ var }}" value="{{ col.values_on_current[loop.index-1] }}" />
                                 </div>
                               {% else %}
-                                <div class="col custom-col-no-media">
+                                <div class="custom-col-no-media">
                                   <input class="form-control custom-input q-vars-text" oldValue="{{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
                                 </div>
                               {% endif %}

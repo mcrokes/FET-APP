@@ -32,13 +32,85 @@ const getModelsList = async (model_type) => {
   })
 }
 
-const isNameValid = () => editedModelName === model_name_field.value || !models_list.includes(model_name_field.value);
+const isNameValid = () => {
+  const validName = editedModelName === model_name_field.value || !models_list.includes(model_name_field.value);
+  document.getElementById('not-available-name').style.display = validName ? 'none' : '';
+  return validName;
+};
 
-const verify_inputs = (isOnModelCreation = false) => {
+const evaluateModelType = async(model_type) => {
+  console.log('model: ', model_field.files[0]);
+  const formData = new FormData();
+  formData.append('model', model_field.files[0]);
+  formData.append('model_type', model_type);
+
+  response = await fetch('/INTERNAL_API/verify_model', {
+    method: 'POST',
+    body: formData
+  })
+
+  res = await response.json().then((value) => {
+    console.log(value)
+    return value.is_valid
+  })
+  return res;
+}
+
+const evaluateDatasetCompatibility = async(model_type) => {
+  console.log('model: ', model_field.files[0]);
+  console.log('dataset: ', model_data_set_field.files[0]);
+  const formData = new FormData();
+  formData.append('model', model_field.files[0]);
+  formData.append('dataset', model_data_set_field.files[0]);
+
+  if (model_field.files[0]) {
+    response = await fetch('/INTERNAL_API/verify_dataset', {
+      method: 'POST',
+      body: formData
+    })
+
+    res = await response.json().then((value) => {
+      console.log(value)
+      return value.is_valid
+    })
+    return res
+  }
+  return true;
+}
+
+const classifierModel = document.getElementById('not-classifier-model');
+const regressorModel = document.getElementById('not-regressor-model');
+const isModelValid = async() => {
+  let validModel = true;
+  if (classifierModel) {
+    validModel = await evaluateModelType('classifier');
+    classifierModel.style.display = validModel ? 'none' : '';
+  } else {
+    validModel = await evaluateModelType('regressor');
+    regressorModel.style.display = validModel ? 'none' : '';
+  }
+  return validModel;
+};
+
+const isDatasetValid = async() => {
+  let validDataset = true;
+  const datasetField = document.getElementById('not-compatible-dataset')
+
+
+  validDataset = await evaluateDatasetCompatibility();
+  if (classifierModel) {
+    datasetField.style.display = validDataset ? 'none' : '';
+  } else {
+    datasetField.style.display = validDataset ? 'none' : '';
+  }
+  return validDataset;
+};
+
+const verify_inputs = async (isOnModelCreation = false) => {
   if (isOnModelCreation) {
     add_button.disabled = true;
-    add_button.classList.remove("btn-success");
-    add_button.classList.add("btn-danger");
+    add_button.classList.add("btn-success");
+    add_button.classList.remove("btn-danger");
     cancel_button.style.display = '';
     cancel_button.disabled = true;
   } else if (
@@ -47,7 +119,7 @@ const verify_inputs = (isOnModelCreation = false) => {
       (
         (model_data_set_field == null && model_name_field.value) ||
         (model_name_field.value && model_field.value && model_data_set_field.value)
-      ) && isNameValid()
+      ) && isNameValid() && await isModelValid() && await isDatasetValid()
     )
   ) {
     add_button.disabled = false
@@ -62,11 +134,16 @@ const verify_inputs = (isOnModelCreation = false) => {
     cancel_button.style.display = 'none';
     console.log('DEACTIVATED');
   }
+  if (model_name_field && model_name_field.value) {
+    await isNameValid()
+  }
   if (model_data_set_field && model_data_set_field.value) {
+    await isDatasetValid()
     model_data_set_field_holder.innerHTML = model_data_set_field.value;
     model_data_set_field_holder.style.color = 'black';
   }
   if (model_field && model_field.value) {
+    await isModelValid()
     model_field_holder.innerHTML = model_field.value;
     model_field_holder.style.color = 'black';
   }
@@ -84,9 +161,9 @@ const initial_check = async (model_type) => {
   }
 }
 
-const is_first_page = () => {
+const is_first_page = async () => {
   if (model_id == null || (model_name_field !== null && model_id.dataset.status == 'Create')) {
-    verify_inputs();
+    await verify_inputs();
   }
 }
 
@@ -95,7 +172,7 @@ const getProgressPercent = async () => {
   const progress_bar = document.getElementById('progress_bar');
   const progress_message = document.getElementById('progress-message');
 
-  response = await fetch('http://127.0.0.1:5000/INTERNAL_API/model/percent', {
+  response = await fetch('/INTERNAL_API/model/percent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: model_id.value

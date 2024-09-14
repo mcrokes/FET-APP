@@ -1,32 +1,31 @@
-<div class="left_col scroll-view" style="height: 100%; width: 100%;">
+<div class="left_col scroll-view" style="height: 100%; width: 100%; display: flex; flex-direction: column;">
   <div class="profile clearfix" id="sidebar-site-logo">
     <h3 style="color: white; font-weight: bold; padding: 0 1rem; line-height: unset; text-transform: uppercase; margin-top: 1.5rem; text-align: center;">
       <i class="fa fa-tree" ></i>
       <span id="app-name-sidebar"></span>
       <i class="fa fa-tree"></i>
     </h3>
-    <br />
   </div>
 
   <!-- sidebar menu -->
-  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu" style="flex-grow: 2;">
     <div class="menu_section">
       <ul class="nav side-menu">
-        <li style="width: 100%">
+        <li style="width: 100%" class="sidebar-list-button" id="home-list-button">
           <a data-toggle="tooltip" id="home-btn-link" href="/home" class="sidebar-link">
             <i class="fa fa-home sidebar-icon"></i>
             <span class="sidebar-item" id="home-btn"></span>
           </a>
         </li>
 
-        <li style="width: 100%">
+        <li style="width: 100%" class="sidebar-list-button" id="classifier-list-button">
           <a data-toggle="tooltip" id="classifier-btn-link" class="sidebar-link" style="overflow: hidden; text-overflow: ellipsis;" href="/processor/manage_classifiers">
             <i class="fa fa-pie-chart sidebar-icon"></i>
             <span class="sidebar-item" id="classifier-btn"></span>
           </a>
         </li>
 
-        <li style="width: 100%">
+        <li style="width: 100%" class="sidebar-list-button" id="regressor-list-button">
           <a data-toggle="tooltip" id="regressor-btn-link" href="/processor/manage_regressors" class="sidebar-link">
             <i class="fa fa-line-chart sidebar-icon"></i>
             <span class="sidebar-item" id="regressor-btn"></span>
@@ -35,7 +34,7 @@
         <li style="width: 100%">
           <div class="accordion accordion-flush" id="configuration-collapse">
             <div class="accordion-item" style="background-color: transparent; border: none;">
-              <a class="accordion-header collapsed sidebar-link" id="config-btn-link" style="background-color: transparent; border: none; color: white;" data-toggle="tooltip" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+              <a class="accordion-header collapsed sidebar-link sidebar-list-button" id="config-btn-link" style="background-color: transparent; border: none; color: white; padding-bottom: 18px;" data-toggle="tooltip" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
                 <i class="fa fa-cogs sidebar-icon"></i>
                 <span class="sidebar-item" style="margin-right: 2rem; font-size: 13px" id="config-btn"></span>
                 <i id="chevron-icon-sidebar" class="fa fa-chevron-down ml-2" style="font-size: 12px;"></i>
@@ -46,7 +45,7 @@
                     {% if Is_admin %}
                       <li>
                         <a class="sidebar-link" data-toggle="tooltip" id="config-sidebar-link" href="/setting/manage_users" style="color: white;">
-                          <i class="fa fa-cog sidebar-icon"></i>
+                          <i class="fa fa-user sidebar-icon"></i>
                           <span class="sidebar-item" id="config-sidebar"></span>
                         </a>
                       </li>
@@ -87,12 +86,39 @@
   <!-- /menu footer buttons -->
 
   <script>
+    console.log('path: ', location.pathname);
+    console.log('location: ', location);
+    if (location.pathname == '/home/') {
+      document.getElementById('home-list-button').classList.add('opened-page');
+    } else if (
+      location.pathname == '/processor/manage_classifiers' ||
+      location.pathname == '/processor/add_classifier' ||
+      location.pathname == '/dashboard/classification' ||
+      location.pathname == '/dashboard/classifier/comparison'
+    ) {
+      document.getElementById('classifier-list-button').classList.add('opened-page');
+    } else if (
+      location.pathname == '/processor/manage_regressors' ||
+      location.pathname == '/processor/add_regressor' ||
+      location.pathname == '/dashboard/regression' ||
+      location.pathname == '/dashboard/regression/comparison'
+    ) {
+	    document.getElementById('regressor-list-button').classList.add('opened-page');
+    } else if (
+      location.pathname == '/setting/manage_users' ||
+      location.pathname == '/setting/change_password' ||
+      location.pathname == '/setting/add_user' ||
+      location.pathname == '/setting/manage_users' ||
+      location.pathname == '/setting/manage_users'
+    ) {
+	    document.getElementById('config-btn-link').classList.add('opened-page');
+    }
 
     (async() => {
       const sidebarTranslations = await t(["sidebar"]);
 
       const app_name = await t(["app-name"]);
-      window.document.getElementById('app-name-sidebar').innerHTML = typeof app_name !== 'object' ? app_name : 'FET';
+      window.document.getElementById('app-name-sidebar').innerHTML = typeof app_name !== 'object' ? app_name : "<span>ARBOL<span style=\"color: #ffcb00;\">EX</span></span>";
 
       window.document.getElementById('home-btn').innerHTML = sidebarTranslations["home-btn"] ?? 'sidebar.home-btn';
       window.document.getElementById('home-btn-link').title = sidebarTranslations["home-btn"] ?? 'sidebar.home-btn';

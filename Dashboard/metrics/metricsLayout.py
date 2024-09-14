@@ -162,7 +162,8 @@ def metricsRegressorLayout(metricsTranslations):
                 [
                     dbc.Row(
                         [
-                            html.Div(id="regression-metrics", style={'width': 'max-content', 'margin': 'auto'}),
+                            html.Div(id="regression-metrics",
+                                     style={'width': 'max-content', 'margin': 'auto', 'overflow': 'scroll'}),
                         ],
                     ),
                     dbc.Row(

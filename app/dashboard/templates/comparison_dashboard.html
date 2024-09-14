@@ -24,25 +24,27 @@
 {% endblock stylesheets %}
 
 {% block content_top %}
-  <div class="right_col iframe-container" role="main">
-    <div style="width: 100%; border-right: 3pt solid black;">
-      <iframe style='background: transparent; width: 100%; height:87vh; bottom: 0;'
-        src={{ dash_url1 }}
-        frameborder="0">
-      </iframe>
-    </div>
-    <div style="width: 100%">
-      <iframe style='background: transparent; width: 100%; height:87vh; bottom: 0;'
-        src={{ dash_url2 }}
-        frameborder="0">
-      </iframe>
+  <div style="display: flex;">
+    {% block sidebar %}
+      {{ super() }}
+    {% endblock sidebar %}
+    <div class="right_col iframe-container" role="main" style="flex-grow: 100;">
+      <div style="width: 100%; border-right: 3pt solid black;">
+        <iframe style='background: transparent; width: 100%; height:87vh; bottom: 0;'
+          src={{ dash_url1 }}
+          frameborder="0">
+        </iframe>
+      </div>
+      <div style="width: 100%">
+        <iframe style='background: transparent; width: 100%; height:87vh; bottom: 0;'
+          src={{ dash_url2 }}
+          frameborder="0">
+        </iframe>
+      </div>
     </div>
   </div>
 {% endblock content_top %}
 
 {% block javascripts %}
-  {{ super()}}
-  <script>
-    $('#resizable').resizable();
-  </script>
+  {{ super() }}
 {% endblock javascripts %}

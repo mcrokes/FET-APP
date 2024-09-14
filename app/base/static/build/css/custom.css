@@ -7,10 +7,10 @@ html , body{
 
 .iframe-container {
 	background-color: #ffffffde !important;
-	border-radius: 10px !important;
-	padding-top: 5rem !important;
 	padding-bottom: 5rem !important;
-	height: 100vh !important;
+	height: calc(100vh - 53px) !important;
+  margin-top: 53px;
+	overflow: hidden;
 }
 
 .full-width {
@@ -255,9 +255,6 @@ html , body{
 	margin-bottom: 0;
 	margin-top: 0;
 	text-shadow: 1px 1px #000
-}
-.menu_section>ul {
-	margin-top: 10px
 }
 .profile_pic {
 	width: 35%;
@@ -907,7 +904,6 @@ a:focus {
 }
 .main_menu_side {
 	padding: 0;
-	margin-top: .2rem;
 }
 .bs-docs-sidebar .nav>li>a {
 	display: block;
@@ -1672,9 +1668,9 @@ span.right {
 	clear: both;
 	display: flex;
 	padding: 5px 0 0 0;
-	position: absolute;
+/*	position: absolute;*/
 	width: 100%;
-	bottom: 53px;
+/*	bottom: 53px;*/
 	z-index:999;
 }
 .sidebar-footer a {

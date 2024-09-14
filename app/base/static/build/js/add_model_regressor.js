@@ -56,6 +56,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if(model_description_field) model_description_field.placeholder = regressorTranslations['description'] ?? 'regressor.description';
 	if(model_data_set_field_holder) model_data_set_field_holder.innerHTML = regressorTranslations['dataset'] ?? 'regressor.dataset';
 
+	if(document.getElementById('not-available-name')) document.getElementById('not-available-name').innerHTML = regressorTranslations['name-error'] ?? 'regressor.name-error';
+	if(document.getElementById('not-regressor-model')) document.getElementById('not-regressor-model').innerHTML = regressorTranslations['model-error'] ?? 'regressor.model-error';
+	if(document.getElementById('not-compatible-dataset')) document.getElementById('not-compatible-dataset').innerHTML = regressorTranslations['dataset-error'] ?? 'regressor.dataset-error';
+
 	const defaultUnits = [
 		{ id: '', text: 'NaN' },
 		{ id: '$', text: '$' },

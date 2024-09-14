@@ -36,6 +36,7 @@
                         <div class="col col-lg-6 custom-col">
                           <span style="color: red;" class="required-field-info"></span>
                           <input class="form-control custom-input" id="{{form.name.id}}" name="name" type="text" value="{{form.name.default}}"/>
+                          <span style="color: red; padding-left: 2rem; display: none;" id="not-available-name"></span>
                         </div>
                         {% if type == 'add' %}
                           <!-- Model -->
@@ -45,6 +46,7 @@
                             <label class="form-control custom-file-input" for="{{form.model.id}}">
                               <p id="{{form.model.id}}-holder"></p>
                             </label>
+                            <span style="color: red; padding-left: 2rem; display: none;" id="not-regressor-model"></span>
                           </div>
                         {% endif %}
                         <!-- Description -->
@@ -60,6 +62,7 @@
                             <label class="form-control custom-file-input" for="{{form.dataset.id}}">
                               <p id="{{form.dataset.id}}-holder"></p>
                             </label>
+                            <span style="color: red; padding-left: 2rem; display: none;" id="not-compatible-dataset"></span>
                           </div>
                         {% endif %}
                         <div class="col custom-col">
@@ -82,9 +85,9 @@
                             {% endfor %}
                           </select>
                         </div>
-                        <div class="col custom-col">
+                        <div style="width: fit-content;">
                           {% if form|length > 1 %}
-                            <div class="form-check form-switch" style="margin: 1rem; margin-bottom: 3rem;">
+                            <div class="form-check form-switch" style="margin: 3rem;">
                               <input class="form-check-input" type="checkbox" role="switch" id="index-selector" name="index">
                               <label class="form-check-label" for="index-selector" id="index-selector-label"></label>
                             </div>

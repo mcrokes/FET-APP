@@ -53,4 +53,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if(model_field_holder) model_field_holder.innerHTML = classifierTranslations['model'] ?? 'classifier.model';
 	if(model_description_field) model_description_field.placeholder = classifierTranslations['description'] ?? 'classifier.description';
 	if(model_data_set_field_holder) model_data_set_field_holder.innerHTML = classifierTranslations['dataset'] ?? 'classifier.dataset';
+	if(document.getElementById('not-available-name')) document.getElementById('not-available-name').innerHTML = classifierTranslations['name-error'] ?? 'classifier.name-error';
+	if(document.getElementById('not-classifier-model')) document.getElementById('not-classifier-model').innerHTML = classifierTranslations['model-error'] ?? 'classifier.model-error';
+	if(document.getElementById('not-compatible-dataset')) document.getElementById('not-compatible-dataset').innerHTML = classifierTranslations['dataset-error'] ?? 'classifier.dataset-error';
 })();
