@@ -63,16 +63,19 @@ const evaluateDatasetCompatibility = async(model_type) => {
   formData.append('model', model_field.files[0]);
   formData.append('dataset', model_data_set_field.files[0]);
 
-  response = await fetch('/INTERNAL_API/verify_dataset', {
-    method: 'POST',
-    body: formData
-  })
+  if (model_field.files[0]) {
+    response = await fetch('/INTERNAL_API/verify_dataset', {
+      method: 'POST',
+      body: formData
+    })
 
-  res = await response.json().then((value) => {
-    console.log(value)
-    return value.is_valid
-  })
-  return res;
+    res = await response.json().then((value) => {
+      console.log(value)
+      return value.is_valid
+    })
+    return res
+  }
+  return true;
 }
 
 const classifierModel = document.getElementById('not-classifier-model');

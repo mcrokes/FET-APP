@@ -182,8 +182,8 @@ def verify_model():
 @blueprint.route("/verify_dataset", methods=["GET", "POST"])
 @login_required
 def verify_dataset():
-    formModel = request.files['model']
-    datasetModel = request.files['dataset']
+    formModel = request.files.get('model')
+    datasetModel = request.files.get('dataset')
     is_valid = False
     try:
         model: RandomForestClassifier | RandomForestRegressor = joblib.load(formModel)

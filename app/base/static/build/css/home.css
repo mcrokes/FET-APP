@@ -1,5 +1,6 @@
 .index-container {
-	padding-bottom: 5rem;
+	padding-bottom: 5rem !important;
+	padding-top: 2rem !important;
 }
 
 .index-container > div:first-child {

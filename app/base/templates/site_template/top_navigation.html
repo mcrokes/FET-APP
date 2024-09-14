@@ -5,14 +5,27 @@
     </div>
     <div id="logo-tob-bar" style="margin-left: 1rem; padding-top: 1.5rem; float: left; display: none;"><i
             class="fa fa-tree"></i> <span id="app-name"></span> <i class="fa fa-tree"></i></div>
-    <img src="/static/images/logo-cujae.png" alt="" style="width: 4rem; float: right; filter: drop-shadow(-0px 0px 6px rgb(255, 255, 255));">
+    <img
+            src="/static/images/logo-cujae.png"
+            alt=""
+            style="
+              height: 45px;
+              margin: 4px -3px;
+              float: right;
+              filter:
+                drop-shadow(-1px 1px 0.5px rgb(255, 255, 255))
+                drop-shadow(1px -1px 0.5px rgb(255, 255, 255))
+                drop-shadow(-1px -1px 0.5px rgb(255, 255, 255))
+                drop-shadow(1px 1px 0.5px rgb(255, 255, 255));
+            "
+    >
     <ul class="nav navbar-nav navbar-right" style="width: min-content; margin: 4px; float: right;">
       <li class="my-3" style="text-align: end; margin-right: 1rem; color: white;">
         <div class="dropdown" id="language">
           <a id="lang-selector-text" href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
              aria-expanded="false" onclick="show_toggle_lang()" style="color: white;">
           </a>
-          <div style="position: absolute; margin-top: 18px; display: flex;  justify-content: flex-end; left: -3px;">
+          <div style="position: absolute; margin-top: 18px; display: flex;  justify-content: flex-end; left: -10px;">
             <ul class="pull-right"
                 style="
                   width: min-content;
