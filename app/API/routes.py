@@ -6,8 +6,8 @@ import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
-from app.proccessor.models import ExplainedClassifierModel, ExplainedRegressorModel, ExplainedModel
-from app.proccessor.models import ModelForProccess
+from app.processor.models import ExplainedClassifierModel, ExplainedRegressorModel, ExplainedModel
+from app.processor.models import ModelForProccess
 from . import blueprint
 from flask import current_app, make_response, render_template, request
 from flask_login import login_required, current_user, AnonymousUserMixin

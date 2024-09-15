@@ -10,10 +10,10 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier
 
 from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
-from app.proccessor.model.explainers.decision_tree_surrogate import (
+from app.processor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
-from app.proccessor.models import ExplainedModel
+from app.processor.models import ExplainedModel
 
 id_sufix = ["trees"]
 

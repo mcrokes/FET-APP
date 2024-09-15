@@ -1,4 +1,4 @@
-from flask import Flask, url_for
+from flask import Flask, url_for, redirect
 from flask_login import current_user
 from .extensions import db, login_manager
 from importlib import import_module
@@ -14,7 +14,7 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
-    for module_name in ("base", "home", "dashboard", "setting", "proccessor", "API"):
+    for module_name in ("base", "home", "dashboard", "setting", "processor", "API"):
         module = import_module("app.{}.routes".format(module_name))
         app.register_blueprint(module.blueprint)
 
@@ -109,6 +109,21 @@ def configure_file_upload(app):
     app.config['UPLOAD_FOLDER'] = environ.get('UPLOAD_FOLDER')
 
 
+def handle_403(e):
+    print('ERROR: ', e)
+    return redirect('/page_403')
+
+
+def handle_404(e):
+    print('ERROR: ', e)
+    return redirect('/page_404')
+
+
+def handle_500(e):
+    print('ERROR: ', e)
+    return redirect('/page_500')
+
+
 def create_app(config, selenium=False):
     app = Flask(__name__, static_folder="base/static")
     app.config.from_object(config)
@@ -122,4 +137,8 @@ def create_app(config, selenium=False):
     apply_themes(app)
     app = regression_dashboard.Add_Dash(app)
     app = classification_dashboard.Add_Dash(app)
+    app.config['TRAP_HTTP_EXCEPTIONS'] = True
+    app.register_error_handler(403, handle_403)
+    app.register_error_handler(404, handle_404)
+    app.register_error_handler(500, handle_500)
     return app

@@ -17,18 +17,6 @@ def route_default():
     return redirect(url_for('base_blueprint.login'))
 
 
-# @blueprint.route('/<template>')
-# @login_required
-# def route_template(template):
-#     return render_template(template + '.html')
-
-
-@blueprint.route('/fixed_<template>')
-@login_required
-def route_fixed_template(template):
-    return render_template('fixed/fixed_{}.html'.format(template))
-
-
 @blueprint.route('/page_<error>')
 def route_errors(error):
     return render_template('errors/page_{}.html'.format(error))
@@ -64,13 +52,13 @@ def logout():
     return redirect(url_for('base_blueprint.login'))
 
 
-@blueprint.route('/shutdown')
-def shutdown():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-    return 'Server shutting down...'
+# @blueprint.route('/shutdown')
+# def shutdown():
+#     func = request.environ.get('werkzeug.server.shutdown')
+#     if func is None:
+#         raise RuntimeError('Not running with the Werkzeug Server')
+#     func()
+#     return 'Server shutting down...'
 
 
 ## Errors
@@ -79,18 +67,3 @@ def shutdown():
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return render_template('errors/page_403.html'), 403
-
-
-@blueprint.errorhandler(403)
-def access_forbidden(error):
-    return render_template('errors/page_403.html'), 403
-
-
-@blueprint.errorhandler(404)
-def not_found_error(error):
-    return render_template('errors/page_404.html'), 404
-
-
-@blueprint.errorhandler(500)
-def internal_error(error):
-    return render_template('errors/page_500.html'), 500

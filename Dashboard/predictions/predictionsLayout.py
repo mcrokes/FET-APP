@@ -13,7 +13,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from Dashboard.utils import get_target_dropdown
 from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
-from app.proccessor.models import ExplainedModel
+from app.processor.models import ExplainedModel
 
 from treeinterpreter import treeinterpreter as ti
 

@@ -10,34 +10,30 @@
 
 {% block top_navigation %}{% endblock top_navigation %}
 
-{% block content %}
-  <div class="col-md-12">
-    <div class="col-middle">
-      <div class="text-center text-center">
-        <h1 class="error-number">403</h1>
-        <h2>Access Denied</h2>
-         <p>Full authentication is required to access this resource. <a href="#">Report this?</a>
-        </p>
-        <div class="mid_center">
-          <h3>Search</h3>
-          <form>
-            <div class="col-xs-12 form-group pull-right top_search">
-              <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search for...">
-                <span class="input-group-btn">
-                        <button class="btn btn-default" type="button">Go!</button>
-                    </span>
-              </div>
-            </div>
-          </form>
-        </div>
+{% block content_top %}
+  <div style="padding: 7%; background-color: #ff00004d; height: 100%;">
+    <div class="error-pages-container">
+      <h1 class="error-number" id="error-title"></h1>
+      <h2 id="error-header"></h2>
+      <p id="error-text"></p>
+      <div id="error-button-container" onclick="window.location.href='/login'">
+        <span id="error-button"></span>
       </div>
     </div>
   </div>
-{% endblock content %}
+{% endblock content_top %}
 
 {% block footer %}{% endblock footer %}
 
-{% block javascripts %}
-  {{ super() }}
-{% endblock javascripts %}
+{% block javascripts2 %}
+  <script>
+    (async()=>{
+      const errorTranslations = await t(["error-pages", "403"]);
+      console.log('errorTranslations: ', errorTranslations);
+      document.getElementById('error-title').innerHTML = errorTranslations['title'] ?? 'error-pages.403.title';
+      document.getElementById('error-header').innerHTML = errorTranslations['header'] ?? 'error-pages.403.heder';
+      document.getElementById('error-text').innerHTML = errorTranslations['text'] ?? 'error-pages.403.text';
+      document.getElementById('error-button').innerHTML = errorTranslations['button'] ?? 'error-pages.403.button';
+    })();
+  </script>
+{% endblock javascripts2 %}

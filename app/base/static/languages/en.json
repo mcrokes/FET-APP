@@ -7,6 +7,26 @@
     "username": "Username",
     "pwd": "Password"
   },
+  "error-pages": {
+    "403": {
+      "title": "403",
+      "header": "Access Denied",
+      "text": "Full authentication is required to access this resource.",
+      "button": "Log in"
+    },
+    "404": {
+      "title": "404",
+      "header": "Sorry but we couldn't find this page",
+      "text": "This page you are looking for does not exist",
+      "button": "Go Home"
+    },
+    "500": {
+      "title": "500",
+      "header": "Internal Server Error",
+      "text": "We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+      "button": "Refresh Page"
+    }
+  },
   "add-user": {
     "title": "Create User",
     "btn": "Create",

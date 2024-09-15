@@ -4,10 +4,10 @@ from typing import Literal
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from app.base.models import User
-from app.proccessor.forms import add_model
-from app.proccessor.model.dataset_interaction_methods import get_modified_dataframe
-from app.proccessor.model.explainers.decision_tree_surrogate import ExplainSingleTree
-from app.proccessor.models import (
+from app.processor.forms import add_model
+from app.processor.model.dataset_interaction_methods import get_modified_dataframe
+from app.processor.model.explainers.decision_tree_surrogate import ExplainSingleTree
+from app.processor.models import (
     DataSetData,
     DataSetDataDistribution,
     ExplainedClassifierModel,
