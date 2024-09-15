@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from dash.exceptions import PreventUpdate
 from flask_login import current_user
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier
 
 from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
@@ -213,7 +213,7 @@ def specificTreesCallbacks(app, furl, isRegressor: bool = False):
             ExplainedModel.id == model_id
         ).first()
 
-        model: RandomForestClassifier = model_x.getElement("model")
+        model: RandomForestClassifier | RandomForestRegressor = model_x.getElement("model")
 
         length = len(model.estimators_)
 
@@ -266,7 +266,8 @@ def specificTreesCallbacks(app, furl, isRegressor: bool = False):
                     [
                         html.Td(index + 1),
                         html.Td(causes_table, style={"padding": "0"}),
-                        html.Td(rule["target_value"]),
+                        html.Td([rule["target_value"],
+                                 f' {model_x.explainer_regressor.getElement("unit")}' if isRegressor else '']),
                         html.Td(rule["probability"]),
                         html.Td(rule["samples_amount"]),
                     ]

@@ -442,10 +442,14 @@ def save_classifier(modelId: int = 0):
             print('df: ', df)
 
             values_on_current = {}
+            descriptions = {}
             if modelId:
                 classifier: ExplainedClassifierModel = ExplainedClassifierModel.query.filter(
                     ExplainedClassifierModel.explainer_model_id == modelId
                 ).first()
+
+                descriptions = classifier.explainer_model.getElement('features_description')
+                print('descriptions: ', descriptions)
 
                 qualitative_target = classifier.getElement('target_names_dict')
                 qualitative_variables_values = classifier.explainer_model.getElement('q_variables_dict')
@@ -461,6 +465,13 @@ def save_classifier(modelId: int = 0):
                     for variable in column['variables']:
                         print('variable: ', variable)
                         values_on_current[f'{column["column_name"]}'].append(variable['new_value'])
+
+            variables = []
+            for column in df.columns:
+                variables.append({
+                    'variable': column,
+                    'current_val': descriptions[column] if modelId else ''
+                })
             print('values_on_current: ', values_on_current)
             for column in df:
                 if len(set(df[column])) < 5 or column == db_model.target_row:
@@ -476,7 +487,7 @@ def save_classifier(modelId: int = 0):
             return render_template(
                 "add_model_classifier.html",
                 form=qualitative_variables_form,
-                variables=list(df.columns),
+                variables=variables,
                 status=status,
                 model_id=db_model.id,
                 type='edit' if modelId else 'add'
@@ -505,11 +516,7 @@ def save_classifier(modelId: int = 0):
         for element in request.form:
             if element != "model_id":
                 if element in df.columns:
-                    features_description[element] = (
-                        request.form[element]
-                        if request.form[element] != ""
-                        else setText(descriptionsClassifier, 'no-description', 'add-classifier.descriptions')
-                    )
+                    features_description[element] = request.form[element]
                 elif "Q-Variable" in element or element == "Add":
                     value_number = 0
                     if q_dict != {}:
@@ -716,12 +723,13 @@ def save_regressor(modelId: int = 0):
             df = db_model.getElement("dataset")
 
             values_on_current = {}
+            descriptions = {}
             if modelId:
                 regressor: ExplainedRegressorModel = ExplainedRegressorModel.query.filter(
                     ExplainedRegressorModel.explainer_model_id == modelId
                 ).first()
+                descriptions = regressor.explainer_model.getElement('features_description')
 
-                unit = regressor.getElement('unit')
                 qualitative_variables_values = regressor.explainer_model.getElement('q_variables_dict')
 
                 print('qualitative_variables_values: ', qualitative_variables_values)
@@ -730,6 +738,13 @@ def save_regressor(modelId: int = 0):
                     for variable in column['variables']:
                         print('variable: ', variable)
                         values_on_current[f'{column["column_name"]}'].append(variable['new_value'])
+
+            variables = []
+            for column in df.columns:
+                variables.append({
+                    'variable': column,
+                    'current_val': descriptions[column] if modelId else ''
+                })
             print('values_on_current: ', values_on_current)
             for column in df:
                 if len(set(df[column])) < 5 and column != db_model.target_row:
@@ -741,11 +756,12 @@ def save_regressor(modelId: int = 0):
                         }
                     )
 
+
             status = "Add"
             return render_template(
                 "add_model_regressor.html",
                 form=qualitative_variables_form,
-                variables=list(df.columns),
+                variables=variables,
                 status=status,
                 model_id=db_model.id,
                 type='edit' if modelId else 'add'
@@ -773,11 +789,7 @@ def save_regressor(modelId: int = 0):
         for element in request.form:
             if element != "model_id":
                 if element in df.columns:
-                    features_description[element] = (
-                        request.form[element]
-                        if request.form[element] != ""
-                        else setText(descriptionsRegressor, 'no-description', 'add-regressor.descriptions')
-                    )
+                    features_description[element] = request.form[element]
                 elif "Q-Variable" in element or element == "Add":
                     value_number = 0
                     if q_dict != {}:

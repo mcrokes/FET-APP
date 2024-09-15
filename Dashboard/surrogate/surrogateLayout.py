@@ -272,7 +272,8 @@ def surrogateCallbacks(app, furl, isRegressor: bool = False):
                     [
                         html.Td(index + 1),
                         html.Td(causes_table, style={"padding": "0"}),
-                        html.Td(rule["target_value"]),
+                        html.Td([rule["target_value"],
+                                 f' {model_x.explainer_regressor.getElement("unit")}' if isRegressor else '']),
                         html.Td(rule["probability"]),
                         html.Td(rule["samples_amount"]),
                     ]

@@ -62,7 +62,7 @@
     {% block body %}
       <div class="main_container">
         <div>
-          <div style="width: 100vw; height: 100vh; background-color: #2b3c3cba; position: absolute; z-index: 2; display: none;"></div>
+          <div id="back-drop-mobile" style="width: 100vw; height: calc(100vh - 53px); background-color: #2b3c3cba; position: absolute; z-index: 2; display: none; margin-top: 53px;"></div>
           <div id="body-container">
             {% block top_navigation %}
               <div id="top-nav-container" class="top_nav" style="margin-left: 0; position: fixed; right: 0; width: 100%; z-index: 999;">
