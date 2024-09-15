@@ -55,7 +55,8 @@
 
 .opened-page {
   background-color: #1b1b1b3d !important;
-  border-right: 8pt solid #80ff00 !important;
+  border-right: 5pt solid #80ff00 !important;
+	margin-right: 0pt;
 }
 
 .sidebar-list-button:hover {

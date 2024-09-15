@@ -949,8 +949,9 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
                     )
                     return setBottomLegend(fig)
 
-                contribution_header = setText(commonTranslations, 'contribution',
+                contribution_header = setText(contributionHeadersTranslations, 'contribution',
                                               'dashboard.predictions.common.contribution.headers')
+
 
                 data_table = html.Div(
                     [
@@ -1024,7 +1025,8 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
                     dcc.Graph(figure=pie_chart) if not isRegressor else
                     html.Plaintext(
                         f"{setText(commonTranslations, 'prediction', 'dashboard.predictions.common')}"
-                        f": {predictions_graph_data['values'][0]}",
+                        f": {predictions_graph_data['values'][0]}"
+                        f" {model_x.explainer_regressor.getElement('unit')}",
                         style={
                             "color": "black",
                             "font-size": "18px",

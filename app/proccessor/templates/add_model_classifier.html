@@ -87,8 +87,8 @@
                         <h5 class="q-vars-header" id="description-title"></h5>
                         {% for var in variables %}
                           <div class="col custom-col">
-                            <label>{{ var }}</label>
-                            <textarea class="form-control custom-input description-text" name="{{ var }}"></textarea>
+                            <label>{{ var.variable }}</label>
+                            <textarea class="form-control custom-input description-text" name="{{ var.variable }}">{{ var.current_val }}</textarea>
                           </div>
                         {% endfor %}
                         <h5 class="q-vars-header" id="q-vars-title"></h5>

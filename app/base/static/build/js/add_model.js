@@ -18,7 +18,7 @@ let models_list = null;
 let editedModelName = null;
 const getModelsList = async (model_type) => {
   // get
-  response = await fetch(`http://127.0.0.1:5000/INTERNAL_API/${model_type}/namelist`, {
+  const response = await fetch(`http://127.0.0.1:5000/INTERNAL_API/${model_type}/namelist`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   })
@@ -39,41 +39,46 @@ const isNameValid = () => {
 };
 
 const evaluateModelType = async(model_type) => {
-  console.log('model: ', model_field.files[0]);
-  const formData = new FormData();
-  formData.append('model', model_field.files[0]);
-  formData.append('model_type', model_type);
+  if (model_field) {
+    console.log('model: ', model_field.files[0]);
+    const formData = new FormData();
+    formData.append('model', model_field.files[0]);
+    formData.append('model_type', model_type);
 
-  response = await fetch('/INTERNAL_API/verify_model', {
-    method: 'POST',
-    body: formData
-  })
-
-  res = await response.json().then((value) => {
-    console.log(value)
-    return value.is_valid
-  })
-  return res;
-}
-
-const evaluateDatasetCompatibility = async(model_type) => {
-  console.log('model: ', model_field.files[0]);
-  console.log('dataset: ', model_data_set_field.files[0]);
-  const formData = new FormData();
-  formData.append('model', model_field.files[0]);
-  formData.append('dataset', model_data_set_field.files[0]);
-
-  if (model_field.files[0]) {
-    response = await fetch('/INTERNAL_API/verify_dataset', {
+    const response = await fetch('/INTERNAL_API/verify_model', {
       method: 'POST',
       body: formData
     })
 
-    res = await response.json().then((value) => {
+    const res = await response.json().then((value) => {
       console.log(value)
       return value.is_valid
     })
-    return res
+    return res;
+  }
+  return true;
+}
+
+const evaluateDatasetCompatibility = async(model_type) => {
+  if (model_field) {
+    console.log('model: ', model_field.files[0]);
+    console.log('dataset: ', model_data_set_field.files[0]);
+    const formData = new FormData();
+    formData.append('model', model_field.files[0]);
+    formData.append('dataset', model_data_set_field.files[0]);
+
+    if (model_field.files[0]) {
+      response = await fetch('/INTERNAL_API/verify_dataset', {
+        method: 'POST',
+        body: formData
+      })
+
+      res = await response.json().then((value) => {
+        console.log(value)
+        return value.is_valid
+      })
+      return res
+    }
   }
   return true;
 }
@@ -85,7 +90,7 @@ const isModelValid = async() => {
   if (classifierModel) {
     validModel = await evaluateModelType('classifier');
     classifierModel.style.display = validModel ? 'none' : '';
-  } else {
+  } else if (regressorModel) {
     validModel = await evaluateModelType('regressor');
     regressorModel.style.display = validModel ? 'none' : '';
   }
@@ -100,7 +105,7 @@ const isDatasetValid = async() => {
   validDataset = await evaluateDatasetCompatibility();
   if (classifierModel) {
     datasetField.style.display = validDataset ? 'none' : '';
-  } else {
+  } else if (regressorModel) {
     datasetField.style.display = validDataset ? 'none' : '';
   }
   return validDataset;

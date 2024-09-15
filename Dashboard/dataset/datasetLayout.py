@@ -115,25 +115,15 @@ def datasetLayout(dataTranslations):
                                 html.Div(id="dataset-view", style={"overflow": "scroll", "border-radius": "5px"}),
                             ]
                         ),
-                        dbc.Row(
+                        html.Div(
                             [
-                                dbc.Col(
-                                    [
-                                        html.Plaintext(
-                                            setText(commonTranslations, 'description-title', 'dashboard.data.common'),
-                                            className="rules-title",
-                                        ),
-                                        html.Div(id="features-description"),
-                                    ],
-                                    xs=8,
-                                    sm=8,
-                                    md=8,
-                                    lg=8,
-                                    xl=8,
-                                    xxl=8,
-                                )
+                                html.Plaintext(
+                                    setText(commonTranslations, 'description-title', 'dashboard.data.common'),
+                                    className="rules-title",
+                                ),
+                                html.Div(id="features-description"),
                             ],
-                            style={"padding-top": "20px"},
+                            style={'max-width': '800px', 'margin': 'auto auto 5rem auto'}
                         ),
                         dbc.Row(
                             [
@@ -298,6 +288,7 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
         Output("dataset-title", "children", allow_duplicate=True),
         Output("modified-dataset-view", "children"),
         Output("dataset-view", "children"),
+        Output("features-description", "children"),
         Output("numeric-plot", "children"),
         Output("object-plot", "children"),
         Output("correlation-plot", "children"),
@@ -319,10 +310,31 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
                 ExplainedModel.id == model_id
             ).first()
 
+            descriptions = model_x.getElement("features_description")
+            descriptions_df: pd.DataFrame = pd.DataFrame(list(descriptions.items()), columns=[
+                setText(translationsCommon, 'columns-header', 'dashboard.data.columns-header'),
+                setText(translationsCommon, 'descriptions-header', 'dashboard.data.descriptions-header'),
+            ])
+
+            def replace_empty_values(x):
+                if x.strip() == '':
+                    print('x: ', x)
+                    print('setText: ', setText(translationsCommon, 'no-description', 'dashboard.data.no-description'))
+                    return setText(translationsCommon, 'no-description', 'dashboard.data.no-description'),
+                else:
+                    return x
+
+            descriptions_df = descriptions_df.map(lambda x: replace_empty_values(x))
+
+            print('descriptions_df: ', descriptions_df)
+
             original_df: pd.DataFrame = model_x.data_set_data.getElement("dataset")
             original_df_with_index = original_df.rename_axis("Índice").reset_index()
             df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
             df_with_index = df.copy()
+            if isRegressor:
+                df_with_index[model_x.getElement('target_row')] = df_with_index[model_x.getElement('target_row')].apply(
+                    lambda x: str(x) + f" {model_x.explainer_regressor.getElement('unit')}")
             if model_x.indexColumnName:
                 df_with_index.insert(0, model_x.indexColumnName, model_x.getElement('indexesList'))
             else:
@@ -363,7 +375,6 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
                                 "placeholder_text": setText(translationsCommon, 'filter', 'dashboard.data.common')},
                             sort_action="native",
                             sort_mode="multi",
-                            row_selectable="single",
                         )
                     ],
                     className="rules-table",
@@ -382,10 +393,24 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
                                 "placeholder_text": setText(translationsCommon, 'filter', 'dashboard.data.common')},
                             sort_action="native",
                             sort_mode="multi",
-                            row_selectable="single",
                         )
                     ],
                     className="rules-table",
+                ),
+                html.Div(
+                    [
+                        dash_table.DataTable(
+                            data=descriptions_df.to_dict("records"),
+                            columns=[
+                                {"name": i, "id": i}
+                                for i in descriptions_df.columns
+                            ],
+                            page_size=10,
+                            sort_action="native",
+                            sort_mode="multi",
+                        )
+                    ],
+                    className="rules-table no_center",
                 ),
                 [
                     dcc.Dropdown(

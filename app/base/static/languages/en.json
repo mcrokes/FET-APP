@@ -195,8 +195,7 @@
     "index-selector": "Residual Column as Index",
     "descriptions": {
       "title": "Variable Descriptions",
-      "placeholder": "Description...",
-      "no-description": "No Description"
+      "placeholder": "Description..."
     },
     "q-vars": {
       "title": "Possible Qualitative Variable Values.",
@@ -277,8 +276,7 @@
     "index-selector": "Residual Column as Index",
     "descriptions": {
       "title": "Variable Descriptions",
-      "placeholder": "Description...",
-      "no-description": "No Description"
+      "placeholder": "Description..."
     },
     "q-vars": {
       "title": "Possible Qualitative Variable Values.",
@@ -315,6 +313,9 @@
     "data": {
       "common": {
         "filter": "Filter...",
+        "columns-header": "Column",
+        "descriptions-header": "Description",
+        "no-description": "No Description",
         "distributions": {
           "labels": {
             "x": "Variable",
@@ -332,7 +333,7 @@
         "title": "Data Set Metrics: ",
         "dataset": {
           "title": "Original Data Set",
-          "modified-title": "Data Set Metrics: ",
+          "modified-title": "Modified Data Set: ",
           "tooltip": {
             "text-1": "* If you want to filter the columns ",
             "text-2": "Numerical",
@@ -666,7 +667,7 @@
           "title": "Individual Prediction by Trees",
           "labels": {
             "x": "Tree Number",
-            "y": "Certainty of Prediction %"
+            "y": "Individual Prediction"
           }
         }
       }

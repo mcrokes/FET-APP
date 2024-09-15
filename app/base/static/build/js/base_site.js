@@ -1,4 +1,5 @@
 const sidebar = document.getElementById('sidebar-container');
+const backDropMobile = document.getElementById('back-drop-mobile');
 const sidebarImage = document.getElementById('sidebar-site-logo');
 const topbarImage = document.getElementById('logo-tob-bar');
 const sidebarChevronIcon = document.getElementById('chevron-icon-sidebar');
@@ -26,10 +27,21 @@ document.addEventListener('mousemove', (e) => {
 	}
 });
 
+const sidebarIfMobile = () => {
+	if (window.innerWidth <= 800){
+		sidebar.style.height = 'calc(100% - 53px)';
+		sidebar.style.position = 'fixed';
+		backDropMobile.style.display = 'unset';
+	} else {
+		backDropMobile.style.display = 'none';
+		sidebar.style.height = 'unset';
+		sidebar.style.position = 'unset';
+	}
+}
+
 const setSmallSideBar = (mobile = false) => {
+	sidebarIfMobile()
 	topbarImage.style.display = '';
-//	body.style.width = window.innerWidth + 'px';
-//	topNav.style.width = window.innerWidth + 'px';
 	sidebarImage.style.display = 'none'
 	sidebarChevronIcon.style.display = 'none'
 	for (const item of sidebarItems) {
@@ -39,16 +51,12 @@ const setSmallSideBar = (mobile = false) => {
 		icon.style.fontSize = '25px';
 		icon.style.marginLeft = '0.5rem';
 	}
-//	if (!mobile) body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width + 0.25) + 'px';
-//	topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
 	sidebarFooter.style.display = 'block';
 	window.localStorage.setItem('sidebar-expanded', 'false');
 }
 
 const setNormalSideBar = () => {
 	topbarImage.style.display = 'none';
-//	body.style.width = window.innerWidth + 'px';
-//	topNav.style.width = window.innerWidth + 'px';
 	sidebarImage.style.display = 'unset'
 	sidebarChevronIcon.style.display = 'unset'
 	for (const item of sidebarItems) {
@@ -58,8 +66,6 @@ const setNormalSideBar = () => {
 		icon.style.fontSize = '18px';
 		icon.style.marginLeft = '0';
 	}
-//	body.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width + 0.25) + 'px';
-//	topNav.style.width = (window.innerWidth - sidebar.getBoundingClientRect().width) + 'px';
 	sidebarFooter.style.display = 'flex';
 	window.localStorage.removeItem('sidebar-expanded');
 }
@@ -67,6 +73,7 @@ const setNormalSideBar = () => {
 const hide_sidebar = () => {
 	topbarImage.style.display = '';
 	sidebar.style.display = 'none';
+	backDropMobile.style.display = 'none';
 	window.localStorage.setItem('sidebar-mobile-expanded', 'false');
 	window.localStorage.setItem('sidebar-expanded', 'false');
 }
@@ -99,12 +106,12 @@ const checkPosition = ()=> {
 	if (window.innerWidth <= 800 && window.localStorage.getItem('sidebar-mobile-expanded') !== 'true') {
 		hide_sidebar();
 	} else {
-		sidebar.style.display = 'unset';
 		if (window.localStorage.getItem('sidebar-mobile-expanded') === 'true' && window.innerWidth <= 800 || window.localStorage.getItem('sidebar-expanded') === 'false') {
 			setSmallSideBar();
 		} else if(window.innerWidth > 800 && window.localStorage.getItem('sidebar-expanded') !== 'false'){
 			setNormalSideBar()
 		}
+		sidebar.style.display = 'unset';
 	}
 }
 

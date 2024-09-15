@@ -195,8 +195,7 @@
     "index-selector": "Columna sobrante como índice",
     "descriptions": {
       "title": "Descripción de variables",
-      "placeholder": "Descripción...",
-      "no-description": "Sin descripción"
+      "placeholder": "Descripción..."
     },
     "q-vars": {
       "title": "Valores de las posibles variables cualitativas.",
@@ -277,8 +276,7 @@
     "index-selector": "Columna sobrante como índice",
     "descriptions": {
       "title": "Descripción de variables",
-      "placeholder": "Descripción...",
-      "no-description": "Sin descripción"
+      "placeholder": "Descripción..."
     },
     "q-vars": {
       "title": "Valores de las posibles variables cualitativas.",
@@ -315,6 +313,9 @@
     "data": {
       "common": {
         "filter": "Filtrar...",
+        "columns-header": "Columna",
+        "descriptions-header": "Descripción",
+        "no-description": "Sin descripción",
         "distributions": {
           "labels": {
             "x": "Variable",
@@ -332,7 +333,7 @@
         "title": "Métricas del Conjunto de Datos: ",
         "dataset": {
           "title": "Conjunto de Datos Original",
-          "modified-title": "Métricas del Conjunto de Datos: ",
+          "modified-title": "Conjunto de Datos Modificado: ",
           "tooltip": {
             "text-1": "* Si desea filtrar las columnas ",
             "text-2": "Numéricas",
@@ -645,7 +646,7 @@
           "title": "Predicción individual por árboles para la clase:",
           "labels": {
             "x": "Número del Árbol",
-            "y": "Certeza de la Predicción %"
+            "y": "Predicción Individual"
           }
         }
       },
