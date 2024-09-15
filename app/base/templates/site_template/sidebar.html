@@ -91,27 +91,27 @@
     if (location.pathname == '/home/') {
       document.getElementById('home-list-button').classList.add('opened-page');
     } else if (
-      location.pathname == '/processor/manage_classifiers' ||
-      location.pathname == '/processor/add_classifier' ||
-      location.pathname == '/dashboard/classification' ||
-      location.pathname == '/dashboard/classifier/comparison'
+    location.pathname == '/processor/manage_classifiers' ||
+    location.pathname == '/processor/add_classifier' ||
+    location.pathname == '/dashboard/classification' ||
+    location.pathname == '/dashboard/classifier/comparison'
     ) {
       document.getElementById('classifier-list-button').classList.add('opened-page');
     } else if (
-      location.pathname == '/processor/manage_regressors' ||
-      location.pathname == '/processor/add_regressor' ||
-      location.pathname == '/dashboard/regression' ||
-      location.pathname == '/dashboard/regression/comparison'
+    location.pathname == '/processor/manage_regressors' ||
+    location.pathname == '/processor/add_regressor' ||
+    location.pathname == '/dashboard/regression' ||
+    location.pathname == '/dashboard/regression/comparison'
     ) {
-	    document.getElementById('regressor-list-button').classList.add('opened-page');
+      document.getElementById('regressor-list-button').classList.add('opened-page');
     } else if (
-      location.pathname == '/setting/manage_users' ||
-      location.pathname == '/setting/change_password' ||
-      location.pathname == '/setting/add_user' ||
-      location.pathname == '/setting/manage_users' ||
-      location.pathname == '/setting/manage_users'
+    location.pathname == '/setting/manage_users' ||
+    location.pathname == '/setting/change_password' ||
+    location.pathname == '/setting/add_user' ||
+    location.pathname == '/setting/manage_users' ||
+    location.pathname == '/setting/manage_users'
     ) {
-	    document.getElementById('config-btn-link').classList.add('opened-page');
+      document.getElementById('config-btn-link').classList.add('opened-page');
     }
 
     (async() => {
@@ -133,12 +133,13 @@
       window.document.getElementById('config-btn').innerHTML = sidebarTranslations["config-btn"] ?? 'sidebar.config-btn';
       window.document.getElementById('config-btn-link').title = sidebarTranslations["config-btn-link"] ?? 'sidebar.config-btn-link';
 
+      if (document.getElementById('config-sidebar')) {
+        document.getElementById('config-sidebar').innerHTML = sidebarTranslations["config"] ?? 'sidebar.config';
+        document.getElementById('config-sidebar-link').title = sidebarTranslations["config-sidebar-link"] ?? 'sidebar.config-sidebar-link';
 
-      window.document.getElementById('config-sidebar').innerHTML = sidebarTranslations["config"] ?? 'sidebar.config';
-      window.document.getElementById('config-sidebar-link').title = sidebarTranslations["config-sidebar-link"] ?? 'sidebar.config-sidebar-link';
-
-      window.document.getElementById('add-user-sidebar').innerHTML = sidebarTranslations["add-user"] ?? 'sidebar.add-user';
-      window.document.getElementById('add-user-sidebar-link').title = sidebarTranslations["add-user-sidebar-link"] ?? 'sidebar.add-user-sidebar-link';
+        document.getElementById('add-user-sidebar').innerHTML = sidebarTranslations["add-user"] ?? 'sidebar.add-user';
+        document.getElementById('add-user-sidebar-link').title = sidebarTranslations["add-user-sidebar-link"] ?? 'sidebar.add-user-sidebar-link';
+      }
 
       window.document.getElementById('password-sidebar').innerHTML = sidebarTranslations["password"] ?? 'sidebar.password';
       window.document.getElementById('password-sidebar-link').title = sidebarTranslations["password-sidebar-link"] ?? 'sidebar.password-sidebar-link';

@@ -72,7 +72,8 @@
   },
   "top-bar": {
     "config": "Configuration",
-    "exit": "Exit"
+    "exit": "Exit",
+    "msg": "Welcome"
   },
   "sidebar": {
     "home-btn": "Home",
