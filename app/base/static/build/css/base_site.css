@@ -127,3 +127,39 @@ footer {
 	display: none;
 	z-index: 2;
 }
+
+.error-pages-container {
+	background-color: #569c5ad6;
+  max-width: fit-content;
+  border-radius: 40px;
+  text-align: center;
+  margin: 53px auto;
+  padding: 4rem;
+  color: black;
+  text-transform: uppercase;
+  font-weight: 900;
+  border: 7pt dashed #ff92008f;
+  white-space: wrap;
+}
+
+#error-button-container {
+  border: 1pt dashed aliceblue;
+  border-radius: 6px;
+	width: fit-content;
+	margin: auto;
+  text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+#error-button {
+	color: #ffb300;
+  font-size: 2rem;
+	white-space: wrap;
+  padding: 4px 12px;
+}
+
+#error-button:hover {
+	color: #0e470c;
+  background-color: #fbfff052;
+}

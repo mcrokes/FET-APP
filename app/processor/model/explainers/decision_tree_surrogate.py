@@ -7,7 +7,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 import numpy as np
 from sklearn.tree._tree import Tree, TREE_UNDEFINED
 
-from app.proccessor.model.dataset_interaction_methods import get_y_transformed
+from app.processor.model.dataset_interaction_methods import get_y_transformed
 
 matplotlib.use('SVG')
 

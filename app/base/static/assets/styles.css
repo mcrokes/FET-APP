@@ -32,8 +32,7 @@ div.section-card {
   border-radius: 4px;
   position: sticky;
   z-index: 1000;
-  width: 100%;
-  top: 0;
+  top: 0.5rem;
   gap: 8px;
   padding: 0.5rem;
   border-radius: 1rem;

@@ -94,7 +94,11 @@
         </div>
       </div>
 
-      <script src="{{ url_for('static', filename='build/js/base_site.js') }}"></script>
+
+      {% block javascripts2 %}
+        <script src="{{ url_for('static', filename='build/js/base_site.js') }}"></script>
+      {% endblock javascripts2 %}
+
       {% block javascripts %}
         <!-- jQuery -->
         <script src="{{ url_for('static', filename='vendors/jquery/dist/jquery.min.js') }}"></script>

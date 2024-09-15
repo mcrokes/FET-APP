@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 from flask_login import current_user
 
 from app.API.utils import setText, findTranslationsParent, getDashboardTranslations
-from app.proccessor.models import ExplainedModel
+from app.processor.models import ExplainedModel
 
 
 def generateDataSetDistributions(df: pd.DataFrame, feature, legendTranslations):

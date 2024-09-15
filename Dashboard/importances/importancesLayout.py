@@ -13,8 +13,8 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.inspection import permutation_importance
 
 from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
-from app.proccessor.model.values import get_target_dropdown
-from app.proccessor.models import ExplainedModel
+from app.processor.model.values import get_target_dropdown
+from app.processor.models import ExplainedModel
 
 id_sufix = ["importances", "permutation-importances"]
 

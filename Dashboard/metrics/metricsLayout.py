@@ -14,11 +14,11 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 from Dashboard.utils import get_target_dropdown
 from app.API.utils import setText, findTranslationsParent, getDashboardTranslations
-from app.proccessor.model.dataset_interaction_methods import (
+from app.processor.model.dataset_interaction_methods import (
     get_y_transformed,
     update_y_pred,
 )
-from app.proccessor.models import ExplainedClassifierModel, ExplainedModel
+from app.processor.models import ExplainedClassifierModel, ExplainedModel
 
 from sklearn import metrics
 import plotly.express as px

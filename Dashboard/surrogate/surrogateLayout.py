@@ -9,10 +9,10 @@ from flask_login import current_user
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
-from app.proccessor.model.explainers.decision_tree_surrogate import (
+from app.processor.model.explainers.decision_tree_surrogate import (
     ExplainSingleTree,
 )
-from app.proccessor.models import (
+from app.processor.models import (
     ExplainedModel,
     SurrogateTreeData,
     Tree,

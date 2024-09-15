@@ -7,6 +7,26 @@
     "username": "Nombre de Usuario",
     "pwd": "Contraseña"
   },
+  "error-pages": {
+    "403": {
+      "title": "403",
+      "header": "Acceso Denegado",
+      "text": "Se requiere autenticación completa para acceder a este recurso.",
+      "button": "Iniciar sesión"
+    },
+    "404": {
+      "title": "404",
+      "header": "Lo sentimos, pero no pudimos encontrar esta página",
+      "text": "La página que estás buscando no existe",
+      "button": "Ir al Inicio"
+    },
+    "500": {
+      "title": "500",
+      "header": "Error Interno del Servidor",
+      "text": "Rastreamos estos errores automáticamente, pero si el problema persiste, no dudes en contactarnos. Mientras tanto, intenta refrescar.",
+      "button": "Refrescar Página"
+    }
+  },
   "add-user": {
     "title": "Crear Usuario",
     "btn": "Crear",
