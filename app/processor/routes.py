@@ -20,7 +20,7 @@ from app.processor.models import (
     TreeRuleCause, dbInteractionMethods,
 )
 from . import blueprint
-from flask import current_app, render_template, request, redirect
+from flask import current_app, render_template, request, redirect, abort
 from flask_login import current_user, login_required
 import pandas as pd
 
@@ -376,6 +376,7 @@ def save_classifier(modelId: int = 0):
                     )
                     db_model.user = User.query.filter(User.id == current_user.id).first()
                     db_model.add_to_db()
+            # abort(500) TODO internal server test
             status = "Second"
             possible_targets = list(
                 set(db_model.getElement("dataset").columns)
@@ -391,6 +392,7 @@ def save_classifier(modelId: int = 0):
         except Exception as e:
             print('Exception on Initial: ', e)
             status = "Wrong Data"
+            # abort(500) TODO internal server test
             return render_template(
                 "add_model_classifier.html", form=form, status=status, type='edit' if modelId else 'add'
             )
