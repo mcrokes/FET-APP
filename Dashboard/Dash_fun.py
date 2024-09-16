@@ -58,4 +58,3 @@ def apply_layout_with_auth(app, createLayout, addCallbacks):
     app.config.suppress_callback_exceptions = True
     app.layout = serve_layout
 
-    print('App Layout: ', app.layout)

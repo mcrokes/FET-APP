@@ -109,7 +109,7 @@ def get_regressor_namelist():
 def find_translations(current_language, keys):
     # Obtener la ruta actual de trabajo
     ruta_actual = os.getcwd()
-    ruta_archivo = os.path.join(ruta_actual, f'app/base/static/languages/{current_language}.json')
+    ruta_archivo = os.path.join(ruta_actual, f'configs/static/languages/{current_language}.json')
     text = ''
     try:
         with open(ruta_archivo) as archivo:

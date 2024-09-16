@@ -1,3 +1,4 @@
+import plotly
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -33,8 +34,11 @@ def generateDataSetDistributions(df: pd.DataFrame, feature, legendTranslations):
             line=dict(color="royalblue", width=1, dash="dot"),
         ))
         graph['graph_data'].append(
-            go.Bar(name=setText(legendTranslations, 'bars', 'dashboard.data.common.distributions.legend'), x=x, y=y,
-                   width=0.5))
+            go.Bar(
+                name=setText(legendTranslations, 'bars', 'dashboard.data.common.distributions.legend'),
+                x=x, y=y, width=0.5,
+                marker=dict(color=['#095e49' for _ in range(len(x))])
+            ))
     return graph
 
 
@@ -209,7 +213,7 @@ def datasetLayout(dataTranslations):
                         ),
                     ], className="container")
                 ],
-            )
+            ),
         ],
         className="section-content",
         style={"margin": "auto"},
@@ -463,6 +467,7 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
                                 y=corr_matrix.columns,
                                 text=round(corr_matrix, 2),
                                 texttemplate="%{text}",
+                                colorscale=['#c6efce', '#8bc34a', '#2f4f4f']
                             ),
                         )
                     )

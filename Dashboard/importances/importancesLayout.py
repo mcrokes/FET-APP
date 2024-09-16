@@ -100,7 +100,7 @@ def importancesLayout(importanceTranslations):
                                                 'dashboard.importance.classifier'),
                         )
                     ], id='selector-container', hidden=True)),
-                ], className="container")
+                ], className="container"),
             ],
         ),
         style={"padding-left": "30px", "padding-right": "30px", "margin": "auto"},
@@ -154,6 +154,7 @@ def importancesCallbacks(app, furl, isRegressor: bool = False):
                 x=setText(translationsGini, 'label-x', 'dashboard.importance.common.gini'),
                 y=setText(translationsGini, 'label-y', 'dashboard.importance.common.gini'),
                 title=setText(translationsGini, 'title', 'dashboard.importance.common.gini'),
+                color_discrete_sequence=['#0a5b35']
             )
 
             if not isRegressor:
@@ -209,6 +210,7 @@ def importancesCallbacks(app, furl, isRegressor: bool = False):
                     "importances_mean":
                         setText(translationsPermutation, 'label-x', 'dashboard.importance.common.permutation')
                 },
+                color_discrete_sequence=['#0b787d']
             )
             classifier_hint = html.Strong(setText(translationsClassifier, 'hint', 'dashboard.importance.classifier'))
             return (

@@ -139,7 +139,8 @@ def generateDependencePlots(X: pd.DataFrame, qualitative_dict,
         graph['graph_data'].append(
             go.Bar(
                 name=setText(legendTranslations, 'bars', 'dashboard.metrics.regressor.partial-dependence.legend'),
-                x=x, y=y, width=0.5
+                x=x, y=y, width=0.5,
+                marker=dict(color=['#095e49' for _ in range(len(x))])
             )
         )
 
@@ -487,7 +488,7 @@ def __create_matrix(cm, class_names, matrixTranslations):
         x=class_names,
         y=class_names,
         text_auto=True,
-        color_continuous_scale="Blues",
+        color_continuous_scale=["white", "aqua", "#095e49"],
     )
     return fig
 
@@ -1019,15 +1020,19 @@ def metricsCallbacks(app, furl, isRegressor: bool = False):
                 )
                 y = regressor_dataset[model_x.getElement('target_row')]
                 y_pred = regressor_model.predict(regressor_dataset.drop(columns=model_x.getElement('target_row')))
-                fig = px.scatter(x=y, y=y_pred, title=setText(regressorPredRealTranslations, 'title',
-                                                              'dashboard.metrics.regressor.prediction-real'),
-                                 marginal_y='histogram',
-                                 labels={
-                                     'x': setText(regressorPredRealLabelsTranslations, 'x',
-                                                  'dashboard.metrics.regressor.prediction-real.labels'),
-                                     'y': setText(regressorPredRealLabelsTranslations, 'y',
-                                                  'dashboard.metrics.regressor.prediction-real.labels')
-                                 })
+                fig = px.scatter(
+                    x=y, y=y_pred,
+                    title=setText(regressorPredRealTranslations, 'title',
+                                  'dashboard.metrics.regressor.prediction-real'),
+                    marginal_y='histogram',
+                    labels={
+                        'x': setText(regressorPredRealLabelsTranslations, 'x',
+                                     'dashboard.metrics.regressor.prediction-real.labels'),
+                        'y': setText(regressorPredRealLabelsTranslations, 'y',
+                                     'dashboard.metrics.regressor.prediction-real.labels')
+                    },
+                    color_discrete_sequence=['#0a5b35']
+                )
                 fig.add_shape(
                     type="line", line=dict(dash='dash'),
                     x0=y.min(), y0=y.min(),
@@ -1036,15 +1041,19 @@ def metricsCallbacks(app, furl, isRegressor: bool = False):
 
                 fig_1 = dcc.Graph(figure=fig)
 
-                fig = px.scatter(x=y_pred, y=y, title=setText(regressorRealPredTranslations, 'title',
-                                                              'dashboard.metrics.regressor.real-prediction'),
-                                 marginal_y='histogram',
-                                 labels={
-                                     'x': setText(regressorRealPredLabelsTranslations, 'x',
-                                                  'dashboard.metrics.regressor.real-prediction.labels'),
-                                     'y': setText(regressorRealPredLabelsTranslations, 'y',
-                                                  'dashboard.metrics.regressor.real-prediction.labels')
-                                 })
+                fig = px.scatter(
+                    x=y_pred, y=y,
+                    title=setText(regressorRealPredTranslations, 'title',
+                                  'dashboard.metrics.regressor.real-prediction'),
+                    marginal_y='histogram',
+                    labels={
+                        'x': setText(regressorRealPredLabelsTranslations, 'x',
+                                     'dashboard.metrics.regressor.real-prediction.labels'),
+                        'y': setText(regressorRealPredLabelsTranslations, 'y',
+                                     'dashboard.metrics.regressor.real-prediction.labels')
+                    },
+                    color_discrete_sequence=['#0b787d']
+                )
                 fig.add_shape(
                     type="line", line=dict(dash='dash'),
                     x0=y_pred.min(), y0=y_pred.min(),

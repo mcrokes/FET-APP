@@ -657,7 +657,7 @@
             "text-2": " in the model makes a prediction. The final prediction is based on the ",
             "text-3": "combination of the predictions",
             "text-4": " of all trees.",
-            "text-5": "* Blue",
+            "text-5": "* Green",
             "text-6": " represents the trees that predict the selected class as positive.",
             "text-7": "* Red",
             "text-8": " represents the trees that predict the remaining classes."

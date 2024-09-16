@@ -10,10 +10,6 @@ This project integrates Gentelella with Flask using:
 - [flask_migrate](https://flask-migrate.readthedocs.io/en/latest/).
 - [dash](https://dash.plot.ly/).
 
-Here is an example of a real project implemented using Flask-Gentelella:
-- [Online demo](http://afourmy.pythonanywhere.com/)
-- [Source code](https://github.com/afourmy/eNMS)
-
 ##  Install requirements 
     pipenv sync
     or

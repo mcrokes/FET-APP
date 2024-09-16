@@ -126,7 +126,7 @@ def getTreeInterpreterParamethersRegressor(
                  f" ({round(point, 3)}) "
                  f"{round((point / (prediction[0][0] if prediction[0][0] > 0 else 1) * 100), 2)} %",
             line=dict(dash="dash"),
-            marker_color=["blue", "blue"],
+            marker_color=["#095e49", "#095e49"],
         )
     )
 
@@ -240,7 +240,7 @@ def getTreeInterpreterParamethersClassifier(
                     mode="lines",
                     name=f"{actual} ({round(point, 3)}) {round((point / (prediction[0][index] if prediction[0][index] > 0 else 1) * 100), 2)} %",
                     line=dict(dash="dash"),
-                    marker_color=["blue", "blue"],
+                    marker_color=["#095e49", "#095e49"],
                 )
             )
 
@@ -262,6 +262,7 @@ def getIndividualPredictionsRegressor(model: RandomForestRegressor, instance, tr
             name=setText(treesTranslations, 'bar-title', 'dashboard.predictions.regressor.trees'),
             y=np.round(sorted(individual_predictions), 2),
             x=x[1:],
+            marker=dict(color=['#095e49' for _ in range(len(x[1:]))])
         ),
         go.Scatter(
             name=setText(treesTranslations, 'line-title', 'dashboard.predictions.regressor.trees'),
@@ -295,19 +296,19 @@ def getIndividualPredictionsClassifier(model, class_names, instance, cut_point, 
     markers = []
     for val in np.array(individual_predictions)[:, index]:
         if val * 100 >= cut_point:
-            markers.append("blue")
+            markers.append("#095e49")
         else:
-            markers.append("red")
+            markers.append("#ba3333")
 
     sorted_predictions = sorted(
         zip(np.array(individual_predictions)[:, index], markers),
-        key=lambda x: (-x[0] if markers.count("blue") > markers.count("red") else x[0]),
+        key=lambda x: (-x[0] if markers.count("#095e49") > markers.count("#ba3333") else x[0]),
     )
     predictions_for_actual_clase = np.array(sorted_predictions)[:, 0]
     prev_x = list(range(len(predictions_for_actual_clase) + 1))
     x = (
         prev_x[1:]
-        if markers.count("blue") > markers.count("red")
+        if markers.count("#095e49") > markers.count("#ba3333")
         else prev_x[::-1][:-1]
     )
     y = np.round(predictions_for_actual_clase.astype(np.float64) * 100, 2)
@@ -320,7 +321,7 @@ def getIndividualPredictionsClassifier(model, class_names, instance, cut_point, 
             marker_color=np.array(sorted_predictions)[:, 1],
         ), go.Scatter(
             name=setText(treesTranslations, 'line-title', 'dashboard.predictions.classifier.trees'),
-            x=[1, x[0]] if markers.count("blue") < markers.count("red") else [x[-1], 1],
+            x=[1, x[0]] if markers.count("#095e49") < markers.count("#ba3333") else [x[-1], 1],
             y=[cut_point, cut_point],
             mode="lines",
             line=dict(dash="dash"),
@@ -335,7 +336,7 @@ def getIndividualPredictionsClassifier(model, class_names, instance, cut_point, 
         bargap=0.1,
         xaxis=dict(
             autorange=(
-                "reversed" if markers.count("blue") > markers.count("red") else True
+                "reversed" if markers.count("#095e49    ") > markers.count("#ba3333") else True
             )
         ),
     )

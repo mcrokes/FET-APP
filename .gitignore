@@ -20,6 +20,7 @@ virtual_env
 .vscode/
 .idea
 .git
+instance
 
 # sphinx docs 
 _build

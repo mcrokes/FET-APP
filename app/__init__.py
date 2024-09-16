@@ -125,7 +125,7 @@ def handle_500(e):
 
 
 def create_app(config, selenium=False):
-    app = Flask(__name__, static_folder="base/static")
+    app = Flask(__name__, static_folder="../configs/static")
     app.config.from_object(config)
     if selenium:
         app.config["LOGIN_DISABLED"] = True
