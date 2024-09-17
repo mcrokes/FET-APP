@@ -12,11 +12,11 @@ from app.API.utils import setText, findTranslationsParent, getDashboardTranslati
 from app.processor.models import ExplainedModel
 
 
-def generateDataSetDistributions(df: pd.DataFrame, feature, legendTranslations):
+def generateDataSetDistributions(df: pd.DataFrame, feature, legendTranslations, isQualitative: bool = False):
     graph = {"predictor": feature, "graph_data": []}
     values = list(set(df[feature]))
     counts = df[feature].value_counts()
-    if len(values) < 5:
+    if isQualitative:
         for value in values:
             graph["graph_data"].append(
                 go.Bar(name=value, x=[value], y=[counts[value]])
@@ -262,7 +262,7 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
             ).first()
 
             df: pd.DataFrame = model_x.data_set_data.getElement("dataset_modified")
-            qualitative_graph = generateDataSetDistributions(df, q_var, legendTranslations)
+            qualitative_graph = generateDataSetDistributions(df, q_var, legendTranslations, isQualitative=True)
             numeric_graph = generateDataSetDistributions(df, n_var, legendTranslations)
             return (
                 dcc.Graph(
@@ -356,7 +356,8 @@ def datasetCallbacks(app, furl, isRegressor: bool = False):
                 n_vars_names.remove(elm)
 
             qualitative_graph = generateDataSetDistributions(df, q_vars_names[0],
-                                                             legendTranslations) if q_vars_names else None
+                                                             legendTranslations,
+                                                             isQualitative=True) if q_vars_names else None
             numeric_graph = generateDataSetDistributions(df, n_vars_names[0],
                                                          legendTranslations) if n_vars_names else None
             corr_matrix = original_df.drop(

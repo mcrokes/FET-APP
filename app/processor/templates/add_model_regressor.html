@@ -4,6 +4,10 @@
   Add Model Regressor
 {% endblock %}
 
+{% if status.value == 'Add' %}
+  {% block bodyOnLoad %}getData({{ variables }}, {{ target_name }}){% endblock bodyOnLoad %}
+{% endif %}
+
 {% block stylesheets %}
   {{ super() }}
   <link href="{{ url_for('static', filename='build/css/add_model.css') }}" rel="stylesheet">
@@ -22,16 +26,16 @@
               <div class="container is-widescreen">
                 <form class="container" data-parsley-validate method="post" enctype="multipart/form-data">
                   <section class="row justify-content-md-center form-fields">
-                    {% if status != 'Initial' %}
-                      <input type="text" id="model_id" name="model_id" value="{{ model_id }}" data-status="{{ status }}" hidden />
+                    {% if status.value != 'Initial' %}
+                      <input type="text" id="model_id" name="model_id" value="{{ model_id }}" data-status="{{ status.value }}" hidden />
                     {% endif %}
-                    {% if status == 'Create' %}
+                    {% if status.value == 'Create' %}
                       <div class="progress">
                         <div id="progress_bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                       </div>
                       <div id="progress-message"></div>
                     {% else %}
-                      {% if status == 'Initial' %}
+                      {% if status.value == 'Initial' %}
                         <!-- Name -->
                         <div class="col col-lg-6 custom-col">
                           <span style="color: red;" class="required-field-info"></span>
@@ -76,7 +80,7 @@
                             </select>
                           </div>
                         </div>
-                      {% elif status == 'Second' %}
+                      {% elif status.value == 'Second' %}
                         <div class="col custom-col">
                           <label for="target-selector" id="target-selector-label"></label>
                           <select name="target" id="target-selector" class="form-control custom-input form-select form-select-lg mb-3" aria-label="Large select example">
@@ -93,7 +97,7 @@
                             </div>
                           {% endif %}
                         </div>
-                      {% elif status == 'Add' %}
+                      {% elif status.value == 'Add' %}
                         <h5 class="q-vars-header" id="description-title"></h5>
                         {% for var in variables %}
                           <div class="col col-lg-6 custom-col">
@@ -101,31 +105,28 @@
                             <textarea class="form-control custom-input description-text" name="{{ var['variable'] }}">{{ var.current_val }}</textarea>
                           </div>
                         {% endfor %}
-                        <h5 class="q-vars-header" id="q-vars-title"></h5>
-                        {% for col in form %}
-                          <input type="text" name="Q-Variable-{{ col.name }}" value="{{ col.name }}" hidden />
-                          <div class="col col-lg-6 custom-col custom-qualitative-col">
-                            <label>{{ col.name }}</label>
-                            {% for var in col.variables %}
-                              {% if col.values_on_current[loop.index-1]|string != var|string %}
-                                <div class="col custom-col-no-media">
-                                  <input class="form-control custom-input q-vars-text" oldValue="{{ var }}"  type="text" name="{{ col.name }}-{{ var }}" value="{{ col.values_on_current[loop.index-1] }}" />
-                                </div>
-                              {% else %}
-                                <div class="col custom-col-no-media">
-                                  <input class="form-control custom-input q-vars-text" oldValue="{{ var }}" type="text" name="{{ col.name }}-{{ var }}" />
-                                </div>
+                        <div class="q-var-selector-container">
+                          <label for="q-var-selector" id="q-var-selector-label"></label>
+                          <select id="q-var-selector" class="form-control custom-input" name="q-vars" onchange="getData({{ variables }}, {{ target_name }})" multiple="multiple">
+                            {% for var in variables %}
+                              {% if var.possible_q and (var.variable != target_name.value) %}
+                                pan
+                                <option value="{{ var.variable }}" selected>{{ var.variable }}</option>
+                              {% elif var.variable != target_name.value %}
+                                <option value="{{ var.variable }}">{{ var.variable }}</option>
                               {% endif %}
                             {% endfor %}
-                          </div>
-                        {% endfor %}
+                          </select>
+                        </div>
+                        <h5 class="q-vars-header" id="q-vars-title"></h5>
+                        <div id="q-vars-form"></div>
                       {% endif %}
                     {% endif %}
                   </section>
 
                   <div class="navbar-right fet-navbar-right">
-                    <button type="submit" id="cancel" style="display: none;" class="btn btn-warning submit" name="cancel" value="{{ status }}">
-                      {% if status == 'Create' %}
+                    <button type="submit" id="cancel" style="display: none;" class="btn btn-warning submit" name="cancel" value="{{ status.value }}">
+                      {% if status.value == 'Create' %}
                         {% if type == 'add' %}
                           <span id="regressor-cancel-btn"></span>
                         {% else %}
@@ -135,10 +136,10 @@
                         <span id="regressor-back-btn"></span>
                       {% endif %}
                     </button>
-                    <button type="submit" id="submit" disabled class="btn btn-default submit" name="{{ status }}">
-                      {% if status == 'Create' %}
+                    <button type="submit" id="submit" disabled class="btn btn-default submit" name="{{ status.value }}">
+                      {% if status.value == 'Create' %}
                         <span id="regressor-accept-btn"></span>
-                      {% elif status != 'Add' %}
+                      {% elif status.value != 'Add' %}
                         <span id="regressor-next-btn"></span>
                       {% elif type != 'add' %}
                         <span id="regressor-modify-btn"></span>
@@ -160,4 +161,64 @@
   {{ super() }}
   <script src="{{ url_for('static', filename='build/js/add_model.js') }}"></script>
   <script src="{{ url_for('static', filename='build/js/add_model_regressor.js') }}"></script>
+  <script>
+    const qVarsForm = document.getElementById('q-vars-form');
+    let dataRows
+    const selected = [];
+    const selector = $("#q-var-selector").select2({});
+    const getData = (data, target_name) => {
+      selected.length = 0;
+      const selectedOptions = selector[0].selectedOptions
+      for (let i = 0; i < selectedOptions.length; i++) {
+        selected.push(selectedOptions[i].value);
+      }
+      let htmlForm = ''
+      data.forEach((elm) => {
+        const name = elm.variable;
+        if(selected.includes(name) && name !== target_name.value) {
+          const values = elm.variable_data.values;
+          const values_on_current = elm.variable_data.values_on_current;
+//          console.log('values_on_current: ', values_on_current);
+
+          let htmlFormCreate = ''
+          let htmlFormEdit = ''
+
+          if (values_on_current.length !== 0) {
+            for (let i = 0; i < values.length; i++) {
+
+              if (values[i] != values_on_current[i]) {
+                htmlFormEdit +=
+                `<div class="custom-col-no-media">
+                  <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}"  value="${values_on_current[i]}"/>
+                </div>`;
+              } else {
+                htmlFormEdit +=
+                `<div class="custom-col-no-media">
+                  <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}" />
+                </div>`;
+              }
+            }
+            htmlFormCreate = null;
+          } else {
+            for (let i = 0; i < values.length; i++) {
+              htmlFormCreate +=
+              `<div class="custom-col-no-media">
+                <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}" />
+              </div>`;
+            }
+            htmlFormEdit = null;
+          }
+          htmlForm +=
+          `<input type="text" name="Q-Variable-${name}" value="${name}" hidden />
+            <div class="custom-qualitative-col" style="grid-column: span 1;">
+              <label>${name}</label>
+              <div style="max-height: 25rem; overflow: scroll; margin-top: 1rem;">${htmlFormCreate ?? htmlFormEdit}</div>
+
+          </div>`;
+        }
+      });
+      qVarsForm.innerHTML = htmlForm;
+      setRegressorTranslations();
+    };
+  </script>
 {% endblock %}

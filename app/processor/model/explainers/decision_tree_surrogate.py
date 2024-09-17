@@ -155,13 +155,14 @@ class ExplainSingleTree:
         return rules
 
     @staticmethod
-    def graph_tree(tree, x_train, y_train, feature_names, class_names):
+    def graph_tree(tree, x_train, y_train, feature_names, class_names, target_name):
 
         viz = model(
             model=tree,
             X_train=x_train,
             y_train=get_y_transformed(y_train),
             feature_names=feature_names,
+            target_name=target_name,
             class_names=class_names
         )
         try:

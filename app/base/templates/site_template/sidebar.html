@@ -86,13 +86,12 @@
   <!-- /menu footer buttons -->
 
   <script>
-    console.log('path: ', location.pathname);
-    console.log('location: ', location);
     if (location.pathname == '/home/') {
       document.getElementById('home-list-button').classList.add('opened-page');
     } else if (
     location.pathname == '/processor/manage_classifiers' ||
     location.pathname == '/processor/add_classifier' ||
+    location.pathname.includes('/processor/edit_classifier') ||
     location.pathname == '/dashboard/classification' ||
     location.pathname == '/dashboard/classifier/comparison'
     ) {
@@ -100,6 +99,7 @@
     } else if (
     location.pathname == '/processor/manage_regressors' ||
     location.pathname == '/processor/add_regressor' ||
+    location.pathname.includes('/processor/edit_regressor') ||
     location.pathname == '/dashboard/regression' ||
     location.pathname == '/dashboard/regression/comparison'
     ) {

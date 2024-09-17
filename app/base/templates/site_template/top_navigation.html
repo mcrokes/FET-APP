@@ -129,7 +129,7 @@
       })
 
       const text = response.json().then((value) => {
-        console.log(value)
+//        console.log(value)
         return
       }).then(() => window.location.reload());
     }
@@ -138,7 +138,7 @@
 
       const currentLanguage = await t(["lang"]);
       for (const language of document.getElementsByClassName('currentLanguage')) {
-        console.log('language: ', language.id);
+//        console.log('language: ', language.id);
         if (language.id === currentLanguage) {
           language.checked = true;
         }

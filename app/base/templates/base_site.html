@@ -43,8 +43,8 @@
           })
 
           text = await response.json().then((value) => {
-            console.log('keys', keys);
-            console.log('value', value.text   );
+//            console.log('keys', keys);
+//            console.log('value', value.text );
             return value.text;
           })
 
@@ -58,7 +58,7 @@
     {% endblock head %}
   </head>
 
-  <body class="{% block body_class %} nav-md {% endblock body_class %}">
+  <body class="{% block body_class %} nav-md {% endblock body_class %}" onload="{% block bodyOnLoad %}{% endblock bodyOnLoad %}">
     {% block body %}
       <div class="main_container">
         <div>

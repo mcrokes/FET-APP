@@ -388,6 +388,7 @@ def surrogateCallbacks(app, furl, isRegressor: bool = False):
             tree=model,
             class_names=class_names,
             feature_names=model.feature_names_in_,
+            target_name=model_x.getElement('target_row')
         )
         # Convertir el árbol en un archivo SVG
 

@@ -334,7 +334,7 @@ def save_classifier(modelId: int = 0):
         ).all()
         for db_model in db_models:
             db_model.delete_from_db()
-        return render_template("add_model_classifier.html", form=form, status="Initial",
+        return render_template("add_model_classifier.html", form=form, status={"value": "Initial"},
                                type='edit' if modelId else 'add')
 
     if "Initial" in request.form or cancel == "Add":
@@ -385,16 +385,18 @@ def save_classifier(modelId: int = 0):
             return render_template(
                 "add_model_classifier.html",
                 form=possible_targets,
-                status=status,
+                status={"value": status},
                 model_id=db_model.id,
-                type='edit' if modelId else 'add'
+                type='edit' if modelId else 'add',
+                target_name={},
+                variables=[],
             )
         except Exception as e:
             print('Exception on Initial: ', e)
             status = "Wrong Data"
             # abort(500) TODO internal server test
             return render_template(
-                "add_model_classifier.html", form=form, status=status, type='edit' if modelId else 'add'
+                "add_model_classifier.html", form=form, status={"value": status}, type='edit' if modelId else 'add'
             )
     elif "Second" in request.form or cancel == "Create":
         try:
@@ -439,7 +441,6 @@ def save_classifier(modelId: int = 0):
                 db_model.percent_processed = 0
                 db_model.db_commit()
 
-            qualitative_variables_form = []
             df = db_model.getElement("dataset")
             print('df: ', df)
 
@@ -469,28 +470,25 @@ def save_classifier(modelId: int = 0):
                         values_on_current[f'{column["column_name"]}'].append(variable['new_value'])
 
             variables = []
-            for column in df.columns:
+            for column in df:
+                print('column: ', column)
                 variables.append({
                     'variable': column,
-                    'current_val': descriptions[column] if modelId else ''
+                    'possible_q': 1 if len(set(df[column])) < 5 or column == db_model.target_row else 0,
+                    'current_val': descriptions[column] if modelId else '',
+                    'variable_data': {
+                        "values": list(set(df[column])),
+                        "values_on_current": values_on_current[column] if modelId and values_on_current.get(
+                            column) else []
+                    }
                 })
-            print('values_on_current: ', values_on_current)
-            for column in df:
-                if len(set(df[column])) < 5 or column == db_model.target_row:
-                    qualitative_variables_form.append(
-                        {
-                            "name": column,
-                            "variables": list(set(df[column])),
-                            "values_on_current": values_on_current[column] if modelId else []
-                        }
-                    )
 
             status = "Add"
             return render_template(
                 "add_model_classifier.html",
-                form=qualitative_variables_form,
+                target_name={'value': db_model.getElement('target_row')},
                 variables=variables,
-                status=status,
+                status={"value": status},
                 model_id=db_model.id,
                 type='edit' if modelId else 'add'
             )
@@ -498,7 +496,7 @@ def save_classifier(modelId: int = 0):
             print('Exception on Second: ', e)
             status = "Wrong Data"
             return render_template(
-                "add_model_classifier.html", form=form, status=status, type='edit' if modelId else 'add'
+                "add_model_classifier.html", form=form, status={"value": status}, type='edit' if modelId else 'add'
             )
     elif "Add" in request.form:
         db_model: ModelForProccess = ModelForProccess.query.filter(
@@ -516,7 +514,7 @@ def save_classifier(modelId: int = 0):
         progressClassifierTranslations = findTranslationsParent(translationsClassifier, 'progress')
 
         for element in request.form:
-            if element != "model_id":
+            if element != "model_id" and element != "q-vars":
                 if element in df.columns:
                     features_description[element] = request.form[element]
                 elif "Q-Variable" in element or element == "Add":
@@ -570,7 +568,8 @@ def save_classifier(modelId: int = 0):
         )
         x.start()
         return render_template(
-            "add_model_classifier.html", model_id=db_model.id, status="Create", type='edit' if modelId else 'add'
+            "add_model_classifier.html", model_id=db_model.id, status={"value": "Create"},
+            type='edit' if modelId else 'add'
         )
     elif "Create" in request.form:
         db_models: ModelForProccess = ModelForProccess.query.filter(
@@ -589,8 +588,11 @@ def save_classifier(modelId: int = 0):
     return render_template(
         "add_model_classifier.html",
         form=form,
-        status="Initial",
-        type='edit' if modelId else 'add')
+        status={"value": "Initial"},
+        type='edit' if modelId else 'add',
+        target_name={},
+        variables=[],
+    )
 
 
 @blueprint.route("/add_regressor", methods=["GET", "POST"])
@@ -620,7 +622,7 @@ def save_regressor(modelId: int = 0):
             ModelForProccess.id == request.form["model_id"]
         ).first()
         db_model.delete_from_db()
-        return render_template("add_model_regressor.html", form=form, status="Initial",
+        return render_template("add_model_regressor.html", form=form, status={"value": "Initial"},
                                type='edit' if modelId else 'add')
 
     if "Initial" in request.form or cancel == "Add":
@@ -671,14 +673,16 @@ def save_regressor(modelId: int = 0):
             return render_template(
                 "add_model_regressor.html",
                 form=possible_targets,
-                status=status,
+                status={"value": status},
                 model_id=db_model.id,
-                type='edit' if modelId else 'add'
+                type='edit' if modelId else 'add',
+                target_name={},
+                variables=[],
             )
         except Exception as e:
             print('Exception on Initial: ', e)
             status = "Wrong Data"
-            return render_template("add_model_regressor.html", form=form, status=status,
+            return render_template("add_model_regressor.html", form=form, status={"value": status},
                                    type='edit' if modelId else 'add')
     elif "Second" in request.form or cancel == "Create":
         try:
@@ -692,15 +696,17 @@ def save_regressor(modelId: int = 0):
                     - set(db_model.getElement("model").feature_names_in_)
                 )
                 possible_not_needed_variables.remove(request.form["target"])
-                print("possible_not_needed_variables: ", possible_not_needed_variables)
+                # print("possible_not_needed_variables: ", possible_not_needed_variables)
                 if request.form.get('index') == 'on':
-                    db_model.indexColumnName = possible_not_needed_variables[0]
-                    print('index: ', db_model.getElement("dataset")[possible_not_needed_variables[0]])
-                    db_model.setElements(
-                        **{
-                            'indexesList': db_model.getElement("dataset")[possible_not_needed_variables[0]]
-                        }
-                    )
+                    if possible_not_needed_variables:
+                        db_model.indexColumnName = possible_not_needed_variables[0]
+                        db_model.setElements(
+                            **{
+                                'indexesList': db_model.getElement("dataset")[possible_not_needed_variables[0]]
+                            }
+                        )
+
+                    # print('index: ', db_model.getElement('indexesList'))
                 db_model.target_row = request.form["target"]
                 db_model.setElements(
                     **{
@@ -742,36 +748,33 @@ def save_regressor(modelId: int = 0):
                         values_on_current[f'{column["column_name"]}'].append(variable['new_value'])
 
             variables = []
-            for column in df.columns:
+            for column in df:
+                print('column: ', column)
                 variables.append({
                     'variable': column,
-                    'current_val': descriptions[column] if modelId else ''
+                    'possible_q': 1 if len(set(df[column])) <= 5 and column != db_model.target_row else 0,
+                    'current_val': descriptions[column] if modelId else '',
+                    'variable_data': {
+                        "values": list(set(df[column])),
+                        "values_on_current": values_on_current[column] if modelId and values_on_current.get(
+                            column) else []
+                    }
                 })
-            print('values_on_current: ', values_on_current)
-            for column in df:
-                if len(set(df[column])) < 5 and column != db_model.target_row:
-                    qualitative_variables_form.append(
-                        {
-                            "name": column,
-                            "variables": list(set(df[column])),
-                            "values_on_current": values_on_current[column] if modelId else []
-                        }
-                    )
-
 
             status = "Add"
+            print('ENT')
             return render_template(
                 "add_model_regressor.html",
-                form=qualitative_variables_form,
+                target_name={'value': db_model.getElement('target_row')},
                 variables=variables,
-                status=status,
+                status={"value": status},
                 model_id=db_model.id,
                 type='edit' if modelId else 'add'
             )
         except Exception as e:
             print('Exception on Second: ', e)
             status = "Wrong Data"
-            return render_template("add_model_regressor.html", form=form, status=status,
+            return render_template("add_model_regressor.html", form=form, status={"value": status},
                                    type='edit' if modelId else 'add')
 
     elif "Add" in request.form:
@@ -789,7 +792,7 @@ def save_regressor(modelId: int = 0):
         descriptionsRegressor = findTranslationsParent(translationsRegressor, 'descriptions')
         progressRegressorTransations = findTranslationsParent(translationsRegressor, 'progress')
         for element in request.form:
-            if element != "model_id":
+            if element != "model_id" and element != "q-vars":
                 if element in df.columns:
                     features_description[element] = request.form[element]
                 elif "Q-Variable" in element or element == "Add":
@@ -838,7 +841,8 @@ def save_regressor(modelId: int = 0):
         x.start()
         # Function to add, the models
         return render_template(
-            "add_model_regressor.html", model_id=db_model.id, status="Create", type='edit' if modelId else 'add'
+            "add_model_regressor.html", model_id=db_model.id, status={"value": "Create"},
+            type='edit' if modelId else 'add'
         )
     elif "Create" in request.form:
         db_models: ModelForProccess = ModelForProccess.query.filter(
@@ -855,9 +859,12 @@ def save_regressor(modelId: int = 0):
     return render_template(
         "add_model_regressor.html",
         form=form,
-        status="Initial",
+        status={"value": "Initial"},
         type='edit' if modelId else 'add',
-        unit=unit if modelId else '')
+        unit=unit if modelId else '',
+        target_name={},
+        variables=[],
+    )
 
 
 @blueprint.route("/manage_classifiers", methods=["GET", "POST"])

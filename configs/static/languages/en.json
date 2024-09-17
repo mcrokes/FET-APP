@@ -220,7 +220,8 @@
     },
     "q-vars": {
       "title": "Possible Qualitative Variable Values.",
-      "placeholder": "Original Value: "
+      "placeholder": "Original Value: ",
+      "selector-label": "<p>Select the qualitative variables <i title='You need to be sure of your selection or it will display wrong data. \n The default selection is a system suggestion' class=\"fa fa-info-circle info-warning\"></i></p>"
     }
   },
   "add-regressor": {
@@ -301,7 +302,8 @@
     },
     "q-vars": {
       "title": "Possible Qualitative Variable Values.",
-      "placeholder": "Original Value: "
+      "placeholder": "Original Value: ",
+      "selector-label": "<p>Select the qualitative variables <i title='You need to be sure of your selection or it will display wrong data. \n The default selection is a system suggestion' class=\"fa fa-info-circle info-warning\"></i></p>"
     }
   },
   "dashboard": {

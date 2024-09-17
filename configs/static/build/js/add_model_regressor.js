@@ -2,7 +2,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	await initial_check('regressor');
 });
 
-(async()=>{
+const setRegressorTranslations = async()=>{
 	const regressorTranslations = await t(["add-regressor"]);
 
 	document.getElementById('regressor-title').innerHTML = regressorTranslations['title'] ?? 'regressor.title';
@@ -30,6 +30,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (document.getElementById('description-title')) document.getElementById('description-title').innerHTML = descriptionsTranslations['title'] ?? 'regressor.descriptions.title';
 	const qVarsTranslations = regressorTranslations['q-vars'] ?? {};
 	if (document.getElementById('q-vars-title')) document.getElementById('q-vars-title').innerHTML = qVarsTranslations['title'] ?? 'regressor.q-vars.title';
+	if (document.getElementById('q-var-selector-label')) document.getElementById('q-var-selector-label').innerHTML = qVarsTranslations['selector-label'] ?? 'regressor.selector-label';
 
 	const descriptionTexts = window.document.getElementsByClassName('description-text');
 	if(descriptionTexts){
@@ -78,4 +79,5 @@ window.addEventListener('DOMContentLoaded', async () => {
 		data: units,
 	});
 	const unit = document.getElementById('unit-selector')
-})();
+}
+setRegressorTranslations();

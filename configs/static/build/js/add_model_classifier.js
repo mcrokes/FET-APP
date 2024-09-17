@@ -2,7 +2,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	await initial_check('classifier');
 });
 
-(async()=>{
+const setClassifierTranslations = async()=>{
 	const classifierTranslations = await t(["add-classifier"]);
 
 	document.getElementById('classifier-title').innerHTML = classifierTranslations['title'] ?? 'classifier.title';
@@ -28,6 +28,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (document.getElementById('description-title')) document.getElementById('description-title').innerHTML = descriptionsTranslations['title'] ?? 'classifier.descriptions.title';
 	const qVarsTranslations = classifierTranslations['q-vars'] ?? {};
 	if (document.getElementById('q-vars-title')) document.getElementById('q-vars-title').innerHTML = qVarsTranslations['title'] ?? 'classifier.q-vars.title';
+	if (document.getElementById('q-var-selector-label')) document.getElementById('q-var-selector-label').innerHTML = qVarsTranslations['selector-label'] ?? 'regressor.selector-label';
 
 	const descriptionTexts = window.document.getElementsByClassName('description-text');
 	if(descriptionTexts){
@@ -56,4 +57,5 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if(document.getElementById('not-available-name')) document.getElementById('not-available-name').innerHTML = classifierTranslations['name-error'] ?? 'classifier.name-error';
 	if(document.getElementById('not-classifier-model')) document.getElementById('not-classifier-model').innerHTML = classifierTranslations['model-error'] ?? 'classifier.model-error';
 	if(document.getElementById('not-compatible-dataset')) document.getElementById('not-compatible-dataset').innerHTML = classifierTranslations['dataset-error'] ?? 'classifier.dataset-error';
-})();
+}
+setClassifierTranslations();

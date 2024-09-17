@@ -91,7 +91,7 @@ const show_sidebar = (onClick = true) => {
 		setSmallSideBar();
 		window.localStorage.setItem('sidebar-mobile-expanded', 'false');
 	} else {
-		console.log('OPENING SIDEBAR');
+//		console.log('OPENING SIDEBAR');
 		sidebar.style.display = 'unset';
 		setNormalSideBar()
 		window.localStorage.setItem('sidebar-mobile-expanded', 'false');

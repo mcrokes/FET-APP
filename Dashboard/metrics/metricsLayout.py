@@ -38,6 +38,10 @@ def generate_regression_metrics(y, y_pred, keys, parametersTranslations):
         f"{keys['r2']}": round(r2_score(y, y_pred), 4),
     }
 
+    print('y1: ', (y - y_pred))
+    print('y2: ', (y - y_pred) / y)
+    print('y3: ', np.abs((y - y_pred) / y))
+
     descriptions = {
         f"{keys['mse']}": setText(parametersTranslations, 'mse-tooltip', 'dashboard.metrics.regressor.parameters'),
         f"{keys['rmse']}": setText(parametersTranslations, 'rmse-tooltip', 'dashboard.metrics.regressor.parameters'),

@@ -1,152 +1,194 @@
 .add-model-container {
-    width: fit-content;
-    margin: auto;
+	width: fit-content;
+	margin: auto;
 }
 
 .common_header {
-    font-family: monospace;
-    font-weight: 900;
-    margin: auto !important;
-    white-space: wrap;
-    text-align: center;
+	font-family: monospace;
+	font-weight: 900;
+	margin: auto !important;
+	white-space: wrap;
+	text-align: center;
 }
 
 .form-fields {
-    width: max-content;
-    margin: auto !important;
-    max-width: 100%;
+	width: max-content;
+	margin: auto !important;
+	max-width: 100%;
 }
 
 .custom-col {
 /*    margin: auto;*/
-    margin-bottom: 20px;
-    max-width: 100%;
+	margin-bottom: 20px;
+	max-width: 100%;
 }
 
 .custom-col-no-media {
-    margin: auto;
-    margin-bottom: 20px;
-    max-width: 100%;
+	margin: auto;
+	margin-bottom: 20px;
+	max-width: 100%;
 }
 
 
 @media (min-width: 800px) {
-    .custom-col {
-        width: 50%;
-    }
+	.custom-col {
+		width: 50%;
+	}
 }
 
 @media (max-width: 800px) {
-    .custom-col {
-        float: unset !important;
-    }
+	.custom-col {
+		float: unset !important;
+	}
 }
 
 textarea {
-    resize: vertical;
-    min-height: 5rem;
-    max-height: 10rem;
+	resize: vertical;
+	min-height: 5rem;
+	max-height: 10rem;
 }
 .custom-input,
 .custom-file-input {
-    min-height: 5rem !important;
-    width: 100%;
-    max-width: 100%;
-    color: #444;
-    padding: 5px;
-    background: #fff;
-    border-radius: 4px !important;
-    height: unset;
-    min-width: 300px;
+	min-height: 5rem !important;
+	width: 100%;
+	max-width: 100%;
+	color: #444;
+	padding: 5px;
+	background: #fff;
+	border-radius: 4px !important;
+	height: unset;
+	min-width: 300px;
 }
 
 input.custom-file-input {
-    display: none;
+	display: none;
 }
 
 label.custom-file-input {
-    align-items: center;
-    display: flex;
+	align-items: center;
+	display: flex;
 }
 
 label.custom-file-input > p:first-child {
-    font-weight: 100;
-    color: darkgray;
-    margin: 0px;
-    width: 500px;
+	font-weight: 100;
+	color: darkgray;
+	margin: 0px;
+	width: 500px;
 }
 
 .custom-file-input::file-selector-button {
-    margin-right: 20px;
-    border: none;
-    background: springgreen;
-    padding: 10px 20px;
-    border-radius: 4px;
-    color: #444;
-    cursor: pointer;
-    transition: background 0.2s ease-in-out;
+	margin-right: 20px;
+	border: none;
+	background: springgreen;
+	padding: 10px 20px;
+	border-radius: 4px;
+	color: #444;
+	cursor: pointer;
+	transition: background 0.2s ease-in-out;
 }
 
 .custom-file-input::file-selector-text {
-    color: red;
+	color: red;
 }
 
 .custom-file-input:focus::file-selector-button,
 .custom-file-input::file-selector-button:hover {
-    background: limegreen;
-    color: #fff;
+	background: limegreen;
+	color: #fff;
 }
 
 .q-vars-header {
-    padding-left: 5rem;
+	padding-left: 5rem;
 }
 
 @media (min-width: 1200px) {
-    .custom-qualitative-col {
-        width: unset !important;
-    }
+	.custom-qualitative-col {
+		width: unset !important;
+	}
 }
 
 .progress {
-    width: 70vw;
+	width: 70vw;
 }
 .progress-bar {
-    width: 0%;
+	width: 0%;
 }
 
 .fet-navbar-right {
-    justify-content: center;
-    display: flex;
+	justify-content: center;
+	display: flex;
 }
 
 /* Only for Regressor */
 
 .select2-selection {
-    border-radius: 2px;
-    min-height: 5rem !important;
-    width: 10rem;
+	border-radius: 2px;
+	min-height: 5rem !important;
+	width: 10rem;
 }
 
 .select2-selection span {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
 }
 
 .unit-selector-container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 1rem;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 1rem;
 }
 
 .unit-selector-container label {
-    white-space: nowrap;
+	white-space: nowrap;
 }
 
 .select2-container {
-    width: 10rem !important;
+	width: 10rem !important;
 }
 
 .form-check-input:checked {
-    background-color: #095e49;
+	background-color: #095e49;
+}
+
+.q-var-selector-container {
+	margin: 2rem;
+	padding: 1rem;
+	cursor: pointer;
+}
+
+.q-var-selector-container > .select2-container {
+	width: 100% !important;
+}
+
+.q-var-selector-container > .select2-container > .selection > .select2-selection {
+	width: 100% !important;
+}
+
+#q-vars-form {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 2rem;
+	margin-top: 1rem;
+}
+
+@media (max-width: 1200px) {
+	#q-vars-form {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+@media (max-width: 800px) {
+	#q-vars-form {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+}
+
+.info-warning {
+	font-size: 16px;
+	margin-left: 0.5rem;
+	cursor: pointer;
+	color: red;
 }

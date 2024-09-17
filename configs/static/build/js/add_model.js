@@ -26,7 +26,7 @@ const getModelsList = async (model_type) => {
   models_list = await response.json().then((value) => {
     if(editedModelID) {
       editedModelName = value.idPath[editedModelID];
-      console.log('editedModelName: ', editedModelName);
+//      console.log('editedModelName: ', editedModelName);
     }
     return value.data;
   })
@@ -40,7 +40,7 @@ const isNameValid = () => {
 
 const evaluateModelType = async(model_type) => {
   if (model_field) {
-    console.log('model: ', model_field.files[0]);
+//    console.log('model: ', model_field.files[0]);
     const formData = new FormData();
     formData.append('model', model_field.files[0]);
     formData.append('model_type', model_type);
@@ -51,7 +51,7 @@ const evaluateModelType = async(model_type) => {
     })
 
     const res = await response.json().then((value) => {
-      console.log(value)
+//      console.log(value)
       return value.is_valid
     })
     return res;
@@ -61,8 +61,8 @@ const evaluateModelType = async(model_type) => {
 
 const evaluateDatasetCompatibility = async(model_type) => {
   if (model_field) {
-    console.log('model: ', model_field.files[0]);
-    console.log('dataset: ', model_data_set_field.files[0]);
+//    console.log('model: ', model_field.files[0]);
+//    console.log('dataset: ', model_data_set_field.files[0]);
     const formData = new FormData();
     formData.append('model', model_field.files[0]);
     formData.append('dataset', model_data_set_field.files[0]);
@@ -74,7 +74,7 @@ const evaluateDatasetCompatibility = async(model_type) => {
       })
 
       res = await response.json().then((value) => {
-        console.log(value)
+//        console.log(value)
         return value.is_valid
       })
       return res
@@ -131,13 +131,13 @@ const verify_inputs = async (isOnModelCreation = false) => {
     add_button.classList.remove('btn-danger');
     add_button.classList.add('btn-success');
     if (model_name_field == null) cancel_button.style.display = '';
-    console.log('ACTIVATED');
+//    console.log('ACTIVATED');
   } else {
     add_button.disabled = true;
     add_button.classList.remove('btn-success');
     add_button.classList.add('btn-danger');
     cancel_button.style.display = 'none';
-    console.log('DEACTIVATED');
+//    console.log('DEACTIVATED');
   }
   if (model_name_field && model_name_field.value) {
     await isNameValid()
@@ -157,7 +157,7 @@ const verify_inputs = async (isOnModelCreation = false) => {
 const initial_check = async (model_type) => {
   if (model_name_field) {
     await getModelsList(model_type);
-    console.log('models_list:', models_list);
+//    console.log('models_list:', models_list);
   }
   if(model_id && model_id.dataset.status == 'Create') {
     verify_inputs(true);
@@ -188,7 +188,7 @@ const getProgressPercent = async () => {
     progress_bar.ariaValueNow = value[0].percent
     progress_bar.innerHTML = `${value[0].percent}%`
     progress_message.innerHTML = value[0].message
-    console.log(value[0])
+//    console.log(value[0])
     return value[0].percent
   })
 
