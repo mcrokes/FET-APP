@@ -9,7 +9,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from app.processor.models import ExplainedClassifierModel, ExplainedRegressorModel, ExplainedModel
 from app.processor.models import ModelForProccess
 from . import blueprint
-from flask import current_app, make_response, render_template, request
+from flask import make_response, request
 from flask_login import login_required, current_user, AnonymousUserMixin
 
 from ..base.models import User

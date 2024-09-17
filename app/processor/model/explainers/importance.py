@@ -3,7 +3,6 @@ import multiprocessing
 import plotly.express as px
 import pandas as pd
 from sklearn.inspection import permutation_importance
-from sklearn.preprocessing import LabelEncoder
 
 
 class Importance:

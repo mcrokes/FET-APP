@@ -1,5 +1,5 @@
 from . import blueprint
-from flask import render_template, current_app, request, redirect
+from flask import render_template, request, redirect
 from flask_login import login_required, current_user
 from .forms import (
     add_user_Form,

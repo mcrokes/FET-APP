@@ -1,5 +1,3 @@
-from numbers import Number
-from unicodedata import numeric
 import numpy as np
 from sklearn.calibration import LabelEncoder
 
