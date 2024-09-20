@@ -18,5 +18,5 @@ app = create_app(config_mode)
 Migrate(app, db)
 
 if __name__ == "__main__":
-    app.run(debug=False)
-    # app.run(debug=True)
+    # app.run(debug=False)
+    app.run(debug=True)

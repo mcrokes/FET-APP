@@ -247,7 +247,7 @@ def surrogateCallbacks(app, furl, isRegressor: bool = False):
                     if jindex > 0:
                         value_cell += f" o {value}"
                     else:
-                        value_cell += value
+                        value_cell += f"{value}"
                 causes.append(
                     html.Tr(
                         [

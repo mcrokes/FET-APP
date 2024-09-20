@@ -188,25 +188,26 @@
 
             if (values_on_current.length !== 0) {
               for (let i = 0; i < values.length; i++) {
-
+                const value = values[i] == 'False' ? false : (values[i] == 'True'? true : values[i])
                 if (values[i] != values_on_current[i]) {
                   htmlFormEdit +=
                   `<div class="custom-col-no-media">
-                    <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}"  value="${values_on_current[i]}"/>
+                    <input class="form-control custom-input q-vars-text" oldValue="${value}" type="text" name="${name}-${value}"  value="${values_on_current[i]}"/>
                   </div>`;
                 } else {
                   htmlFormEdit +=
                   `<div class="custom-col-no-media">
-                    <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}" />
+                    <input class="form-control custom-input q-vars-text" oldValue="${values}" type="text" name="${name}-${value}" />
                   </div>`;
                 }
               }
               htmlFormCreate = null;
             } else {
               for (let i = 0; i < values.length; i++) {
+                const value = values[i] == 'False' ? false : (values[i] == 'True'? true : values[i])
                 htmlFormCreate +=
                 `<div class="custom-col-no-media">
-                  <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}" />
+                  <input class="form-control custom-input q-vars-text" oldValue="${value}" type="text" name="${name}-${value}" />
                 </div>`;
               }
               htmlFormEdit = null;

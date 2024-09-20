@@ -477,7 +477,7 @@ def save_classifier(modelId: int = 0):
                     'possible_q': 1 if len(set(df[column])) < 5 or column == db_model.target_row else 0,
                     'current_val': descriptions[column] if modelId else '',
                     'variable_data': {
-                        "values": list(set(df[column])),
+                        "values": [val if not isinstance(val, bool) else str(val) for val in list(set(df[column]))],
                         "values_on_current": values_on_current[column] if modelId and values_on_current.get(
                             column) else []
                     }
@@ -531,10 +531,11 @@ def save_classifier(modelId: int = 0):
                         }
                 else:
                     old_value = element.replace(f"{q_dict['column_name']}-", "")
+                    old_value = False if old_value == 'false' else True if old_value == 'true' else old_value
                     new_value = (
                         request.form[element]
                         if request.form[element] != ""
-                        else old_value
+                        else old_value if not isinstance(old_value, bool) else str(old_value).lower()
                     )
                     try:
                         old_value = int(old_value)
@@ -755,7 +756,7 @@ def save_regressor(modelId: int = 0):
                     'possible_q': 1 if len(set(df[column])) <= 5 and column != db_model.target_row else 0,
                     'current_val': descriptions[column] if modelId else '',
                     'variable_data': {
-                        "values": list(set(df[column])),
+                        "values": [val if not isinstance(val, bool) else str(val) for val in list(set(df[column]))],
                         "values_on_current": values_on_current[column] if modelId and values_on_current.get(
                             column) else []
                     }
@@ -808,10 +809,11 @@ def save_regressor(modelId: int = 0):
                         }
                 else:
                     old_value = element.replace(f"{q_dict['column_name']}-", "")
+                    old_value = False if old_value == 'false' else True if old_value == 'true' else old_value
                     new_value = (
                         request.form[element]
                         if request.form[element] != ""
-                        else old_value
+                        else old_value if not isinstance(old_value, bool) else str(old_value).lower()
                     )
                     try:
                         old_value = int(old_value)
