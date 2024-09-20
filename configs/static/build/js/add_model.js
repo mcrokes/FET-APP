@@ -18,7 +18,7 @@ let models_list = null;
 let editedModelName = null;
 const getModelsList = async (model_type) => {
   // get
-  const response = await fetch(`http://127.0.0.1:5000/INTERNAL_API/${model_type}/namelist`, {
+  const response = await fetch(`/INTERNAL_API/${model_type}/namelist`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   })

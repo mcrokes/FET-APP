@@ -4,9 +4,11 @@
   Add Model Regressor
 {% endblock %}
 
-{% if status.value == 'Add' %}
-  {% block bodyOnLoad %}getData({{ variables }}, {{ target_name }}){% endblock bodyOnLoad %}
-{% endif %}
+{% block bodyOnLoad %}
+  {% if status.value == 'Add' %}
+    getData({{ variables }}, {{ target_name }})
+  {% endif %}
+{% endblock bodyOnLoad %}
 
 {% block stylesheets %}
   {{ super() }}
@@ -168,57 +170,59 @@
     const selector = $("#q-var-selector").select2({});
     const getData = (data, target_name) => {
       selected.length = 0;
-      const selectedOptions = selector[0].selectedOptions
-      for (let i = 0; i < selectedOptions.length; i++) {
-        selected.push(selectedOptions[i].value);
-      }
-      let htmlForm = ''
-      data.forEach((elm) => {
-        const name = elm.variable;
-        if(selected.includes(name) && name !== target_name.value) {
-          const values = elm.variable_data.values;
-          const values_on_current = elm.variable_data.values_on_current;
-//          console.log('values_on_current: ', values_on_current);
+      if (selector && selector[0]) {
+        const selectedOptions = selector[0].selectedOptions
+        for (let i = 0; i < selectedOptions.length; i++) {
+          selected.push(selectedOptions[i].value);
+        }
+        let htmlForm = ''
+        data.forEach((elm) => {
+          const name = elm.variable;
+          if(selected.includes(name) && name !== target_name.value) {
+            const values = elm.variable_data.values;
+            const values_on_current = elm.variable_data.values_on_current;
+            //          console.log('values_on_current: ', values_on_current);
 
-          let htmlFormCreate = ''
-          let htmlFormEdit = ''
+            let htmlFormCreate = ''
+            let htmlFormEdit = ''
 
-          if (values_on_current.length !== 0) {
-            for (let i = 0; i < values.length; i++) {
+            if (values_on_current.length !== 0) {
+              for (let i = 0; i < values.length; i++) {
 
-              if (values[i] != values_on_current[i]) {
-                htmlFormEdit +=
-                `<div class="custom-col-no-media">
-                  <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}"  value="${values_on_current[i]}"/>
-                </div>`;
-              } else {
-                htmlFormEdit +=
+                if (values[i] != values_on_current[i]) {
+                  htmlFormEdit +=
+                  `<div class="custom-col-no-media">
+                    <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}"  value="${values_on_current[i]}"/>
+                  </div>`;
+                } else {
+                  htmlFormEdit +=
+                  `<div class="custom-col-no-media">
+                    <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}" />
+                  </div>`;
+                }
+              }
+              htmlFormCreate = null;
+            } else {
+              for (let i = 0; i < values.length; i++) {
+                htmlFormCreate +=
                 `<div class="custom-col-no-media">
                   <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}" />
                 </div>`;
               }
+              htmlFormEdit = null;
             }
-            htmlFormCreate = null;
-          } else {
-            for (let i = 0; i < values.length; i++) {
-              htmlFormCreate +=
-              `<div class="custom-col-no-media">
-                <input class="form-control custom-input q-vars-text" oldValue="${values[i]}" type="text" name="${name}-${values[i]}" />
-              </div>`;
-            }
-            htmlFormEdit = null;
-          }
-          htmlForm +=
-          `<input type="text" name="Q-Variable-${name}" value="${name}" hidden />
-            <div class="custom-qualitative-col" style="grid-column: span 1;">
-              <label>${name}</label>
-              <div style="max-height: 25rem; overflow: scroll; margin-top: 1rem;">${htmlFormCreate ?? htmlFormEdit}</div>
+            htmlForm +=
+            `<input type="text" name="Q-Variable-${name}" value="${name}" hidden />
+              <div class="custom-qualitative-col" style="grid-column: span 1;">
+                <label>${name}</label>
+                <div style="max-height: 25rem; overflow: scroll; margin-top: 1rem;">${htmlFormCreate ?? htmlFormEdit}</div>
 
-          </div>`;
-        }
-      });
-      qVarsForm.innerHTML = htmlForm;
-      setRegressorTranslations();
+            </div>`;
+          }
+        });
+        qVarsForm.innerHTML = htmlForm;
+        setRegressorTranslations();
+      }
     };
   </script>
 {% endblock %}

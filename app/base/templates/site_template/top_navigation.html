@@ -122,7 +122,7 @@
 
     const changeLanguage = async (lang) => {
       // get
-      response = await fetch(`http://127.0.0.1:5000/INTERNAL_API/changeLanguage`, {
+      response = await fetch(`/INTERNAL_API/changeLanguage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: lang,

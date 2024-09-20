@@ -27,9 +27,9 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite://{}:{}@{}:{}/{}".format(
         os.environ.get("FET_DATABASE_USER", "admin"),
         os.environ.get("FET_DATABASE_PASSWORD", "admin"),
-        os.environ.get("FET_DATABASE_HOST", "db"),
-        os.environ.get("FET_DATABASE_PORT", 5432),
-        os.environ.get("FET_DATABASE_NAME", "fet_database"),
+        os.environ.get("FET_DATABASE_HOST", "host"),
+        os.environ.get("FET_DATABASE_PORT", "port"),
+        os.environ.get("FET_DATABASE_NAME", "database.db"),
     )
 
 
@@ -37,4 +37,4 @@ class DebugConfig(Config):
     DEBUG = True
 
 
-config_dict = {"Production": DebugConfig, "Debug": DebugConfig}
+config_dict = {"Production": ProductionConfig, "Debug": DebugConfig}
