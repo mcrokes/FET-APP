@@ -31,7 +31,7 @@
     "title": "Crear Usuario",
     "btn": "Crear",
     "username": "Nombre de Usuario",
-    "email": "Email",
+    "email": "Correo electrónico",
     "password": "Contraseña",
     "user-exist-message": "El nombre de usuario ya existe",
     "email-exist-message": "Este email ya existe",
@@ -66,7 +66,7 @@
     "table": {
       "id": "ID",
       "name": "Nombre",
-      "email": "Email",
+      "email": "Correo electrónico",
       "options": "Opciones"
     }
   },
@@ -220,7 +220,9 @@
     },
     "q-vars": {
       "title": "Valores de las posibles variables cualitativas.",
-      "placeholder": "Original Value: "
+      "placeholder": "Valor original: ",
+      "selector-label":  "<p>Seleccionar las variables cualitativas <i title='Asegúrese de su selección o se mostrarán datos erróneos. \n La selección predeterminada es una sugerencia del sistema' class=\"fa fa-info-circle info-warning\"></i></p>"
+
     }
   },
   "add-regressor": {
@@ -301,7 +303,8 @@
     },
     "q-vars": {
       "title": "Valores de las posibles variables cualitativas.",
-      "placeholder": "Original Value: "
+      "placeholder": "Valor original: ",
+      "selector-label":  "<p>Seleccionar las variables cualitativas <i title='Asegúrese de su selección o se mostrarán datos erróneos. \n La selección predeterminada es una sugerencia del sistema' class=\"fa fa-info-circle info-warning\"></i></p>"
     }
   },
   "dashboard": {
@@ -657,7 +660,7 @@
             "text-2": " del modelo hace una predicción. La predicción final se basa en la ",
             "text-3": "combinación de las predicciones",
             "text-4": " de todos los árboles.",
-            "text-5": "* El azul",
+            "text-5": "* El verde",
             "text-6": " representa los árboles que predicen la clase seleccionada como positiva.",
             "text-7": "* El rojo",
             "text-8": " representa los árboles que predicen la(s) clases restantes."

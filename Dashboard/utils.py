@@ -1,3 +1,4 @@
+import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -14,3 +15,11 @@ def get_y_test_transformed(y_test):
             y_test = LabelEncoder().fit_transform(y_test)
             break
     return y_test
+
+
+def verify_and_round(val):
+    if isinstance(val, pd.Series):
+        val = val.values[0]
+    if isinstance(val, float):
+        val = round(val, 3)
+    return val

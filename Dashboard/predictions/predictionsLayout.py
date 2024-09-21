@@ -11,7 +11,7 @@ from flask_login import current_user
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-from Dashboard.utils import get_target_dropdown
+from Dashboard.utils import get_target_dropdown, verify_and_round
 from app.API.utils import findTranslationsParent, setText, getDashboardTranslations
 from app.processor.models import ExplainedModel
 
@@ -21,6 +21,13 @@ from treeinterpreter import treeinterpreter as ti
 def setBottomLegend(fig):
     fig.update_layout(
         legend=dict(orientation="h", yanchor="top", y=-0.5, xanchor="right", x=1)
+    )
+    return fig
+
+
+def setSideLegend(fig):
+    fig.update_layout(
+        legend=dict(orientation="v", yanchor="top", xanchor="right", x=10)
     )
     return fig
 
@@ -948,18 +955,17 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
                                 'dashboard.predictions.classifier.contribution')
                         )
                     )
-                    return setBottomLegend(fig)
+                    return setSideLegend(fig)
 
                 contribution_header = setText(contributionHeadersTranslations, 'contribution',
                                               'dashboard.predictions.common.contribution.headers')
-
 
                 data_table = html.Div(
                     [
                         dash_table.DataTable(
                             data=[
                                 {
-                                    **{f"{x1}_{x2}": y for (x1, x2), y in data},
+                                    **{f"{x1}_{x2}": verify_and_round(y) for (x1, x2), y in data},
                                 }
                                 for (n, data) in [
                                     *enumerate(
@@ -1026,7 +1032,7 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
                     dcc.Graph(figure=pie_chart) if not isRegressor else
                     html.Plaintext(
                         f"{setText(commonTranslations, 'prediction', 'dashboard.predictions.common')}"
-                        f": {predictions_graph_data['values'][0]}"
+                        f": {verify_and_round(predictions_graph_data['values'][0])}"
                         f" {model_x.explainer_regressor.getElement('unit')}",
                         style={
                             "color": "black",
