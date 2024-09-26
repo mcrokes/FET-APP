@@ -189,7 +189,7 @@
             if (values_on_current.length !== 0) {
               for (let i = 0; i < values.length; i++) {
                 const value = values[i] == 'False' ? false : (values[i] == 'True'? true : values[i])
-                if (values[i] != values_on_current[i]) {
+                if (value != values_on_current[i]) {
                   htmlFormEdit +=
                   `<div class="custom-col-no-media">
                     <input class="form-control custom-input q-vars-text" oldValue="${value}" type="text" name="${name}-${value}"  value="${values_on_current[i]}"/>
@@ -197,7 +197,7 @@
                 } else {
                   htmlFormEdit +=
                   `<div class="custom-col-no-media">
-                    <input class="form-control custom-input q-vars-text" oldValue="${values}" type="text" name="${name}-${value}" />
+                    <input class="form-control custom-input q-vars-text" oldValue="${value}" type="text" name="${name}-${value}" />
                   </div>`;
                 }
               }

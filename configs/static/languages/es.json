@@ -670,7 +670,7 @@
           "title": "Predicción individual por árboles para la clase:",
           "labels": {
             "x": "Número del Árbol",
-            "y": "Predicción Individual"
+            "y": "Certeza de la Predicción %"
           }
         }
       },
@@ -691,7 +691,7 @@
           "title": "Predicción individual por árboles",
           "labels": {
             "x": "Número del Árbol",
-            "y": "Certeza de la Predicción %"
+            "y": "Predicción Individual"
           }
         }
       }
