@@ -45,6 +45,7 @@ def generateDataSetDistributions(df: pd.DataFrame, feature, legendTranslations, 
 def datasetLayout(dataTranslations):
     commonTranslations = findTranslationsParent(dataTranslations, 'common')
     distributionTranslations = findTranslationsParent(commonTranslations, 'distributions')
+    distributionTooltipTranslations = findTranslationsParent(distributionTranslations, 'tooltip')
     datasetTranslations = findTranslationsParent(commonTranslations, 'dataset')
     datasetTooltipTranslations = findTranslationsParent(datasetTranslations, 'tooltip')
     correlationTranslations = findTranslationsParent(commonTranslations, 'correlation')
@@ -54,7 +55,6 @@ def datasetLayout(dataTranslations):
         [
             dcc.Loading(
                 [
-                    html.Div(id='dummy', style={'display': 'none'}),
                     html.Div([
                         html.Plaintext(
                             [
@@ -64,6 +64,7 @@ def datasetLayout(dataTranslations):
                             className="rules-title",
                             style={"font-size": "30px"},
                         ),
+                        html.Div(className='separator'),
                         html.Div(
                             [
                                 html.Div(
@@ -107,7 +108,7 @@ def datasetLayout(dataTranslations):
                                 html.Div(
                                     id="modified-dataset-view", style={"overflow": "scroll", "border-radius": "5px"}
                                 ),
-                                html.Div(id="test-tert"),
+                                html.Div(className='separator'),
                             ]
                         ),
                         html.Div(
@@ -117,6 +118,7 @@ def datasetLayout(dataTranslations):
                                     className="rules-title",
                                 ),
                                 html.Div(id="dataset-view", style={"overflow": "scroll", "border-radius": "5px"}),
+                                html.Div(className='separator'),
                             ]
                         ),
                         html.Div(
@@ -129,11 +131,35 @@ def datasetLayout(dataTranslations):
                             ],
                             style={'max-width': '800px', 'margin': 'auto auto 5rem auto'}
                         ),
+                        html.Div(className='separator'),
                         dbc.Row(
                             [
-                                html.Plaintext(
-                                    setText(distributionTranslations, 'title', 'dashboard.data.common.distributions'),
-                                    className="rules-title",
+                                html.Div([
+                                    html.Plaintext(
+                                        setText(distributionTranslations, 'title',
+                                                'dashboard.data.common.distributions'),
+                                        className="rules-title",
+                                    ),
+                                    html.I(
+                                        id="distributions-info",
+                                        className="fa fa-info-circle info-icon",
+                                    ),
+                                    dbc.Tooltip(
+                                        [
+                                            html.Plaintext(
+                                                [
+                                                    setText(distributionTooltipTranslations, 'text-1',
+                                                            'dashboard.data.common.distributions.tooltip'),
+                                                    html.Strong(setText(distributionTooltipTranslations, 'text-2',
+                                                                        'dashboard.data.common.distributions.tooltip'))
+                                                ]
+                                            ),
+                                        ],
+                                        className="personalized-tooltip",
+                                        target="distributions-info",
+                                    ),
+                                ],
+                                    className="title-hint-container",
                                 ),
                                 dbc.Col([
                                     html.Plaintext(
@@ -163,6 +189,7 @@ def datasetLayout(dataTranslations):
                                     lg=6,
                                     xl=6,
                                     xxl=6, ),
+                                html.Div(className='separator'),
                                 html.Div(
                                     [
                                         html.Plaintext(

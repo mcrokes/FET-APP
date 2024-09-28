@@ -9,16 +9,6 @@
 
 {% block content %}
   <div class="container text-center index-container">
-    <div id="model-buttons">
-      <div>
-        <a id="classifier-models-button" href="/processor/manage_classifiers" class="btn linked-button-card" role="button" aria-pressed="true"></a>
-      </div>
-      <div>
-        <a id="regressor-models-button" href="/processor/manage_regressors" class="btn linked-button-card" role="button" aria-pressed="true"></a>
-      </div>
-    </div>
-    <br>
-    <br>
     <h1 id="home-title" style="text-transform: uppercase;"></h1>
     <hr>
     <div id="home-info">
@@ -99,8 +89,6 @@
       window.document.getElementById('tree-image').src = `/static/images/home-tree-${currentLang}.png`
       const homeTranslations = await t(["home"]);
       window.document.getElementById('home-title').innerHTML = homeTranslations['info-title'];
-      window.document.getElementById('classifier-models-button').innerHTML = homeTranslations["classifier-btn"] ?? 'home.classifier-btn';
-      window.document.getElementById('regressor-models-button').innerHTML = homeTranslations["regressor-btn"] ?? 'home.regressor-btn';
 
       window.document.getElementById('home-index').innerHTML = homeTranslations["index"] ?? 'home.index';
       window.document.getElementById('home-index-intro').innerHTML = homeTranslations["index-intro"] ?? 'home.index-intro';

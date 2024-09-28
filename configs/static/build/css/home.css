@@ -74,8 +74,9 @@
 	border-radius: 4px;
 	line-height: 25px;
 	font-size: larger;
-	height: 60vh;
+	height: 78vh;
   overflow: scroll;
+	position: fixed;
 }
 
 #home-info > h1 {

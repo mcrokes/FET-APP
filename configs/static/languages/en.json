@@ -351,7 +351,11 @@
           "no-data": "No data",
           "title": "Distribution by Variables",
           "numeric-title": "Quantitative Variables",
-          "q-title": "Qualitative Variables"
+          "q-title": "Qualitative Variables",
+          "tooltip": {
+            "text-1": "Column-wise representation in the dataset of ",
+            "text-2": "each variable occurrences."
+          }
         },
         "title": "Data Set Metrics: ",
         "dataset": {
@@ -530,7 +534,14 @@
           "no-data": "No data",
           "title": "Partial Dependence of Variables",
           "numeric-title": "Quantitative Variables",
-          "q-title": "Qualitative Variables"
+          "q-title": "Qualitative Variables",
+          "tooltip": {
+            "text-1": "The partial dependence plot shows the relationship between a variable and the target variable, ",
+            "text-2": "controlling for the effects of all other variables.",
+            "text-3": "It helps to identify the importance of each feature and ",
+            "text-4": "visualize interactions",
+            "text-5": " between them."
+          }
         }
       }
     },

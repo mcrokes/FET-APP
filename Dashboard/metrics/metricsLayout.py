@@ -24,7 +24,7 @@ from sklearn import metrics
 import plotly.express as px
 import plotly.graph_objects as go
 
-id_sufix = ["confusion-matrix", "roc-curve", "pred-real", "real-pred"]
+id_sufix = ["confusion-matrix", "roc-curve", "pred-real", "real-pred", "partial-dependence"]
 
 
 # REGRESSOR FUNCTIONS
@@ -159,7 +159,9 @@ def metricsRegressorLayout(metricsTranslations):
     regressorRealPredTranslations = findTranslationsParent(regressorTranslations, 'real-prediction')
     regressorRealPredTooltipTranslations = findTranslationsParent(regressorRealPredTranslations, 'tooltip')
 
-    regressorDependenceTranslations = findTranslationsParent(regressorTranslations, 'partial-dependence')
+    regressorDependenceTranslations = findTranslationsParent(regressorTranslations, id_sufix[4])
+    regressorPartialDepTooltipTranslations = findTranslationsParent(regressorDependenceTranslations, 'tooltip')
+
 
     layout = html.Div(
         [
@@ -171,6 +173,7 @@ def metricsRegressorLayout(metricsTranslations):
                                      style={'width': 'max-content', 'margin': 'auto', 'overflow': 'scroll'}),
                         ],
                     ),
+                    html.Div(className='separator'),
                     dbc.Row(
                         [
                             dbc.Col(
@@ -283,12 +286,55 @@ def metricsRegressorLayout(metricsTranslations):
                             ),
                         ],
                     ),
+                    html.Div(className='separator'),
                     dbc.Row(
                         [
-                            html.Plaintext(
-                                setText(regressorDependenceTranslations, 'title',
-                                        'dashboard.metrics.regressor.partial-dependence'),
-                                className="rules-title",
+                            html.Div([
+                                html.Plaintext(
+                                    setText(regressorDependenceTranslations, 'title',
+                                            'dashboard.metrics.regressor.partial-dependence'),
+                                    className="rules-title",
+                                ),
+                                html.I(
+                                    id=f"{id_sufix[4]}-info",
+                                    className="fa fa-info-circle info-icon",
+                                ),
+                                dbc.Tooltip(
+                                    [
+                                        html.Plaintext(
+                                            [
+                                                setText(regressorPartialDepTooltipTranslations, 'text-1',
+                                                        f'dashboard.metrics.regressor.{id_sufix[4]}'
+                                                        '.tooltip'),
+                                                html.Strong(
+                                                    setText(regressorPartialDepTooltipTranslations, 'text-2',
+                                                            f'dashboard.metrics.regressor.{id_sufix[4]}'
+                                                            '.tooltip')
+                                                ),
+                                            ]
+                                        ),
+                                        html.Plaintext(
+                                            [
+                                                setText(regressorPartialDepTooltipTranslations, 'text-3',
+                                                        f'dashboard.metrics.regressor.{id_sufix[4]}'
+                                                        '.tooltip'),
+                                                html.Strong(
+                                                    setText(regressorPartialDepTooltipTranslations, 'text-4',
+                                                            f'dashboard.metrics.regressor.{id_sufix[4]}'
+                                                            '.tooltip'),
+                                                ),
+                                                html.Strong(
+                                                    setText(regressorPartialDepTooltipTranslations, 'text-5',
+                                                            f'dashboard.metrics.regressor.{id_sufix[4]}'
+                                                            '.tooltip')
+                                                ),
+                                            ]
+                                        ),
+                                    ],
+                                    className="personalized-tooltip",
+                                    target=f"{id_sufix[4]}-info",
+                                ),
+                            ], className="title-hint-container",
                             ),
                             dbc.Col([
                                 html.Plaintext(
@@ -757,6 +803,7 @@ def metricsClassifierLayout(metricsTranslations):
                             ),
                         ],
                     ),
+                    html.Div(className='separator'),
                     html.Div(
                         [
                             html.I(

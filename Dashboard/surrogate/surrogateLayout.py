@@ -54,6 +54,7 @@ def surrogateLayout(surrogateTranslations):
                         ],
                         className="tree-creator",
                     ),
+                    html.Div(className='separator container'),
                     dbc.Row(
                         [
                             dbc.Col(
@@ -98,6 +99,7 @@ def surrogateLayout(surrogateTranslations):
                         ],
                         style={"padding-top": "20px"},
                     ),
+                    html.Div(className='separator container'),
                     html.Div(
                         [
                             html.Plaintext(

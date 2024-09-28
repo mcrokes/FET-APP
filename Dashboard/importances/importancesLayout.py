@@ -60,6 +60,7 @@ def importancesLayout(importanceTranslations):
                         html.Div(id="importance-output-upload"),
                         style={"padding-top": "20px"},
                     ),
+                    html.Div(className='separator'),
                     html.Div(
                         [
                             html.I(

@@ -1,102 +1,102 @@
 body {
-  --green-color-200: rgb(28, 196, 84);
+	--green-color-200: rgb(28, 196, 84);
 
-  /*background-image: url("/assets/images/general_background.jpg");*/
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top;
-  color: #000000 !important;
-  background-color: transparent;
-  font-family: monospace !important;
-  margin: 0;
+	/*background-image: url("/assets/images/general_background.jpg");*/
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: top;
+	color: #000000 !important;
+	background-color: transparent;
+	font-family: monospace !important;
+	margin: 0;
 }
 
 div.section-card {
-  background-color: transparent;
-  border: none;
+	background-color: transparent;
+	border: none;
 }
 
 .svg-container > svg:first-child {
-  background: transparent !important;
-  border-radius: 1rem;
+	background: transparent !important;
+	border-radius: 1rem;
 }
 
 .legend > rect {
-    fill: transparent !important;
+	fill: transparent !important;
 }
 
 #classifier-tabs {
-  border: none !important;
-  display: flex;
-  justify-content: center;
-  border-radius: 4px;
-  position: sticky;
-  z-index: 1000;
-  top: 0.5rem;
-  gap: 8px;
-  padding: 0.5rem;
-  border-radius: 1rem;
-  width: fit-content;
-  margin: auto;
+	border: none !important;
+	display: flex;
+	justify-content: center;
+	border-radius: 4px;
+	position: sticky;
+	z-index: 1000;
+	top: 0.5rem;
+	gap: 8px;
+	padding: 0.5rem;
+	border-radius: 1rem;
+	width: fit-content;
+	margin: auto;
 }
 
 #classifier-tabs div {
-  width: 9rem;
-  font-size: 1rem;
-  text-align: center;
-  margin-left: 0.2rem;
-  margin-right: 0.2rem;
+	width: 9rem;
+	font-size: 1rem;
+	text-align: center;
+	margin-left: 0.2rem;
+	margin-right: 0.2rem;
 }
 
 #classifier-tabs div a,
 .tree-btn {
-  border-radius: 4px;
-  margin: 0;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: black;
-  padding: 0.3rem 0;
-  border: dashed #4b474769 1pt;
+	border-radius: 4px;
+	margin: 0;
+	font-weight: 700;
+	text-transform: uppercase;
+	color: black;
+	padding: 0.3rem 0;
+	border: dashed #4b474769 1pt;
 }
 
 #classifier-tabs div a:hover,
 .tree-btn:hover {
-  background-color: rgba(181, 230, 230, 0.767);
-  border: solid #000000 1pt;
+	background-color: rgba(181, 230, 230, 0.767);
+	border: solid #000000 1pt;
 }
 
 #classifier-tabs div a.active {
-  background-color: rgb(39, 55, 102);
-  color: aliceblue;
-  border: solid transparent 1pt;
-  background-color: rgba(39, 102, 43, 0.56);
+	background-color: rgb(39, 55, 102);
+	color: aliceblue;
+	border: solid transparent 1pt;
+	background-color: rgba(39, 102, 43, 0.56);
 }
 
 .classifier-tab {
-  margin-top: 2rem;
-  width: 100%;
-  font-size: 1rem !important;
-  text-align: center;
-  font-family: monospace;
-  height: 90vh;
-  overflow: scroll;
-  display: flex;
+	margin-top: 2rem;
+	width: 100%;
+	font-size: 1rem !important;
+	text-align: center;
+	font-family: monospace;
+	height: 90vh;
+	overflow: scroll;
+	display: flex;
 }
 
 #toggle-modal-1 {
-  max-width: 50%;
+	max-width: 50%;
 }
 
 .section-content {
-  
+
 }
 
 .rules-table-container {
-  /* overflow: scroll; */
-  max-width: 1400px;
-  margin: auto;
-  max-height: 50vh;
-  overflow: scroll;
+/* overflow: scroll; */
+	max-width: 1400px;
+	margin: auto;
+	max-height: 50vh;
+	overflow: scroll;
 }
 
 .rules-table th,
@@ -105,22 +105,22 @@ div.section-card {
 .rules-table tbody,
 .rules-table tfoot,
 .rules-table tr {
-  border-style: dotted;
-  background-color: rgb(251, 254, 255);
-  color: #000000;
-  font-size: medium;
-  line-height: 12px;
-  padding: 4px 1px;
-  vertical-align: middle;
-  width: min-content;
-  text-align: center !important;
+	border-style: dotted;
+	background-color: rgb(251, 254, 255);
+	color: #000000;
+	font-size: medium;
+	line-height: 12px;
+	padding: 4px 1px;
+	vertical-align: middle;
+	width: min-content;
+	text-align: center !important;
 }
 
 .rules-table.no_center td {
-  text-align: left !important;
-  padding-left: 10px !important;
-  overflow: scroll;
-  white-space: wrap !important;
+	text-align: left !important;
+	padding-left: 10px !important;
+	overflow: scroll;
+	white-space: wrap !important;
 }
 
 .rules-table.no_center th {
@@ -128,98 +128,107 @@ div.section-card {
 }
 
 .rules-table tr th {
-  background-color: #a2b1f75b !important;
-  font-weight: bolder !important;
+	background-color: #a2b1f75b !important;
+	font-weight: bolder !important;
 }
 
 .rules-title {
-  color: #095e49;
-  font-weight: 500;
-  font-size: 24px;
-  text-align: initial;
-  padding-left: 3rem;
-  white-space: wrap;
+	color: #095e49;
+	font-weight: 500;
+	font-size: 24px;
+	text-align: initial;
+	padding-left: 3rem;
+	white-space: wrap;
 }
 
 .tree-creator {
-  display: flex;
-  justify-content: center;
-  align-items: baseline;
-  gap: 6px;
-  flex-wrap: wrap;
+	display: flex;
+	justify-content: center;
+	align-items: baseline;
+	gap: 6px;
+	flex-wrap: wrap;
 }
 
 .tree-creator-label {
-  width: 120px;
-  text-align: center;
-  font-weight: bold;
-  color: black;
+	width: 120px;
+	text-align: center;
+	font-weight: bold;
+	color: black;
 }
 
 .tree-creator-input {
-  width: 55px;
-  padding: 0 8px;
-  margin-right: 4px;
+	width: 55px;
+	padding: 0 8px;
+	margin-right: 4px;
 }
 
 .tree-creator-btn {
-  width: fit-content;
-  height: fit-content;
-  padding: 4px 8px;
-  white-space: nowrap;
+	width: fit-content;
+	height: fit-content;
+	padding: 4px 8px;
+	white-space: nowrap;
 }
 
 .personalized-tooltip {
-  width: 300px;
-  background-color: rgba(255, 255, 255, 0.67);
-  border-radius: 10px;
-  padding: 1rem;
-  border: dashed black 1pt;
+	width: 300px;
+	background-color: rgba(255, 255, 255, 0.67);
+	border-radius: 10px;
+	padding: 1rem;
+	border: dashed black 1pt;
 }
 
 .personalized-tooltip div {
-  background-color: transparent;
-  max-width: 100% !important;
-  padding: 0;
+	background-color: transparent;
+	max-width: 100% !important;
+	padding: 0;
 }
 
 .personalized-tooltip div plaintext {
-  white-space: initial;
+	white-space: initial;
 }
 
 .tree-img-container {
-  width: 100%;
-  overflow: scroll;
-  border-radius: 10px;
+	width: 100%;
+	overflow: scroll;
+	border-radius: 10px;
 }
 
 .tree-img-container img {
-  border-radius: 10px;
+	border-radius: 10px;
 }
 
 .title-hint-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
 }
 
 .info-icon {
-  color: #1b4e2b;
-  margin-right: 2rem;
-  font-size: 25px;
+	color: #1b4e2b;
+	margin-right: 2rem;
+	font-size: 25px;
 }
 
 .info-icon:hover {
-  color: rgb(99, 189, 89);
-  cursor: pointer;
+	color: rgb(99, 189, 89);
+	cursor: pointer;
 }
 
 .dash-spreadsheet-container {
-  overflow: scroll;
+	overflow: scroll;
 }
 
 .predictor-selector {
-  cursor: pointer;
-  width: 250px;
-  margin-left: 1.5rem;
+	cursor: pointer;
+	width: 250px;
+	margin-left: 1.5rem;
+}
+
+.separator {
+	width: 100%;
+	height: 0.25rem;
+	border-bottom: 3pt dashed #193e2d7d;
+	border-radius: 10px;
+	margin-top: 0.5rem;
+	margin-bottom: 1rem;
 }

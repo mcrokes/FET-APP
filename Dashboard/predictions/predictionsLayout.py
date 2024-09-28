@@ -481,6 +481,7 @@ def predictionsLayout(predictionsTranslations):
                 ],
                 style={"padding-top": "20px"},
             ),
+            html.Div(className='separator', id='separator'),
             dbc.Row(
                 [
                     dbc.Col(
@@ -853,6 +854,7 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
         Output("predictions-class_selector-title", "hidden"),
         Output(f"{id_sufix[0]}-container", "hidden"),
         Output(f"{id_sufix[1]}-container", "hidden"),
+        Output("separator", "hidden"),
         Output("current-class-data", "data"),
         State("path", "href"),
         Input("select", "value"),
@@ -1044,6 +1046,7 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
                     False if not isRegressor else True,
                     False,
                     False,
+                    False,
                     json.dumps(
                         {
                             "prediction": predictions_graph_data["values"][positive_class] if not isRegressor else
@@ -1055,7 +1058,7 @@ def predictionsCallbacks(app, furl, isRegressor: bool = False):
                 raise PreventUpdate
 
         else:
-            return [], [], [], [], True, True, True, True, True, None
+            return [], [], [], [], True, True, True, True, True, True, None
 
     if not isRegressor:
         @app.callback(
